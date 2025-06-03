@@ -5,20 +5,20 @@ import { server } from "../../server";
 const CountDown = ({ data }) => {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
-  useEffect(() => {
-    setTimeout(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
-    if (
-      typeof timeLeft.days === "undefined" &&
-      typeof timeLeft.hours === "undefined" &&
-      typeof timeLeft.minutes === "undefined" &&
-      typeof timeLeft.seconds === "undefined"
-    ) {
-      axios.delete(`${server}/event/delete-shop-event/${data._id}`);
-    }
-    return () => clearInterval(timeLeft);
-  });
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     setTimeLeft(calculateTimeLeft());
+  //   }, 1000);
+  //   if (
+  //     typeof timeLeft.days === "undefined" &&
+  //     typeof timeLeft.hours === "undefined" &&
+  //     typeof timeLeft.minutes === "undefined" &&
+  //     typeof timeLeft.seconds === "undefined"
+  //   ) {
+  //     axios.delete(`${server}/event/delete-shop-event/${data._id}`);
+  //   }
+  //   return () => clearInterval(timeLeft);
+  // });
 
   function calculateTimeLeft() {
     // today date + 3 days

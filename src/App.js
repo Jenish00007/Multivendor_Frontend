@@ -12,7 +12,6 @@ import {
   EventsPage,
   FAQPage,
   CheckoutPage,
-  PaymentPage,
   OrderSuccessPage,
   ProductDetailsPage,
   ProfilePage,
@@ -68,46 +67,21 @@ import { getAllProducts } from "./redux/actions/product";
 import { getAllEvents } from "./redux/actions/event";
 import axios from "axios";
 import { server } from "./server";
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
 import AdminDashboardSettings from "./pages/AdminDashboardSettings";
 import DeliveryManLogin from "./pages/DeliveryManLogin";
 import DeliveryManRegistration from "./pages/DeliveryManRegistration";
 import DeliveryManManagement from "./pages/DeliveryManManagement";
 
 const App = () => {
-  const [stripeApikey, setStripeApiKey] = useState("");
-
-  async function getStripeApikey() {
-    const { data } = await axios.get(`${server}/payment/stripeapikey`);
-    setStripeApiKey(data.stripeApikey);
-  }
-
   useEffect(() => {
     Store.dispatch(loadUser());
     Store.dispatch(loadSeller());
     Store.dispatch(getAllProducts());
     Store.dispatch(getAllEvents());
-    getStripeApikey();
   }, []);
 
   return (
     <BrowserRouter>
-      {stripeApikey && (
-        <Elements stripe={loadStripe(stripeApikey)}>
-          <Routes>
-            <Route
-              path="/payment"
-              element={
-                <ProtectedRoute>
-                  <PaymentPage />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </Elements>
-      )}
-
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />

@@ -102,8 +102,14 @@ export const getAllOrdersOfAdmin = () => async (dispatch) => {
       type: "adminAllOrdersRequest",
     });
 
+    const token = localStorage.getItem('token');
     const { data } = await axios.get(`${server}/order/admin-all-orders`, {
       withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
     });
 
     dispatch({
@@ -111,9 +117,10 @@ export const getAllOrdersOfAdmin = () => async (dispatch) => {
       payload: data.orders,
     });
   } catch (error) {
+    console.error("Error fetching admin orders:", error.response || error);
     dispatch({
       type: "adminAllOrdersFailed",
-      payload: error.response.data.message,
+      payload: error.response?.data?.message || "Failed to fetch orders",
     });
   }
 };
