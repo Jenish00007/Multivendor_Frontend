@@ -7,6 +7,8 @@ import { Link } from "react-router-dom";
 import { deleteProduct, getAllProductsShop } from "../../redux/actions/product";
 import Loader from "../Layout/Loader";
 import { BsCurrencyRupee } from "react-icons/bs";
+import { backend_url } from "../../server";
+import { toast } from "react-toastify";
 
 const AllProducts = () => {
   const { products, isLoading } = useSelector((state) => state.products);
@@ -20,9 +22,26 @@ const AllProducts = () => {
     dispatch(getAllProductsShop(seller._id));
   }, [dispatch]);
 
-  const handleDelete = (id) => {
-    dispatch(deleteProduct(id));
-    window.location.reload();
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      try {
+        const response = await dispatch(deleteProduct(id));
+        if (response.type === "deleteProductSuccess") {
+          toast.success("Product deleted successfully!");
+          // Update the local state by filtering out the deleted product
+          const updatedProducts = products.filter((product) => product._id !== id);
+          dispatch({
+            type: "getAllProductsShopSuccess",
+            payload: updatedProducts,
+          });
+        } else {
+          toast.error(response.payload || "Failed to delete product");
+        }
+      } catch (error) {
+        console.error("Delete error:", error);
+        toast.error(error.response?.data?.message || "Error deleting product");
+      }
+    }
   };
 
   const handlePreview = (product) => {
@@ -178,12 +197,13 @@ const AllProducts = () => {
         price: item.discountPrice,
         stock: item.stock,
         sold_out: item.sold_out,
-        image: item.images?.[0] || "https://via.placeholder.com/50",
+        image: item.images?.[0]?.url ? `${backend_url}${item.images[0].url}` :item.images,
         description: item.description,
         category: item.category,
         tags: item.tags,
         originalPrice: item.originalPrice,
-        images: item.images,
+        images: item.images?.map(img => `${backend_url}${img.url}`) || [],
+        ...item // Include all product data for the modal
       });
     });
 
@@ -249,19 +269,25 @@ const AllProducts = () => {
                   <div className="space-y-4">
                     <div className="aspect-square rounded-lg overflow-hidden">
                       <img
-                        src={selectedProduct.image}
+                        src={selectedProduct.image || "https://via.placeholder.com/400"}
                         alt={selectedProduct.name}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = "https://via.placeholder.com/400";
+                        }}
                       />
                     </div>
                     {selectedProduct.images && selectedProduct.images.length > 1 && (
                       <div className="grid grid-cols-4 gap-2">
-                        {selectedProduct.images.map((image, index) => (
+                        {selectedProduct.images.map((imageUrl, index) => (
                           <div key={index} className="aspect-square rounded-lg overflow-hidden">
                             <img
-                              src={image}
+                              src={imageUrl}
                               alt={`${selectedProduct.name} - ${index + 1}`}
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.src = "https://via.placeholder.com/100";
+                              }}
                             />
                           </div>
                         ))}
@@ -273,7 +299,7 @@ const AllProducts = () => {
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-lg font-medium text-gray-900">{selectedProduct.name}</h3>
-                      <p className="text-sm text-gray-500">Category: {selectedProduct.category}</p>
+                      <p className="text-sm text-gray-500">Category: {selectedProduct.category?.name}</p>
                     </div>
 
                     <div className="space-y-2">

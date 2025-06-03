@@ -56,21 +56,38 @@ export const deleteProduct = (id) => async (dispatch) => {
       type: "deleteProductRequest",
     });
 
+    const token = localStorage.getItem('seller_token');
     const { data } = await axios.delete(
       `${server}/product/delete-shop-product/${id}`,
       {
         withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       }
     );
 
-    dispatch({
-      type: "deleteProductSuccess",
-      payload: data.message,
-    });
+    if (data.success) {
+      dispatch({
+        type: "deleteProductSuccess",
+        payload: {
+          message: data.message,
+          productId: id
+        },
+      });
+    } else {
+      dispatch({
+        type: "deleteProductFailed",
+        payload: data.message || "Failed to delete product"
+      });
+    }
   } catch (error) {
+    console.error('Error deleting product:', error.response || error);
     dispatch({
       type: "deleteProductFailed",
-      payload: error.response.data.message,
+      payload: error.response?.data?.message || "Error deleting product"
     });
   }
 };

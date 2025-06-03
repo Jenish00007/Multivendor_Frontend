@@ -46,12 +46,18 @@ const AllEvents = () => {
       headerName: "Name",
       minWidth: 180,
       flex: 1.4,
+      renderCell: (params) => {
+        return <div>{params.value}</div>;
+      }
     },
     {
       field: "price",
       headerName: "Price",
       minWidth: 100,
       flex: 0.6,
+      renderCell: (params) => {
+        return <div>{params.value}</div>;
+      }
     },
     {
       field: "stock",
@@ -59,6 +65,9 @@ const AllEvents = () => {
       type: "number",
       minWidth: 80,
       flex: 0.5,
+      renderCell: (params) => {
+        return <div>{params.value}</div>;
+      }
     },
     {
       field: "sold",
@@ -66,6 +75,9 @@ const AllEvents = () => {
       type: "number",
       minWidth: 130,
       flex: 0.6,
+      renderCell: (params) => {
+        return <div>{params.value}</div>;
+      }
     },
     {
       field: "Preview",

@@ -44,67 +44,28 @@ const ProductSections = () => {
     return <Loader />;
   }
 
+  const renderProductSection = (title, products) => (
+    <div className={`${styles.section}`}>
+      <div className={`${styles.heading}`}>
+        <h1>{title}</h1>
+      </div>
+      <div className="grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-4 lg:gap-[25px] xl:grid-cols-5 xl:gap-[30px] mb-12 border-0">
+        {products && products.length !== 0 && (
+          products.map((product) => (
+            <ProductCard key={product._id} data={product} />
+          ))
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="w-full">
-      {/* Recommended Products */}
-      <div className="mb-8">
-        <h2 className={`${styles.heading} text-2xl font-bold mb-4`}>
-          Recommended Products
-        </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {recommendedProducts.map((product) => (
-            <ProductCard key={product._id} data={product} />
-          ))}
-        </div>
-      </div>
-
-      {/* Top Offers */}
-      <div className="mb-8">
-        <h2 className={`${styles.heading} text-2xl font-bold mb-4`}>
-          Top Offers
-        </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {topOffers.map((product) => (
-            <ProductCard key={product._id} data={product} />
-          ))}
-        </div>
-      </div>
-
-      {/* Most Popular */}
-      <div className="mb-8">
-        <h2 className={`${styles.heading} text-2xl font-bold mb-4`}>
-          Most Popular
-        </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {popularProducts.map((product) => (
-            <ProductCard key={product._id} data={product} />
-          ))}
-        </div>
-      </div>
-
-      {/* Latest Products */}
-      <div className="mb-8">
-        <h2 className={`${styles.heading} text-2xl font-bold mb-4`}>
-          Latest Products
-        </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {latestProducts.map((product) => (
-            <ProductCard key={product._id} data={product} />
-          ))}
-        </div>
-      </div>
-
-      {/* Flash Sale */}
-      <div className="mb-8">
-        <h2 className={`${styles.heading} text-2xl font-bold mb-4`}>
-          Flash Sale
-        </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {flashSaleItems.map((product) => (
-            <ProductCard key={product._id} data={product} />
-          ))}
-        </div>
-      </div>
+      {renderProductSection("Recommended Products", recommendedProducts)}
+      {renderProductSection("Top Offers", topOffers)}
+      {renderProductSection("Most Popular", popularProducts)}
+      {renderProductSection("Latest Products", latestProducts)}
+      {renderProductSection("Flash Sale", flashSaleItems)}
     </div>
   );
 };
