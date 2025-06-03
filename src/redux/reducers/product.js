@@ -39,6 +39,12 @@ export const productReducer = createReducer(initialState, {
   deleteProductSuccess: (state, action) => {
     state.isLoading = false;
     state.message = action.payload;
+    // Remove the deleted product from the products array
+    if (state.products) {
+      state.products = state.products.filter(
+        (product) => product._id !== action.payload.productId
+      );
+    }
   },
   deleteProductFailed: (state, action) => {
     state.isLoading = false;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import Store from "./redux/store";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -57,7 +57,6 @@ import {
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useEffect } from "react";
 import { loadSeller, loadUser } from "./redux/actions/user";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import ProtectedAdminRoute from "./routes/ProtectedAdminRoute";
@@ -71,6 +70,7 @@ import AdminDashboardSettings from "./pages/AdminDashboardSettings";
 import DeliveryManLogin from "./pages/DeliveryManLogin";
 import DeliveryManRegistration from "./pages/DeliveryManRegistration";
 import DeliveryManManagement from "./pages/DeliveryManManagement";
+import { getAppSettings } from "./redux/actions/appSettings";
 
 const App = () => {
   useEffect(() => {
@@ -78,6 +78,7 @@ const App = () => {
     Store.dispatch(loadSeller());
     Store.dispatch(getAllProducts());
     Store.dispatch(getAllEvents());
+    Store.dispatch(getAppSettings());
   }, []);
 
   return (
