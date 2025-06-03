@@ -6,9 +6,12 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
+import { useDispatch } from 'react-redux';
+import { loadSeller } from '../../redux/actions/user';
 
 const ShopLogin = () => {
     const navigate = useNavigate()
+    const dispatch = useDispatch();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("")
     const [visible, setVisible] = useState(false)
@@ -16,22 +19,50 @@ const ShopLogin = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        await axios
-            .post(
+        try {
+            console.log('Attempting login...');
+            const response = await axios.post(
                 `${server}/shop/login-shop`,
                 {
                     email,
                     password,
                 },
-                { withCredentials: true }
-            ).then((res) => {
-                toast.success("Login Success!")
-                navigate("/dashboard")
-                window.location.reload(true);
-            })
-            .catch((err) => {
-                toast.error(err.response.data.message);
-            });
+                { 
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            console.log('Login response:', response.data);
+
+            // Store the seller token
+            if (response.data.token) {
+                localStorage.setItem('seller_token', response.data.token);
+                console.log('Token stored in localStorage');
+                
+                // Set default authorization header for all future requests
+                axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+            }
+
+            // Load seller data
+            console.log('Dispatching loadSeller action...');
+            const result = await dispatch(loadSeller());
+            
+            if (result?.error) {
+                toast.error(result.error);
+                return;
+            }
+            
+            toast.success("Login Success!");
+            console.log('Navigating to dashboard...');
+            navigate("/dashboard");
+        } catch (err) {
+            console.error('Login error:', err);
+            toast.error(err.response?.data?.message || "Login failed");
+        }
     };
 
     return (

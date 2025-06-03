@@ -80,7 +80,13 @@ export const getAllEvents = () => async (dispatch) => {
       type: "getAlleventsRequest",
     });
 
-    const { data } = await axios.get(`${server}/event/get-all-events`);
+    const { data } = await axios.get(`${server}/event/get-all-events`, {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
     dispatch({
       type: "getAlleventsSuccess",
       payload: data.events,
@@ -88,7 +94,37 @@ export const getAllEvents = () => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: "getAlleventsFailed",
-      payload: error.response.data.message,
+      payload: error.response?.data?.message || "Failed to fetch events",
+    });
+  }
+};
+
+// get all events for admin
+export const getAllEventsAdmin = () => async (dispatch) => {
+  try {
+    dispatch({
+      type: "getAlleventsRequest",
+    });
+
+    const token = localStorage.getItem('token');
+    const { data } = await axios.get(`${server}/event/admin-all-events`, {
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    dispatch({
+      type: "getAlleventsSuccess",
+      payload: data.events,
+    });
+  } catch (error) {
+    console.error("Error fetching admin events:", error.response || error);
+    dispatch({
+      type: "getAlleventsFailed",
+      payload: error.response?.data?.message || "Failed to fetch events",
     });
   }
 };

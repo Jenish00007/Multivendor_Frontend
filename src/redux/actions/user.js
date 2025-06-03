@@ -7,8 +7,14 @@ export const loadUser = () => async (dispatch) => {
     dispatch({
       type: "LoadUserRequest",
     });
+    const token = localStorage.getItem('token');
     const { data } = await axios.get(`${server}/user/getuser`, {
       withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
     });
     dispatch({
       type: "LoadUserSuccess",
@@ -25,20 +31,34 @@ export const loadUser = () => async (dispatch) => {
 // load seller
 export const loadSeller = () => async (dispatch) => {
   try {
+    console.log('loadSeller: Starting request...');
     dispatch({
       type: "LoadSellerRequest",
     });
+    
+    const token = localStorage.getItem('seller_token');
+    console.log('loadSeller: Token from localStorage:', token);
+    
     const { data } = await axios.get(`${server}/shop/getSeller`, {
       withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
     });
+    
+    console.log('loadSeller: Response received:', data);
     dispatch({
       type: "LoadSellerSuccess",
       payload: data.seller,
     });
+    console.log('loadSeller: Success action dispatched');
   } catch (error) {
+    console.error('loadSeller: Error occurred:', error);
     dispatch({
       type: "LoadSellerFail",
-      payload: error.response.data.message,
+      payload: error.response?.data?.message || "Failed to load seller data",
     });
   }
 };
@@ -146,8 +166,14 @@ export const getAllUsers = () => async (dispatch) => {
       type: "getAllUsersRequest",
     });
 
-    const { data } = await axios.get(`${server}/user/admin-all-users`, {
+    const token = localStorage.getItem('token');
+    const { data } = await axios.get(`${server}/admin/users`, {
       withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
     });
 
     dispatch({
@@ -155,9 +181,10 @@ export const getAllUsers = () => async (dispatch) => {
       payload: data.users,
     });
   } catch (error) {
+    console.error('Error fetching users:', error.response || error);
     dispatch({
       type: "getAllUsersFailed",
-      payload: error.response.data.message,
+      payload: error.response?.data?.message || "Failed to fetch users",
     });
   }
 };

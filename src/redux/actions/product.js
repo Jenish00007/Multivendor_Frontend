@@ -94,3 +94,33 @@ export const getAllProducts = () => async (dispatch) => {
     });
   }
 };
+
+// get all products for admin
+export const getAllProductsAdmin = () => async (dispatch) => {
+  try {
+    dispatch({
+      type: "getAllProductsRequest",
+    });
+
+    const token = localStorage.getItem('token');
+    const { data } = await axios.get(`${server}/admin/products`, {
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    dispatch({
+      type: "getAllProductsSuccess",
+      payload: data.products,
+    });
+  } catch (error) {
+    console.error('Error fetching products:', error.response || error);
+    dispatch({
+      type: "getAllProductsFailed",
+      payload: error.response?.data?.message || "Failed to fetch products",
+    });
+  }
+};

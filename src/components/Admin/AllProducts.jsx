@@ -1,30 +1,44 @@
 import { Button } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
 import React, { useEffect, useState } from "react";
-import { AiOutlineDelete, AiOutlineEye, AiOutlineShopping, AiOutlineDollar, AiOutlineStock, AiOutlineFire, AiOutlineClose } from "react-icons/ai";
+import { AiOutlineDelete, AiOutlineEye, AiOutlineShopping, AiOutlineDollar, AiOutlineStock, AiOutlineFire, AiOutlineClose, AiOutlineLineChart } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { getAllProductsShop } from "../../redux/actions/product";
-import { deleteProduct } from "../../redux/actions/product";
+import { getAllProductsAdmin } from "../../redux/actions/product";
 import Loader from "../Layout/Loader";
+import { FiSearch } from "react-icons/fi";
+import { BsFilter, BsCurrencyRupee } from "react-icons/bs";
+import { toast } from "react-toastify";
 import axios from "axios";
 import { server } from "../../server";
-import { FiSearch } from "react-icons/fi";
-import { BsFilter } from "react-icons/bs";
-import { BsCurrencyRupee } from "react-icons/bs";
 
 const AllProducts = () => {
-  const [data, setData] = useState([]);
+  const { allProducts, isLoading } = useSelector((state) => state.products);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    axios
-      .get(`${server}/product/admin-all-products`, { withCredentials: true })
-      .then((res) => {
-        setData(res.data.products);
+    dispatch(getAllProductsAdmin());
+  }, [dispatch]);
+
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${server}/admin/product/${id}`, {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       });
-  }, []);
+      toast.success("Product deleted successfully!");
+      dispatch(getAllProductsAdmin());
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete product");
+    }
+  };
 
   const handlePreview = (product) => {
     setSelectedProduct(product);
@@ -48,33 +62,22 @@ const AllProducts = () => {
   };
 
   const columns = [
-    { 
-      field: "id", 
-      headerName: "Product ID", 
-      minWidth: 150, 
-      flex: 0.7,
-      renderCell: (params) => (
-        <div className="flex items-center gap-2">
-          <AiOutlineShopping className="text-blue-500" />
-          <span className="text-gray-700">#{params.value ? params.value.slice(-6) : 'N/A'}</span>
-        </div>
-      ),
-    },
     {
-      field: "image",
-      headerName: "Image",
-      minWidth: 100,
+      field: "id",
+      headerName: "Product ID",
+      minWidth: 180,
       flex: 0.8,
+      headerClassName: 'custom-header',
+      cellClassName: 'custom-cell',
       renderCell: (params) => (
-        <div className="w-[50px] h-[50px] rounded-lg overflow-hidden">
-          <img
-            src={params.value}
-            alt={params.row.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.src = "https://via.placeholder.com/50";
-            }}
-          />
+        <div className="flex items-center gap-3 w-full">
+          <div className="p-2.5 bg-blue-50 rounded-lg flex-shrink-0">
+            <AiOutlineShopping className="text-blue-600" size={20} />
+          </div>
+          <div className="flex flex-col justify-center min-w-[100px]">
+            <span className="font-medium text-gray-700 truncate leading-tight">#{params.value.slice(-6)}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5">Product ID</span>
+          </div>
         </div>
       ),
     },
@@ -83,21 +86,36 @@ const AllProducts = () => {
       headerName: "Name",
       minWidth: 180,
       flex: 1.4,
+      headerClassName: 'custom-header',
+      cellClassName: 'custom-cell',
       renderCell: (params) => (
-        <div className="font-medium text-gray-800 hover:text-blue-500 transition-colors duration-300">
-          {params.value || 'N/A'}
+        <div className="flex items-center gap-3 w-full">
+          <div className="p-2.5 bg-purple-50 rounded-lg flex-shrink-0">
+            <AiOutlineLineChart className="text-purple-600" size={20} />
+          </div>
+          <div className="flex flex-col justify-center min-w-[120px]">
+            <span className="font-medium text-gray-700 truncate leading-tight">{params.value}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5">Product Name</span>
+          </div>
         </div>
       ),
     },
     {
       field: "price",
       headerName: "Price",
-      minWidth: 100,
-      flex: 0.6,
+      minWidth: 160,
+      flex: 0.8,
+      headerClassName: 'custom-header',
+      cellClassName: 'custom-cell',
       renderCell: (params) => (
-        <div className="flex items-center gap-2 text-green-600 font-medium">
-          <BsCurrencyRupee />
-          {params.value || 'N/A'}
+        <div className="flex items-center gap-3 w-full">
+          <div className="p-2.5 bg-green-50 rounded-lg flex-shrink-0">
+            <BsCurrencyRupee className="text-green-600" size={20} />
+          </div>
+          <div className="flex flex-col justify-center min-w-[100px]">
+            <span className="font-medium text-gray-700 truncate leading-tight">{params.value}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5">Price</span>
+          </div>
         </div>
       ),
     },
@@ -105,14 +123,19 @@ const AllProducts = () => {
       field: "Stock",
       headerName: "Stock",
       type: "number",
-      minWidth: 80,
-      flex: 0.5,
+      minWidth: 160,
+      flex: 0.8,
+      headerClassName: 'custom-header',
+      cellClassName: 'custom-cell',
       renderCell: (params) => (
-        <div className="flex items-center gap-2">
-          <AiOutlineStock className="text-orange-500" />
-          <span className={params.value < 10 ? "text-red-500 font-medium" : "text-gray-700"}>
-            {params.value || 0}
-          </span>
+        <div className="flex items-center gap-3 w-full">
+          <div className="p-2.5 bg-orange-50 rounded-lg flex-shrink-0">
+            <AiOutlineStock className="text-orange-600" size={20} />
+          </div>
+          <div className="flex flex-col justify-center min-w-[100px]">
+            <span className="font-medium text-gray-700 truncate leading-tight">{params.value}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5">In Stock</span>
+          </div>
         </div>
       ),
     },
@@ -120,12 +143,19 @@ const AllProducts = () => {
       field: "sold",
       headerName: "Sold",
       type: "number",
-      minWidth: 130,
-      flex: 0.6,
+      minWidth: 160,
+      flex: 0.8,
+      headerClassName: 'custom-header',
+      cellClassName: 'custom-cell',
       renderCell: (params) => (
-        <div className="flex items-center gap-2 text-orange-500">
-          <AiOutlineFire />
-          <span className="font-medium">{params.value || 0}</span>
+        <div className="flex items-center gap-3 w-full">
+          <div className="p-2.5 bg-red-50 rounded-lg flex-shrink-0">
+            <AiOutlineFire className="text-red-600" size={20} />
+          </div>
+          <div className="flex flex-col justify-center min-w-[100px]">
+            <span className="font-medium text-gray-700 truncate leading-tight">{params.value}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5">Sold Out</span>
+          </div>
         </div>
       ),
     },
@@ -136,33 +166,50 @@ const AllProducts = () => {
       headerName: "",
       type: "number",
       sortable: false,
+      headerClassName: 'custom-header',
+      cellClassName: 'custom-cell',
       renderCell: (params) => (
-        <Button 
+        <button
           onClick={() => handlePreview(params.row)}
-          className="!bg-blue-500 !text-white hover:!bg-blue-600 transition-colors duration-300"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300"
         >
-          <AiOutlineEye size={20} />
-        </Button>
+          <span>View</span>
+          <AiOutlineEye className="transform group-hover:translate-x-1 transition-transform" />
+        </button>
+      ),
+    },
+    {
+      field: "Delete",
+      flex: 0.8,
+      minWidth: 120,
+      headerName: "",
+      type: "number",
+      sortable: false,
+      headerClassName: 'custom-header',
+      cellClassName: 'custom-cell',
+      renderCell: (params) => (
+        <button
+          onClick={() => handleDelete(params.id)}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors duration-300"
+        >
+          <span>Delete</span>
+          <AiOutlineDelete className="transform group-hover:translate-x-1 transition-transform" />
+        </button>
       ),
     },
   ];
 
   const row = [];
 
-  data &&
-    data.forEach((item) => {
+  allProducts &&
+    allProducts.forEach((item) => {
       row.push({
-        id: item._id || '',
-        name: item.name || 'N/A',
-        price: item.discountPrice,
-        Stock: item.stock || 0,
-        sold: item?.sold_out || 0,
-        image: item.images?.[0] || item.image,
-        description: item.description,
-        category: item.category,
-        tags: Array.isArray(item.tags) ? item.tags : [],
-        originalPrice: item.originalPrice,
-        images: item.images,
+        id: item._id,
+        name: item.name,
+        price: formatIndianCurrency(item.discountPrice),
+        Stock: item.stock,
+        sold: item?.sold_out,
+        ...item // Include all product data for the modal
       });
     });
 
@@ -179,35 +226,26 @@ const AllProducts = () => {
             </h6>
             <p className="text-gray-600 mt-2 ml-1">Manage and monitor all products</p>
           </div>
-          <div className="w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0">
-            <p className="text-sm text-gray-600">Current Date</p>
-            <p className="text-lg font-semibold text-gray-800">{new Date().toLocaleDateString('en-IN', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}</p>
+          <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+            <div className="relative flex-1 sm:flex-none">
+              <input
+                type="text"
+                placeholder="Search products..."
+                className="w-full sm:w-[300px] pl-12 pr-6 py-3.5 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white/80 backdrop-blur-sm shadow-lg"
+              />
+              <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            </div>
+            <button className="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-3.5 bg-white/80 backdrop-blur-sm border-2 border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+              <BsFilter size={20} />
+              <span className="text-sm font-semibold">Filter</span>
+            </button>
           </div>
         </div>
 
         <div className="w-full min-h-[75vh] bg-white rounded-xl shadow-xl p-4 sm:p-6 lg:p-8 transform transition-all duration-300 hover:shadow-2xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1 sm:flex-none">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="w-full sm:w-[300px] pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              </div>
-              <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-300">
-                <BsFilter size={18} />
-                <span className="text-sm font-medium">Filter</span>
-              </button>
-            </div>
-          </div>
-          {row.length === 0 ? (
+          {isLoading ? (
+            <Loader />
+          ) : row.length === 0 ? (
             <div className="w-full h-[400px] flex items-center justify-center">
               <div className="text-center">
                 <AiOutlineShopping className="mx-auto text-gray-400" size={48} />
@@ -253,7 +291,7 @@ const AllProducts = () => {
               <div className="space-y-4">
                 <div className="aspect-square rounded-lg overflow-hidden">
                   <img
-                    src={selectedProduct.image}
+                    src={selectedProduct.images[0]?.url}
                     alt={selectedProduct.name}
                     className="w-full h-full object-cover"
                   />
@@ -263,7 +301,7 @@ const AllProducts = () => {
                     {selectedProduct.images.map((image, index) => (
                       <div key={index} className="aspect-square rounded-lg overflow-hidden">
                         <img
-                          src={image}
+                          src={image.url}
                           alt={`${selectedProduct.name} - ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
@@ -277,7 +315,7 @@ const AllProducts = () => {
               <div className="space-y-4">
                 <div>
                   <h3 className="text-lg font-medium text-gray-900">{selectedProduct.name}</h3>
-                  <p className="text-sm text-gray-500">Category: {selectedProduct.category}</p>
+                  <p className="text-sm text-gray-500">Category: {selectedProduct.category?.name}</p>
                 </div>
 
                 <div className="space-y-2">
@@ -287,15 +325,15 @@ const AllProducts = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Discount Price:</span>
-                    <span className="font-medium text-green-600">{formatIndianCurrency(selectedProduct.price)}</span>
+                    <span className="font-medium text-green-600">{formatIndianCurrency(selectedProduct.discountPrice)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Stock:</span>
-                    <span className="font-medium">{selectedProduct.Stock} units</span>
+                    <span className="font-medium">{selectedProduct.stock} units</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Sold:</span>
-                    <span className="font-medium">{selectedProduct.sold} units</span>
+                    <span className="font-medium">{selectedProduct.sold_out} units</span>
                   </div>
                 </div>
 
@@ -304,7 +342,7 @@ const AllProducts = () => {
                   <p className="text-gray-600 text-sm">{selectedProduct.description}</p>
                 </div>
 
-                {selectedProduct.tags && Array.isArray(selectedProduct.tags) && selectedProduct.tags.length > 0 && (
+                {selectedProduct.tags && selectedProduct.tags.length > 0 && (
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-2">Tags</h4>
                     <div className="flex flex-wrap gap-2">
