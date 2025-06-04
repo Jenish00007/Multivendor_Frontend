@@ -82,18 +82,26 @@ const ProfileContent = ({ active }) => {
                     <>
                         <div className="flex justify-center w-full">
                             <div className='relative'>
-                                <img src={`${backend_url}${user?.avatar}`}
+                                <img 
+                                    src={user?.avatar ? `${backend_url}/${user.avatar}` : "https://via.placeholder.com/150?text=User"}
                                     className="w-[150px] h-[150px] rounded-full object-cover border-[3px] border-[#3ad132]"
-                                    alt="profile img" />
+                                    alt="profile img"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = "https://via.placeholder.com/150?text=User";
+                                    }}
+                                />
 
-                                <div className="w-[30px] h-[30px] bg-[#E3E9EE] rounded-full flex items-center justify-center cursor-pointer absolute bottom-[5px] right-[5px]">
-                                    <input type="file"
+                                <div className="w-[30px] h-[30px] bg-[#E3E9EE] rounded-full flex items-center justify-center cursor-pointer absolute bottom-[5px] right-[5px] hover:bg-[#d8e0e6] transition-colors duration-200">
+                                    <input 
+                                        type="file"
                                         id="image"
                                         className="hidden"
                                         onChange={handleImage}
+                                        accept="image/*"
                                     />
-                                    <label htmlFor="image">
-                                        <AiOutlineCamera />
+                                    <label htmlFor="image" className="cursor-pointer">
+                                        <AiOutlineCamera className="text-gray-600 hover:text-gray-800 transition-colors duration-200" />
                                     </label>
                                 </div>
                             </div>

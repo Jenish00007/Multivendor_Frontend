@@ -6,6 +6,10 @@ import {
   AiOutlineHeart,
   AiOutlineMessage,
   AiOutlineShoppingCart,
+  AiOutlineShareAlt,
+  AiOutlineTag,
+  AiOutlineFire,
+  AiOutlineStar,
 } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllProductsShop } from "../../redux/actions/product";
@@ -18,6 +22,7 @@ import { addTocart } from "../../redux/actions/cart";
 import { toast } from "react-toastify";
 import Ratings from "./Ratings";
 import axios from "axios";
+import { motion } from "framer-motion";
 
 const ProductDetails = ({ data }) => {
   const { products } = useSelector((state) => state.products);
@@ -30,6 +35,17 @@ const ProductDetails = ({ data }) => {
   const [click, setClick] = useState(false);
   const [select, setSelect] = useState(0);
   const navigate = useNavigate();
+
+  // Function to format currency in Indian format
+  const formatIndianCurrency = (amount) => {
+    const formatter = new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    return formatter.format(amount);
+  };
 
   useEffect(() => {
     if (!data?.shop?._id) {
@@ -47,7 +63,6 @@ const ProductDetails = ({ data }) => {
     }
   }, [data, wishlist, dispatch]);
 
-  // Remove from wish list
   const removeFromWishlistHandler = (data) => {
     if (!data?._id) {
       toast.error("Invalid product data");
@@ -57,7 +72,6 @@ const ProductDetails = ({ data }) => {
     dispatch(removeFromWishlist(data));
   };
 
-  // add to wish list
   const addToWishlistHandler = (data) => {
     if (!data?._id) {
       toast.error("Invalid product data");
@@ -67,15 +81,8 @@ const ProductDetails = ({ data }) => {
     dispatch(addToWishlist(data));
   };
 
-  // Add to cart
   const addToCartHandler = (id) => {
-    if (!id || !data?._id) {
-      toast.error("Invalid product data");
-      return;
-    }
-    
     const isItemExists = cart && cart.find((i) => i._id === id);
-
     if (isItemExists) {
       toast.error("Item already in cart!");
     } else {
@@ -89,10 +96,36 @@ const ProductDetails = ({ data }) => {
     }
   };
 
-  const incrementCount = () => {
-    setCount(count + 1);
+  const handleMessageSubmit = async () => {
+    if (isAuthenticated) {
+      const groupTitle = data._id + user._id;
+      const userId = user._id;
+      const sellerId = data.shop._id;
+      await axios
+        .post(`${server}/conversation/create-new-conversation`, {
+          groupTitle,
+          userId,
+          sellerId,
+        })
+        .then((res) => {
+          navigate(`/inbox?${res.data.conversation._id}`);
+        })
+        .catch((error) => {
+          toast.error(error.response.data.message);
+        });
+    } else {
+      toast.error("Please login to create a conversation");
+    }
   };
-  
+
+  const incrementCount = () => {
+    if (count < data.stock) {
+      setCount(count + 1);
+    } else {
+      toast.error("Maximum stock limit reached!");
+    }
+  };
+
   const decrementCount = () => {
     if (count > 1) {
       setCount(count - 1);
@@ -114,28 +147,24 @@ const ProductDetails = ({ data }) => {
   const avg = totalRatings / totalReviewsLength || 0;
   const averageRating = avg.toFixed(2);
 
-  // Send message
-  const handleMessageSubmit = async () => {
-    if (!isAuthenticated || !user?._id || !data?.shop?._id) {
-      toast.error("Please login to create a conversation");
-      return;
+  const getImageUrl = (image) => {
+    if (!image) return "https://via.placeholder.com/400x400?text=No+Image";
+    
+    if (typeof image === 'string') {
+      if (image.startsWith('http')) {
+        return image;
+      }
+      return `${backend_url}/${image}`;
+    }
+    
+    if (image.url) {
+      if (image.url.startsWith('http')) {
+        return image.url;
+      }
+      return `${backend_url}/${image.url}`;
     }
 
-    try {
-      const groupTitle = data._id + user._id;
-      const userId = user._id;
-      const sellerId = data.shop._id;
-      
-      const res = await axios.post(`${server}/conversation/create-new-conversation`, {
-        groupTitle,
-        userId,
-        sellerId,
-      });
-      
-      navigate(`/inbox?${res.data.conversation._id}`);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to create conversation");
-    }
+    return "https://via.placeholder.com/400x400?text=No+Image";
   };
 
   if (!data || !data._id) {
@@ -144,127 +173,207 @@ const ProductDetails = ({ data }) => {
 
   return (
     <div className="bg-white">
-      <div className={`${styles.section} w-[90%] 800px:w-[80%] `}>
-        <div className="w-full py-5">
-          <div className="block w-full 800px:flex">
-            <div className="w-full 800px:w-[50%]">
-              <img
-                src={`${backend_url}${data.images?.[select]}`}
-                alt=""
-                className="w-[80%]"
-              />
-              <div className="w-full flex">
-                {data.images?.map((i, index) => (
-                  <div
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start">
+          {/* Image gallery */}
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Main image */}
+            <div className="w-full lg:w-[70%]">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="w-full aspect-square rounded-lg overflow-hidden bg-gray-100"
+              >
+                <img
+                  src={getImageUrl(data?.images?.[select])}
+                  alt={data?.name || "Product Image"}
+                  className="w-full h-full object-center object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://via.placeholder.com/400x400?text=No+Image";
+                  }}
+                />
+              </motion.div>
+            </div>
+
+            {/* Thumbnails */}
+            <div className="w-full lg:w-[30%]">
+              <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
+                {data?.images?.map((image, index) => (
+                  <motion.div
                     key={index}
-                    className={`${
-                      select === index ? "border" : "null"
-                    } cursor-pointer`}
+                    whileHover={{ scale: 1.02 }}
+                    className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer"
+                    onClick={() => setSelect(index)}
                   >
                     <img
-                      src={`${backend_url}${i}`}
-                      alt=""
-                      className="h-[200px] overflow-hidden mr-3 mt-3"
-                      onClick={() => setSelect(index)}
+                      src={getImageUrl(image)}
+                      alt={`${data?.name || "Product"} - ${index + 1}`}
+                      className="w-full h-full object-center object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "https://via.placeholder.com/100x100?text=No+Image";
+                      }}
                     />
-                  </div>
+                    {select === index && (
+                      <div className="absolute inset-0 border-2 border-blue-500 rounded-lg" />
+                    )}
+                  </motion.div>
                 ))}
               </div>
             </div>
-            {/* Right */}
-            <div className="w-full 800px:w-[50%] pt-5 ">
-              <h1 className={`${styles.productTitle}`}>{data.name}</h1>
-              <p>{data.description}</p>
-              <div className="flex pt-3">
-                <h4 className={`${styles.productDiscountPrice}`}>
-                  {data.discountPrice}$
-                </h4>
-                <h3 className={`${styles.price}`}>
-                  {data.originalPrice ? data.originalPrice + "$" : null}
-                </h3>
+          </div>
+
+          {/* Product info */}
+          <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
+                {data?.name}
+              </h1>
+
+              <div className="mt-3">
+                <h2 className="sr-only">Product information</h2>
+                <div className="flex items-center space-x-4">
+                  <p className="text-3xl text-gray-900 font-bold">
+                    {formatIndianCurrency(data?.discountPrice)}
+                  </p>
+                  {data?.originalPrice && (
+                    <p className="text-xl text-gray-500 line-through">
+                      {formatIndianCurrency(data?.originalPrice)}
+                    </p>
+                  )}
+                  {data?.originalPrice && (
+                    <div className="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-0.5 rounded-full">
+                      {Math.round(((data.originalPrice - data.discountPrice) / data.originalPrice) * 100)}% OFF
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* inc dec option */}
-              <div className="flex items-center mt-12 justify-between pr-3">
-                <div>
+              {/* Reviews */}
+              <div className="mt-3">
+                <div className="flex items-center">
+                  <div className="flex items-center">
+                    <Ratings rating={data?.ratings} />
+                  </div>
+                  <p className="ml-2 text-sm text-gray-500">
+                    ({data?.reviews?.length} reviews)
+                  </p>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="mt-6">
+                <h3 className="sr-only">Description</h3>
+                <div className="text-base text-gray-700 space-y-6">
+                  <p>{data?.description}</p>
+                </div>
+              </div>
+
+              {/* Stock and Sold */}
+              <div className="mt-6 flex items-center space-x-4">
+                <div className="flex items-center text-gray-500">
+                  <AiOutlineFire className="w-5 h-5 mr-1" />
+                  <span>{data?.sold_out} sold</span>
+                </div>
+                <div className="flex items-center text-gray-500">
+                  <AiOutlineTag className="w-5 h-5 mr-1" />
+                  <span>{data?.stock} in stock</span>
+                </div>
+              </div>
+
+              {/* Quantity selector */}
+              <div className="mt-8">
+                <div className="flex items-center">
                   <button
-                    className="bg-gradient-to-r from-teal-400 to-teal-500 text-white font-bold rounded-l px-4 py-2 shadow-lg hover:opacity-75 transition duration-300 ease-in-out"
                     onClick={decrementCount}
+                    className="bg-gray-100 text-gray-600 hover:bg-gray-200 h-10 w-10 rounded-full flex items-center justify-center"
                   >
                     -
                   </button>
-
-                  <span className="bg-gray-200 text-gray-800 font-medium px-4 py-[11px]">
-                    {count}
-                  </span>
-
+                  <span className="mx-4 text-gray-600">{count}</span>
                   <button
-                    className="bg-gradient-to-r from-teal-400 to-teal-500 text-white font-bold rounded-l px-4 py-2 shadow-lg hover:opacity-75 transition duration-300 ease-in-out"
                     onClick={incrementCount}
+                    className="bg-gray-100 text-gray-600 hover:bg-gray-200 h-10 w-10 rounded-full flex items-center justify-center"
                   >
                     +
                   </button>
                 </div>
-
-                <div>
-                  {click ? (
-                    <AiFillHeart
-                      size={30}
-                      className="cursor-pointer"
-                      onClick={() => removeFromWishlistHandler(data)}
-                      color={click ? "red" : "#333"}
-                      title="Remove from wishlist"
-                    />
-                  ) : (
-                    <AiOutlineHeart
-                      size={30}
-                      className="cursor-pointer"
-                      onClick={() => addToWishlistHandler(data)}
-                      title="Add to wishlist"
-                    />
-                  )}
-                </div>
               </div>
-              <div
-                className={`${styles.button} !mt-6 !rounded !h-11 flex items-center`}
-                onClick={() => addToCartHandler(data._id)}
-              >
-                <span className="text-white flex items-center">
-                  Add to Cart <AiOutlineShoppingCart className="ml-1" />
-                </span>
-              </div>
-              <div className="flex items-center pt-8">
-                <Link to={`/shop/preview/${data.shop?._id}`}>
-                  <img
-                    src={`${backend_url}${data.shop?.avatar}`}
-                    alt=""
-                    className="w-[50px] h-[50px] rounded-full mr-2"
-                  />
-                </Link>
 
-                <div className="pr-8">
-                  <Link to={`/shop/preview/${data.shop?._id}`}>
-                    <h3
-                      className={`${styles.shop_name} pb-1 pt-1 cursor-pointer`}
-                    >
-                      {data.shop?.name}
-                    </h3>
-                  </Link>
-                  <h5 className="pb-3 text-[15px]">
-                    ({averageRating}/5) Ratings
-                  </h5>
-                </div>
-
-                <div
-                  className={`${styles.button} bg-[#6443d1] mt-4 !rounded !h-11`}
-                  onClick={handleMessageSubmit}
+              {/* Action buttons */}
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => addToCartHandler(data?._id)}
+                  className="flex-1 bg-blue-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  <span className="text-white flex items-center">
-                    Send Message <AiOutlineMessage className="ml-1" />
-                  </span>
+                  <AiOutlineShoppingCart className="w-5 h-5 mr-2" />
+                  Add to Cart
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => addToWishlistHandler(data)}
+                  className="flex-1 bg-white border border-gray-300 rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  {click ? (
+                    <AiFillHeart className="w-5 h-5 mr-2 text-red-500" />
+                  ) : (
+                    <AiOutlineHeart className="w-5 h-5 mr-2" />
+                  )}
+                  {click ? "Remove from Wishlist" : "Add to Wishlist"}
+                </motion.button>
+              </div>
+
+              {/* Share and Message */}
+              <div className="mt-6 flex items-center space-x-4">
+                <button
+                  onClick={handleMessageSubmit}
+                  className="flex items-center text-gray-500 hover:text-gray-700"
+                >
+                  <AiOutlineMessage className="w-5 h-5 mr-2" />
+                  Message Seller
+                </button>
+                <button className="flex items-center text-gray-500 hover:text-gray-700">
+                  <AiOutlineShareAlt className="w-5 h-5 mr-2" />
+                  Share
+                </button>
+              </div>
+
+              {/* Shop info */}
+              <div className="mt-8 border-t border-gray-200 pt-8">
+                <div className="flex items-center">
+                  <img
+                    src={getImageUrl(data?.shop?.avatar)}
+                    alt={data?.shop?.name || "Shop Avatar"}
+                    className="w-12 h-12 rounded-full object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://via.placeholder.com/50x50?text=Shop";
+                    }}
+                  />
+                  <div className="ml-4">
+                    <h3 className="text-sm font-medium text-gray-900">
+                      {data?.shop?.name}
+                    </h3>
+                    <div className="flex items-center mt-1">
+                      <Ratings rating={data?.shop?.ratings} />
+                      <span className="ml-2 text-sm text-gray-500">
+                        ({data?.shop?.ratings} rating)
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
