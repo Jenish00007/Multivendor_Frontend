@@ -37,7 +37,7 @@ const Footer = () => {
                                 <img
                                     src={logo}
                                     alt={appName}
-                                    className="w-24 h-10 object-contain bg-white/10 p-2 rounded-lg backdrop-blur-sm border border-white/20 transition-all duration-300 group-hover:bg-white/20 group-hover:scale-105"
+                                    className="w-32 h-14 object-contain bg-white/10 p-2 rounded-lg backdrop-blur-sm border border-white/20 transition-all duration-300 group-hover:bg-white/20 group-hover:scale-105"
                                 />
                             </div>
                             <h1 className="text-2xl font-bold mt-3 bg-gradient-to-r from-teal-400 to-blue-400 bg-clip-text text-transparent">

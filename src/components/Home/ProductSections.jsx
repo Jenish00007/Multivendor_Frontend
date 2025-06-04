@@ -49,7 +49,7 @@ const ProductSections = () => {
       <div className={`${styles.heading}`}>
         <h1>{title}</h1>
       </div>
-      <div className="grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-4 lg:gap-[25px] xl:grid-cols-5 xl:gap-[30px] mb-12 border-0">
+      <div className="grid grid-cols-2 gap-[15px] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 sm:gap-[20px] md:gap-[25px] lg:gap-[25px] xl:gap-[30px] mb-12 border-0">
         {products && products.length !== 0 && (
           products.map((product) => (
             <ProductCard key={product._id} data={product} />
@@ -61,12 +61,14 @@ const ProductSections = () => {
 
   return (
     <div className="w-full">
+       <div className="h-20"></div>
       {renderProductSection("Recommended Products", recommendedProducts)}
       {renderProductSection("Top Offers", topOffers)}
       {renderProductSection("Most Popular", popularProducts)}
       {renderProductSection("Latest Products", latestProducts)}
       {renderProductSection("Flash Sale", flashSaleItems)}
     </div>
+    
   );
 };
 

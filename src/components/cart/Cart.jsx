@@ -24,6 +24,16 @@ const Cart = ({ setOpenCart }) => {
     0
   );
 
+  // Format price in Indian currency
+  const formatIndianPrice = (price) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(price);
+  };
+
   const quantityChangeHandler = (data) => {
     dispatch(addTocart(data));
   };
@@ -81,10 +91,10 @@ const Cart = ({ setOpenCart }) => {
               {/* Check out btn */}
               <Link to="/checkout">
                 <div
-                  className={`h-[45px] flex items-center justify-center w-[100%] bg-[#e44343] rounded-[5px]`}
+                  className={`h-[45px] flex items-center justify-center w-[100%] bg-[#e44343] rounded-[5px] hover:bg-[#d13a3a] transition-colors duration-300`}
                 >
                   <h1 className="text-[#fff] text-[18px] font-[600]">
-                    Checkout Now (USD${totalPrice})
+                    Checkout Now ({formatIndianPrice(totalPrice)})
                   </h1>
                 </div>
               </Link>
@@ -100,15 +110,21 @@ const CartSingle = ({ data, quantityChangeHandler, removeFromCartHandler }) => {
   const [value, setValue] = useState(data.qty);
   const totalPrice = data.discountPrice * value;
 
+  // Format price in Indian currency
+  const formatIndianPrice = (price) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(price);
+  };
+
   const increment = (data) => {
     if (data.stock < value) {
       toast.error("Product stock limited!");
     } else {
       setValue(value + 1);
-      /* The line `const updateCartData = { ...data, qty: value + 1 };` is creating a new object
-            `updateCartData` by spreading the properties of the `data` object and adding a new
-            property `qty` with the value of `value + 1`. This is typically used to update the
-            quantity of an item in the cart. */
       const updateCartData = { ...data, qty: value + 1 };
       quantityChangeHandler(updateCartData);
     }
@@ -121,45 +137,71 @@ const CartSingle = ({ data, quantityChangeHandler, removeFromCartHandler }) => {
     quantityChangeHandler(updateCartData);
   };
 
+  const getImageUrl = () => {
+    if (!data.images || data.images.length === 0) {
+      return "https://via.placeholder.com/130x130?text=No+Image";
+    }
+
+    const image = data.images[0];
+    if (typeof image === 'string') {
+      if (image.startsWith('http')) {
+        return image;
+      }
+      return `${backend_url}/${image}`;
+    }
+    
+    if (image.url) {
+      if (image.url.startsWith('http')) {
+        return image.url;
+      }
+      return `${backend_url}/${image.url}`;
+    }
+
+    return "https://via.placeholder.com/130x130?text=No+Image";
+  };
+
   return (
     <>
-      <div className="border-b p-4">
+      <div className="border-b p-4 hover:bg-gray-50 transition-colors duration-200">
         <div className="w-full flex items-center">
-          <div>
+          <div className="flex flex-col items-center gap-2">
             <div
-              className={`bg-[#e44343] border border-[#e4434373] rounded-full w-[25px] h-[25px] ${styles.noramlFlex} justify-center cursor-pointer`}
+              className={`bg-[#e44343] border border-[#e4434373] rounded-full w-[25px] h-[25px] ${styles.noramlFlex} justify-center cursor-pointer hover:bg-[#d13a3a] transition-colors duration-200`}
               onClick={() => increment(data)}
             >
               <HiPlus size={18} color="#fff" />
             </div>
-            <span className="pl-[10px]">{data.qty}</span>
+            <span className="font-medium">{data.qty}</span>
             <div
-              className="bg-[#a7abb14f] rounded-full w-[25px] h-[25px] flex items-center justify-center cursor-pointer"
+              className="bg-[#a7abb14f] rounded-full w-[25px] h-[25px] flex items-center justify-center cursor-pointer hover:bg-[#8f939b4f] transition-colors duration-200"
               onClick={() => decrement(data)}
             >
               <HiOutlineMinus size={16} color="#7d879c" />
             </div>
           </div>
           <img
-            src={`${backend_url}${data?.images[0]}`}
-            className="w-[130px] h-min ml-2 mr-2 rounded-[5px]"
-            alt="side card"
+            src={getImageUrl()}
+            className="w-[130px] h-[130px] ml-2 mr-2 rounded-[5px] object-cover"
+            alt={data.name}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://via.placeholder.com/130x130?text=No+Image";
+            }}
           />
 
-          <div className="pl-[15px]">
-            <h1>{data.name}</h1>
+          <div className="pl-[15px] flex-1">
+            <h1 className="font-medium text-gray-800">{data.name}</h1>
             <h4 className="font-[400] text-[15px] text-[#00000082]">
-              {" "}
-              ${data.discountPrice} * {value}
+              {formatIndianPrice(data.discountPrice)} × {value}
             </h4>
-            <h4 className="font-[400] text-[17px] pt-[3px]  text-[#d02222] font-Roboto ">
-              US${totalPrice}
+            <h4 className="font-[500] text-[17px] pt-[3px] text-[#d02222] font-Roboto">
+              {formatIndianPrice(totalPrice)}
             </h4>
           </div>
           <RxCross1
-            size={99}
+            size={20}
             color="#7d879c"
-            className="cursor-pointer"
+            className="cursor-pointer hover:text-red-500 transition-colors duration-200"
             onClick={() => removeFromCartHandler(data)}
           />
         </div>

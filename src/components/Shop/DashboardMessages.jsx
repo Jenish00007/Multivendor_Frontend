@@ -297,9 +297,13 @@ const MessageList = ({
     >
       <div className="relative">
         <img
-          src={`${backend_url}${user?.avatar}`}
-          alt=""
-          className="w-[50px] h-[50px] rounded-full"
+          src={user?.avatar ? `${backend_url}/${user.avatar}` : "https://via.placeholder.com/50?text=User"}
+          alt={user?.name || "User"}
+          className="w-[50px] h-[50px] rounded-full object-cover"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "https://via.placeholder.com/50?text=User";
+          }}
         />
         {online ? (
           <div className="w-[12px] h-[12px] bg-green-400 rounded-full absolute top-[2px] right-[2px]" />

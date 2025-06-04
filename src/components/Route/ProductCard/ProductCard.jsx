@@ -89,15 +89,15 @@ const ProductCard = ({ data, isEvent }) => {
             <div className='flex justify-end'>
                 {click ? (
                     <AiFillHeart
-                        size={22}
-                        className="cursor-pointer absolute right-2 top-5 text-red-500 transform transition-all duration-300 hover:scale-110 z-10"
+                        size={28}
+                        className="cursor-pointer absolute right-4 top-4 text-red-500 transform transition-all duration-300 hover:scale-110 z-10 p-2 bg-white/80 rounded-full shadow-sm hover:shadow-md"
                         onClick={() => removeFromWishlistHandler(data)}
                         title='Remove from wishlist'
                     />
                 ) : (
                     <AiOutlineHeart
-                        size={22}
-                        className="cursor-pointer absolute right-2 top-5 text-gray-600 transform transition-all duration-300 hover:scale-110 z-10"
+                        size={28}
+                        className="cursor-pointer absolute right-4 top-4 text-gray-600 transform transition-all duration-300 hover:scale-110 z-10 p-2 bg-white/80 rounded-full shadow-sm hover:shadow-md"
                         onClick={() => addToWishlistHandler(data)}
                         title='Add to wishlist'
                     />
@@ -136,7 +136,6 @@ const ProductCard = ({ data, isEvent }) => {
                             e.target.src = "https://via.placeholder.com/30x30?text=Shop";
                         }}
                     />
-                    <AiOutlineShop className="text-blue-500 mr-1 flex-shrink-0" />
                     <h5 className={`${styles.shop_name} text-blue-500 truncate`}>{data.shop.name}</h5>
                 </div>
             </Link>
@@ -172,17 +171,10 @@ const ProductCard = ({ data, isEvent }) => {
                 </div>
             </Link>
 
-            <div className="absolute right-2 top-14 flex flex-col gap-2 z-10">
-                <AiOutlineEye
-                    size={22}
-                    className="cursor-pointer text-gray-600 transform transition-all duration-300 hover:scale-110 hover:text-blue-500"
-                    onClick={() => setOpen(!open)}
-                    title='Quick view'
-                />
-
+            <div className="absolute right-4 top-16 z-10">
                 <AiOutlineShoppingCart
-                    size={25}
-                    className="cursor-pointer text-gray-600 transform transition-all duration-300 hover:scale-110 hover:text-green-500"
+                    size={30}
+                    className="cursor-pointer text-gray-600 transform transition-all duration-300 hover:scale-110 hover:text-green-500 p-2 bg-white/80 rounded-full shadow-sm hover:shadow-md"
                     onClick={() => addToCartHandler(data._id)}
                     title='Add to cart'
                 />

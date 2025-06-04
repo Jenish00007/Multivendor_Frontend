@@ -68,12 +68,9 @@ const Header = ({ activeHeading }) => {
                   <img
                     src={logo}
                     alt={appName}
-                    className="w-[140px] h-[60px] object-contain transition-transform duration-300 group-hover:scale-105"
+                    className="w-[140px] h-[100px] object-contain transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
-                <h1 className="text-3xl font-bold ml-3 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-                  {appName}
-                </h1>
               </Link>
             </div>
 
@@ -82,7 +79,7 @@ const Header = ({ activeHeading }) => {
               <div className="relative group">
                 <input
                   type="text"
-                  placeholder="Search for products, brands, categories..."
+                  placeholder="Search..."
                   value={searchTerm}
                   onChange={handleSearchChange}
                   className="h-[50px] w-full pl-4 pr-12 border-2 border-gray-200 rounded-full text-gray-700 bg-white shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all duration-300 group-hover:shadow-md"
@@ -160,9 +157,13 @@ const Header = ({ activeHeading }) => {
                 {isAuthenticated ? (
                   <Link to="/profile" className="group">
                     <img
-                      src={`${backend_url}${user.avatar}`}
-                      className="w-10 h-10 rounded-full border-2 border-gray-200 group-hover:border-blue-500 transition-all duration-300 group-hover:scale-105"
+                      src={user.avatar ? `${backend_url}/${user.avatar}` : "https://via.placeholder.com/40?text=User"}
+                      className="w-10 h-10 rounded-full border-2 border-gray-200 group-hover:border-blue-500 transition-all duration-300 group-hover:scale-105 object-cover"
                       alt="Profile"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "https://via.placeholder.com/40?text=User";
+                      }}
                     />
                   </Link>
                 ) : (
@@ -240,11 +241,8 @@ const Header = ({ activeHeading }) => {
               <img
                 src={logo}
                 alt={appName}
-                className="w-[80px] h-[35px] object-contain mr-2"
+                className="w-[80px] h-[100px] object-contain"
               />
-              <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                {appName}
-              </h1>
             </Link>
           </div>
 
@@ -297,7 +295,7 @@ const Header = ({ activeHeading }) => {
               <div className="relative">
                 <input
                   type="search"
-                  placeholder="Search for products..."
+                  placeholder="Search"
                   className="h-[45px] w-full pl-4 pr-12 border-2 border-gray-200 rounded-full text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all duration-300"
                   value={searchTerm}
                   onChange={handleSearchChange}

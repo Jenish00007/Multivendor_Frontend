@@ -167,9 +167,13 @@ const ShopProfileData = ({ isOwner }) => {
                                         <div className="relative">
                                             <div className="relative">
                                                 <img
-                                                    src={`${backend_url}/${item.user.avatar}`}
+                                                    src={item.user.avatar ? `${backend_url}/${item.user.avatar}` : "https://via.placeholder.com/60?text=User"}
                                                     className="w-[60px] h-[60px] rounded-full object-cover border-2 border-gray-100 shadow-sm"
-                                                    alt=""
+                                                    alt={item.user.name || "User"}
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src = "https://via.placeholder.com/60?text=User";
+                                                    }}
                                                 />
                                                 <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-r from-red-500 to-red-600 rounded-full border-2 border-white shadow-sm"></div>
                                             </div>

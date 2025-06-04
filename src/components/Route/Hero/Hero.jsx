@@ -1,38 +1,135 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from "react-router-dom";
 import styles from "../../../styles/styles";
-
+import axios from "axios";
+import { server } from "../../../server";
+import { AiOutlineShoppingCart, AiOutlineArrowRight } from "react-icons/ai";
+import { motion } from "framer-motion";
 
 const Hero = () => {
+    const [banner, setBanner] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchConfiguration = async () => {
+            try {
+                setLoading(true);
+                const { data } = await axios.get(`${server}/settings/config`);
+                if (data?.data?.banner) {
+                    setBanner(data.data.banner);
+                } else {
+                    setError("No banner URL found in configuration");
+                }
+            } catch (error) {
+                console.error("Error fetching banner:", error);
+                setError("Failed to load banner");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchConfiguration();
+    }, []);
+
     return (
         <div
-            className={`relative min-h-[70vh] 800px:min-h-[80vh] w-full bg-no-repeat ${styles.noramlFlex}`}
+            className="relative min-h-[85vh] w-full bg-no-repeat flex items-center"
             style={{
-                backgroundImage:
-                    "url(https://themes.rslahmed.dev/rafcart/assets/images/banner-2.jpg)",
+                backgroundImage: banner ? `url(${banner})` : 'none',
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundColor: "#f5f5f5"
             }}
         >
-            <div className={`${styles.section} w-[90%] 800px:w-[60%]`}>
-                <h1
-                    className={`text-[35px] leading-[1.2] 800px:text-[60px] font-[600] capitalize bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent`}
-                >
-                    Fresh Groceries <br /> Delivered to Your Door
-                </h1>
-                <p className="pt-5 text-[16px] font-[Poppins] font-[400] text-[#000000ba]">
-                    Discover our wide selection of fresh fruits, vegetables, dairy products, and pantry essentials. <br /> 
-                    Shop from the comfort of your home and get your groceries delivered right to your doorstep. <br /> 
-                    Quality products, competitive prices, and convenient delivery - all in one place.
-                </p>
-                <Link to="/products" className="inline-block">
-                    <div className={`${styles.button} mt-5`}>
-                        <span className="text-[#fff] font-[Poppins] text-[18px]">
-                            Shop Now
-                        </span>
-                    </div>
-                </Link>
+            {/* Overlay gradient */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30"></div>
 
+            <div className="relative z-10 w-[90%] 800px:w-[60%] mx-auto px-4 sm:px-6">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                >
+                    <h1 className="text-[28px] leading-[1.2] sm:text-[40px] md:text-[50px] lg:text-[60px] 800px:text-[70px] font-[700] capitalize text-white drop-shadow-lg">
+                        Fresh Groceries <br /> 
+                        <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                            Delivered to Your Door
+                        </span>
+                    </h1>
+
+                    <p className="pt-4 sm:pt-6 text-[14px] sm:text-[16px] md:text-[18px] font-[Poppins] font-[400] text-white/90 max-w-2xl leading-relaxed">
+                        Discover our wide selection of fresh fruits, vegetables, dairy products, and pantry essentials. 
+                        Shop from the comfort of your home and get your groceries delivered right to your doorstep.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 sm:mt-8">
+                        <Link to="/products" className="inline-block w-full sm:w-auto">
+                            <motion.div 
+                                className="group w-full"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                <button className="relative inline-flex items-center justify-center w-full px-6 sm:px-8 py-3 sm:py-4 overflow-hidden font-medium transition duration-300 ease-out rounded-full shadow-lg group bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white">
+                                    <span className="absolute inset-0 flex items-center justify-center w-full h-full text-white duration-300 -translate-x-full bg-gradient-to-r from-blue-800 to-blue-900 group-hover:translate-x-0 ease">
+                                        <AiOutlineShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
+                                    </span>
+                                    <span className="absolute flex items-center justify-center w-full h-full text-white transition-all duration-300 transform group-hover:translate-x-full ease">
+                                        Shop Now
+                                    </span>
+                                    <span className="relative invisible">Shop Now</span>
+                                </button>
+                            </motion.div>
+                        </Link>
+
+                        <Link to="/categories" className="inline-block w-full sm:w-auto">
+                            <motion.div 
+                                className="group w-full"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                <button className="relative inline-flex items-center justify-center w-full px-6 sm:px-8 py-3 sm:py-4 overflow-hidden font-medium transition duration-300 ease-out rounded-full shadow-lg group bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border border-white/20">
+                                    <span className="flex items-center gap-2">
+                                        Explore Categories
+                                        <AiOutlineArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+                                    </span>
+                                </button>
+                            </motion.div>
+                        </Link>
+                    </div>
+
+                    {/* Features section */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-8 sm:mt-12">
+                        {[
+                            { text: "Free Delivery", icon: "🚚" },
+                            { text: "24/7 Support", icon: "💬" },
+                            { text: "Fresh Products", icon: "✨" },
+                            { text: "Secure Payment", icon: "🔒" }
+                        ].map((feature, index) => (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                                className="flex items-center gap-2 text-white/90 bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3"
+                            >
+                                <span className="text-xl sm:text-2xl">{feature.icon}</span>
+                                <span className="text-xs sm:text-sm font-medium">{feature.text}</span>
+                            </motion.div>
+                        ))}
+                    </div>
+                </motion.div>
             </div>
 
+            {loading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+            )}
+            {error && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <p className="text-red-500 bg-white/90 px-4 py-2 rounded-lg">{error}</p>
+                </div>
+            )}
         </div>
     )
 }
