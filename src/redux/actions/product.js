@@ -141,3 +141,39 @@ export const getAllProductsAdmin = () => async (dispatch) => {
     });
   }
 };
+
+// update product
+export const updateProduct = (id, productData) => async (dispatch) => {
+  try {
+    dispatch({
+      type: "updateProductRequest",
+    });
+
+    const { data } = await axios.put(
+      `${server}/product/update-product/${id}`,
+      productData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
+
+    dispatch({
+      type: "updateProductSuccess",
+      payload: data.product,
+    });
+
+    return {
+      type: "updateProductSuccess",
+      payload: data.product,
+    };
+  } catch (error) {
+    dispatch({
+      type: "updateProductFailed",
+      payload: error.response?.data?.message || "Error updating product",
+    });
+    throw error;
+  }
+};

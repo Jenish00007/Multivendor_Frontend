@@ -39,6 +39,7 @@ import {
   ShopBannersPage,
   ShopCreateBanner,
   ShopEditBanner,
+  ShopEditProduct,
 } from "./routes/ShopRoutes";
 
 import {
@@ -217,6 +218,15 @@ const App = () => {
           element={
             <SellerProtectedRoute>
               <ShopAllProducts />
+            </SellerProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard-edit-product/:id"
+          element={
+            <SellerProtectedRoute>
+              <ShopEditProduct />
             </SellerProtectedRoute>
           }
         />
