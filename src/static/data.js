@@ -362,16 +362,6 @@ export const footerProductLinks = [
     link: "/about",
   },
   {
-    name: "Careers",
-    link: "/carrers",
-  },
-  {
-    name: "Store Locations",
-  },
-  {
-    name: "Our Blog",
-  },
-  {
     name: "Reviews",
   },
 ];

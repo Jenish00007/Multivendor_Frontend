@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import styles from "../../styles/styles";
-import { productData, categoriesData } from "../../static/data";
+import { productData } from "../../static/data";
 import {
   AiOutlineHeart,
   AiOutlineSearch,
@@ -13,10 +13,11 @@ import { CgProfile } from "react-icons/cg";
 import DropDown from "./DropDown";
 import Navbar from "./Navbar";
 import { useSelector } from "react-redux";
-import { backend_url } from "../../server";
+import { backend_url, server } from "../../server";
 import Cart from "../cart/Cart";
 import Wishlist from "../Wishlist/Wishlist";
 import { RxCross1 } from "react-icons/rx";
+import axios from "axios";
 
 const Header = ({ activeHeading }) => {
   const { isSeller } = useSelector((state) => state.seller);
@@ -32,11 +33,34 @@ const Header = ({ activeHeading }) => {
   const [openCart, setOpenCart] = useState(false);
   const [openWishlist, setOpenWishlist] = useState(false);
   const [open, setOpen] = useState(false); // mobile menu
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${server}/categories`);
+      setCategories(response.data.data || []);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      setLoading(false);
+    }
+  };
 
   // Handle search change
   const handleSearchChange = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
+
+    if (!term) {
+      setSearchData(null);
+      return;
+    }
 
     // Filter products
     const filteredProducts =
@@ -101,7 +125,7 @@ const Header = ({ activeHeading }) => {
                         onClick={() => setSearchData(null)}
                       >
                         <img
-                          src={`${backend_url}${item.images[0]}`}
+                          src={item.images?.[0] ? `${item.images[0]}` : "https://via.placeholder.com/150?text=Product"}
                           alt={item.name}
                           className="w-12 h-12 object-cover rounded-lg mr-3 border border-gray-200"
                         />
@@ -110,7 +134,7 @@ const Header = ({ activeHeading }) => {
                             {item.name}
                           </h3>
                           <p className="text-xs text-gray-500 mt-1">
-                            ${item.discountPrice || item.originalPrice}
+                            ₹{item.discountPrice || item.originalPrice}
                           </p>
                         </div>
                       </Link>
@@ -204,7 +228,10 @@ const Header = ({ activeHeading }) => {
               </div>
               {dropDown && (
                 <DropDown
-                  categoriesData={categoriesData}
+                  categoriesData={categories.map(category => ({
+                    title: category.name,
+                    image_Url: category.image || "https://via.placeholder.com/150?text=Category"
+                  }))}
                   setDropDown={setDropDown}
                 />
               )}
@@ -318,7 +345,7 @@ const Header = ({ activeHeading }) => {
                           }}
                         >
                           <img
-                            src={item.image_Url?.[0]?.url || `${backend_url}${item.images?.[0]}`}
+                            src={item.images && item.images[0] ? `${backend_url}/${item.images[0]}` : "https://via.placeholder.com/150?text=Product"}
                             alt={item.name}
                             className="w-10 h-10 object-cover rounded-lg mr-3 border border-gray-200"
                           />

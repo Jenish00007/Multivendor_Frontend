@@ -81,6 +81,16 @@ const CartSingle = ({ data, removeFromWishlistHandler, addToCartHandler }) => {
   const [value, setValue] = useState(1);
   const totalPrice = data.discountPrice * value;
 
+  // Robust image URL handling
+  let imageUrl = "https://via.placeholder.com/130x130?text=No+Image";
+  if (data?.images && data.images[0]) {
+    if (typeof data.images[0] === 'string') {
+      imageUrl = data.images[0].startsWith('http') ? data.images[0] : `${backend_url}/${data.images[0]}`;
+    } else if (data.images[0].url) {
+      imageUrl = data.images[0].url.startsWith('http') ? data.images[0].url : `${backend_url}/${data.images[0].url}`;
+    }
+  }
+
   return (
     <>
       <div className="border-b p-4">
@@ -90,16 +100,17 @@ const CartSingle = ({ data, removeFromWishlistHandler, addToCartHandler }) => {
             onClick={() => removeFromWishlistHandler(data)}
           />
           <img
-            src={`${backend_url}${data?.images[0]}`}
-            alt=""
-            className="w-[130px] h-min ml-2 mr-2 rounded-[5px]"
+            src={imageUrl}
+            alt={data.name}
+            className="w-[130px] h-min ml-2 mr-2 rounded-[5px] object-cover"
+            onError={e => { e.target.onerror = null; e.target.src = "https://via.placeholder.com/130x130?text=No+Image"; }}
           />
 
           <div className="pl-[15px]">
             <h1>{data.name}</h1>
 
             <h4 className="font-[600] pt-3 800px:pt-[3px] text-[17px] text-[#d02222] font-Roboto">
-              US${totalPrice}
+              ₹{totalPrice}
             </h4>
           </div>
 

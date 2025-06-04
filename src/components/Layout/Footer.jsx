@@ -79,7 +79,7 @@ const Footer = () => {
                                 <li key={index}>
                                     <Link
                                         className="text-gray-400 hover:text-teal-400 transition-all duration-300 text-sm leading-6 hover:translate-x-2 inline-block relative group"
-                                        to={link.link}
+                                        to={link.link || "#"}
                                     >
                                         <span className="relative z-10">{link.name}</span>
                                         <div className="absolute inset-0 bg-teal-400/10 rounded-md scale-0 group-hover:scale-100 transition-transform duration-300 -z-10"></div>
@@ -100,7 +100,7 @@ const Footer = () => {
                                 <li key={index}>
                                     <Link
                                         className="text-gray-400 hover:text-blue-400 transition-all duration-300 text-sm leading-6 hover:translate-x-2 inline-block relative group"
-                                        to={link.link}
+                                        to={link.link || "#"}
                                     >
                                         <span className="relative z-10">{link.name}</span>
                                         <div className="absolute inset-0 bg-blue-400/10 rounded-md scale-0 group-hover:scale-100 transition-transform duration-300 -z-10"></div>
@@ -121,7 +121,7 @@ const Footer = () => {
                                 <li key={index}>
                                     <Link
                                         className="text-gray-400 hover:text-purple-400 transition-all duration-300 text-sm leading-6 hover:translate-x-2 inline-block relative group"
-                                        to={link.link}
+                                        to={link.link || "#"}
                                     >
                                         <span className="relative z-10">{link.name}</span>
                                         <div className="absolute inset-0 bg-purple-400/10 rounded-md scale-0 group-hover:scale-100 transition-transform duration-300 -z-10"></div>
@@ -133,13 +133,13 @@ const Footer = () => {
                 </div>
 
                 {/* Bottom Section */}
-                <div className="border-t border-white/10 bg-black/20 backdrop-blur-sm">
+                <div className="border-t border-white/10 bg-black/20 backdrop-blur-sm relative z-[60]" style={{zIndex:60, position:'relative'}}>
                     <div className="flex flex-col sm:flex-row justify-between items-center px-6 sm:px-8 py-6 text-gray-400 text-sm">
                         <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
                             <span className="flex items-center gap-2">
-                                © 2025 
+                                © {new Date().getFullYear()} {" "}
                                 <span className="text-white font-medium">{appName}</span>
-                                All rights reserved.
+                                . All rights reserved.
                             </span>
                             <div className="flex gap-6">
                                 <Link 
@@ -160,7 +160,8 @@ const Footer = () => {
                         {/* Back to top button */}
                         <button 
                             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                            className="mt-4 sm:mt-0 px-4 py-2 bg-gradient-to-r from-teal-400 to-blue-500 text-white text-xs font-medium rounded-full hover:from-teal-500 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl"
+                            className="mt-4 sm:mt-0 px-4 py-2 bg-gradient-to-r from-teal-400 to-blue-500 text-white text-xs font-medium rounded-full hover:from-teal-500 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl relative z-[70]"
+                            style={{zIndex:70, position:'relative'}}
                         >
                             Back to Top ↑
                         </button>
