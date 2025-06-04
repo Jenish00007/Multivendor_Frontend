@@ -14,6 +14,7 @@ import ShopInboxPage from "../pages/Shop/ShopInboxPage";
 import ShopBannersPage from "../pages/Shop/ShopBannersPage";
 import ShopCreateBanner from "../pages/Shop/ShopCreateBanner";
 import ShopEditBanner from "../pages/Shop/ShopEditBanner";
+import ShopEditProduct from "../pages/Shop/ShopEditProduct";
 
 export {
   ShopDashboardPage,
@@ -32,4 +33,5 @@ export {
   ShopBannersPage,
   ShopCreateBanner,
   ShopEditBanner,
+  ShopEditProduct,
 };

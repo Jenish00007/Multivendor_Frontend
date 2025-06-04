@@ -35,14 +35,129 @@ const DashboardHero = () => {
         return formatter.format(amount);
     };
 
-    const columns = [
+    return (
+        <div className="w-full p-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
+                <div className="relative">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
+                            <span className="text-4xl">🏪</span>
+                        </div>
+                        <div>
+                            <div className="font-bold text-[32px] font-Poppins bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+                                Seller Dashboard
+                            </div>
+                            <div className="text-gray-600 text-[18px] mt-1 font-medium">
+                                Manage your shop with powerful insights
+                            </div>
+                        </div>
+                    </div>
+                    <div className="absolute -top-2 -left-2 w-20 h-20 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full opacity-20 blur-xl"></div>
+                </div>
+                <div className="backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                    <p className="text-sm text-gray-500 font-medium">Current Date</p>
+                    <p className="text-xl font-bold text-gray-800 mt-1">
+                        {new Date().toLocaleDateString('en-IN', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        })}
+                    </p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-white/50">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                            <AiOutlineMoneyCollect className="text-white" size={24} />
+                        </div>
+                        <div className="text-sm text-gray-500">Available Balance</div>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-800 mb-2">
+                        {formatIndianCurrency(availableBalance)}
+                    </div>
+                    <div className="flex items-center text-green-500 text-sm">
+                        <BsGraphUpArrow className="mr-1" />
+                        <span>Active Balance</span>
+                    </div>
+                </div>
+
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-white/50">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+                            <AiOutlineShoppingCart className="text-white" size={24} />
+                        </div>
+                        <div className="text-sm text-gray-500">Total Orders</div>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-800 mb-2">
+                        {orders?.length || 0}
+                    </div>
+                    <div className="flex items-center text-purple-500 text-sm">
+                        <MdOutlineTrendingUp className="mr-1" />
+                        <span>All Time Orders</span>
+                    </div>
+                </div>
+
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-white/50">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+                            <MdOutlineStorefront className="text-white" size={24} />
+                        </div>
+                        <div className="text-sm text-gray-500">Total Products</div>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-800 mb-2">
+                        {products?.length || 0}
+                    </div>
+                    <div className="flex items-center text-green-500 text-sm">
+                        <AiOutlineLineChart className="mr-1" />
+                        <span>Active Products</span>
+                    </div>
+                </div>
+
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-white/50">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
+                            <MdOutlinePeopleAlt className="text-white" size={24} />
+                        </div>
+                        <div className="text-sm text-gray-500">Total Customers</div>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-800 mb-2">
+                        {orders ? new Set(orders.map(order => order.user?._id)).size : 0}
+                    </div>
+                    <div className="flex items-center text-orange-500 text-sm">
+                        <MdOutlineWavingHand className="mr-1" />
+                        <span>Active Customers</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-white/50">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-800">Recent Orders</h2>
+                    <Link to="/dashboard-orders">
+                        <Button
+                            variant="contained"
+                            className="!bg-blue-500 !text-white hover:!bg-blue-600 transition-colors duration-300"
+                            endIcon={<AiOutlineArrowRight />}
+                        >
+                            View All
+                        </Button>
+                    </Link>
+                </div>
+                {isLoading ? (
+                    <Loader />
+                ) : (
+                    <div className="w-full overflow-x-auto">
+                        <DataGrid
+                            rows={orders?.slice(0, 5) || []}
+                            columns={[
         { 
             field: "id", 
             headerName: "Order ID", 
-            minWidth: 180, 
-            flex: 0.8,
-            headerClassName: 'custom-header',
-            cellClassName: 'custom-cell',
+                                    minWidth: 150,
+                                    flex: 1,
             renderCell: (params) => (
                 <div className="flex items-center gap-3 w-full">
                     <div className="p-2.5 bg-blue-50 rounded-lg flex-shrink-0">
@@ -59,12 +174,7 @@ const DashboardHero = () => {
             field: "status",
             headerName: "Status",
             minWidth: 130,
-            flex: 0.7,
-            headerClassName: 'custom-header',
-            cellClassName: (params) => {
-                const status = params.getValue(params.id, "status");
-                return `custom-cell ${status === "Delivered" ? "text-green-600" : "text-red-600"}`;
-            },
+                                    flex: 1,
             renderCell: (params) => (
                 <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${params.value === "Delivered" ? "bg-green-500" : "bg-red-500"}`} />
@@ -73,159 +183,27 @@ const DashboardHero = () => {
             ),
         },
         {
-            field: "itemsQty",
-            headerName: "Items Qty",
-            type: "number",
+                                    field: "totalPrice",
+                                    headerName: "Total Price",
             minWidth: 130,
-            flex: 0.7,
-            headerClassName: 'custom-header',
-            cellClassName: 'custom-cell',
-        },
-        {
-            field: "total",
-            headerName: "Total",
-            type: "number",
-            minWidth: 130,
-            flex: 0.8,
-            headerClassName: 'custom-header',
-            cellClassName: 'custom-cell',
+                                    flex: 1,
             renderCell: (params) => (
-                <span className="font-medium">{formatIndianCurrency(params.value)}</span>
-            ),
-        },
-    ];
-
-    const row = [];
-
-    orders && orders.forEach((item) => {
-        row.push({
-            id: item._id,
-            itemsQty: item.cart.length,
-            total: item.totalPrice,
-            status: item.status,
-        });
-    });
-
-    return (
-        <>
-            {isLoading ? (
-                <Loader />
-            ) : (
-                <div className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-2">
-                        <div>
-                            <h6 className="text-[32px] font-Poppins font-bold flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                                <div className="p-2.5 bg-blue-50 rounded-lg">
-                                    <MdOutlineWavingHand className="text-blue-600" size={28} />
-                                </div>
-                                Welcome, {seller?.name}
-                            </h6>
-                            <p className="text-gray-600 mt-2 ml-1">Here's what's happening with your store today.</p>
-                        </div>
-                        <div className="w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0">
-                            <p className="text-sm text-gray-600">Current Date</p>
-                            <p className="text-lg font-semibold text-gray-800">{new Date().toLocaleDateString('en-IN', { 
-                                weekday: 'long', 
-                                year: 'numeric', 
-                                month: 'long', 
-                                day: 'numeric' 
-                            })}</p>
-                        </div>
-                    </div>
-
-                    <div className="w-full block 800px:flex items-center justify-between gap-6">
-                        <div className="w-full mb-4 800px:w-[30%] min-h-[20vh] bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-xl rounded-xl px-6 py-8 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                            <div className="flex items-center">
-                                <div className="p-3 bg-white/20 rounded-lg">
-                                    <BsCurrencyRupee size={35} className="text-white" />
-                                </div>
-                                <h3 className="text-[20px] font-medium text-white ml-4">
-                                    Available Balance
-                                </h3>
-                            </div>
-                            <h5 className="pt-6 pl-[36px] text-[32px] font-bold text-white">
-                                {formatIndianCurrency(availableBalance)}
-                            </h5>
-                            <Link to="/dashboard-withdraw-money">
-                                <div className="mt-6 flex items-center text-white/90 group">
-                                    <span className="text-sm font-medium">Withdraw Money</span>
-                                    <AiOutlineArrowRight className="ml-2 transform group-hover:translate-x-1 transition-transform" />
-                                </div>
-                            </Link>
-                        </div>
-
-                        <div className="w-full mb-4 800px:w-[30%] min-h-[20vh] bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 shadow-xl rounded-xl px-6 py-8 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                            <div className="flex items-center">
-                                <div className="p-3 bg-white/20 rounded-lg">
-                                    <AiOutlineShoppingCart size={35} className="text-white" />
-                                </div>
-                                <h3 className="text-[20px] font-medium text-white ml-4">
-                                    Total Orders
-                                </h3>
-                            </div>
-                            <h5 className="pt-6 pl-[36px] text-[32px] font-bold text-white">
-                                {orders && orders.length}
-                            </h5>
-                            <Link to="/dashboard-orders">
-                                <div className="mt-6 flex items-center text-white/90 group">
-                                    <span className="text-sm font-medium">View all orders</span>
-                                    <AiOutlineArrowRight className="ml-2 transform group-hover:translate-x-1 transition-transform" />
-                                </div>
-                            </Link>
-                        </div>
-
-                        <div className="w-full mb-4 800px:w-[30%] min-h-[20vh] bg-gradient-to-br from-green-500 via-green-600 to-green-700 shadow-xl rounded-xl px-6 py-8 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                            <div className="flex items-center">
-                                <div className="p-3 bg-white/20 rounded-lg">
-                                    <MdOutlineStorefront size={35} className="text-white" />
-                                </div>
-                                <h3 className="text-[20px] font-medium text-white ml-4">
-                                    Total Products
-                                </h3>
-                            </div>
-                            <h5 className="pt-6 pl-[36px] text-[32px] font-bold text-white">
-                                {products && products.length}
-                            </h5>
-                            <Link to="/dashboard-products">
-                                <div className="mt-6 flex items-center text-white/90 group">
-                                    <span className="text-sm font-medium">View all products</span>
-                                    <AiOutlineArrowRight className="ml-2 transform group-hover:translate-x-1 transition-transform" />
-                                </div>
-                            </Link>
-                        </div>
-                    </div>
-
-                    <div className="w-full mt-8">
-                        <div className="bg-white rounded-xl shadow-lg p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-semibold text-gray-800">Recent Orders</h3>
-                                <Link to="/dashboard-orders">
-                                    <Button
-                                        variant="contained"
-                                        className="!bg-blue-500 hover:!bg-blue-600"
-                                    >
-                                        View All
-                                    </Button>
-                                </Link>
-                            </div>
-                            <DataGrid
-                                rows={row}
-                                columns={columns}
-                                pageSize={6}
+                                        <div className="flex items-center">
+                                            <BsCurrencyRupee className="mr-1" />
+                                            <span className="font-medium text-gray-700">{params.value}</span>
+                                        </div>
+                                    ),
+                                },
+                            ]}
+                            pageSize={5}
                                 disableSelectionOnClick
                                 autoHeight
-                                className="bg-white"
-                                componentsProps={{
-                                    pagination: {
-                                        className: "text-gray-700",
-                                    },
-                                }}
+                            className="!border-none"
                             />
                         </div>
+                )}
                     </div>
                 </div>
-            )}
-        </>
     );
 };
 
