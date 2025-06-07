@@ -9,6 +9,7 @@ import AdminDashboardModules from "../pages/AdminDashboardModules";
 import AdminDashboardCategories from "../pages/AdminDashboardCategories";
 import AdminDashboardSubcategories from "../pages/AdminDashboardSubcategories";
 import AdminDashboardBanners from "../pages/AdminDashboardBanners";
+import AdminDashboardDeliveryMen from "../pages/AdminDashboardDeliveryMen";
 
 export {
   AdminDashboardPage,
@@ -22,4 +23,5 @@ export {
   AdminDashboardCategories,
   AdminDashboardSubcategories,
   AdminDashboardBanners,
+  AdminDashboardDeliveryMen,
 };

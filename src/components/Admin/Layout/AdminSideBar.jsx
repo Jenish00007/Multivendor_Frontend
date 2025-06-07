@@ -6,6 +6,7 @@ import { CiMoneyBill } from "react-icons/ci";
 import { Link } from "react-router-dom";
 import { BsHandbag, BsGraphUp, BsGrid, BsListUl, BsListNested, BsImages } from "react-icons/bs";
 import { MdOutlineLocalOffer } from "react-icons/md";
+import { FaTruck } from "react-icons/fa";
 
 const AdminSideBar = ({ active, openSidebar }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,7 +23,8 @@ const AdminSideBar = ({ active, openSidebar }) => {
     { id: 10, title: "Categories", icon: <BsListUl size={22} />, path: "/admin-categories" },
     { id: 11, title: "Subcategories", icon: <BsListNested size={22} />, path: "/admin-subcategories" },
     { id: 12, title: "Banners", icon: <BsImages size={22} />, path: "/admin-banners" },
-    { id: 13, title: "Settings", icon: <FiSettings size={22} />, path: "/admin-settings" },
+    { id: 13, title: "Delivery Men", icon: <FaTruck size={22} />, path: "/admin-delivery-men" },
+    { id: 14, title: "Settings", icon: <FiSettings size={22} />, path: "/admin-settings" },
   ];
 
   const filteredMenuItems = menuItems.filter((item) =>
