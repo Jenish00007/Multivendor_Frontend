@@ -263,7 +263,7 @@ const AllProducts = () => {
       </div>
 
       {/* Main Content */}
-      <div className="w-full min-h-[70vh] bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 transform transition-all duration-300 hover:shadow-3xl border border-white/50 relative overflow-hidden">
+      <div className="w-full min-h-[70vh] relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-indigo-100/30 to-purple-100/30 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-pink-100/30 to-blue-100/30 rounded-full blur-3xl"></div>
@@ -272,10 +272,8 @@ const AllProducts = () => {
           {`
             .MuiDataGrid-root {
               border: none !important;
-              background: rgba(255, 255, 255, 0.7) !important;
+              background: transparent !important;
               border-radius: 20px !important;
-              box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
-              backdrop-filter: blur(10px) !important;
               overflow: hidden !important;
             }
             .MuiDataGrid-main {
@@ -298,9 +296,8 @@ const AllProducts = () => {
               position: relative !important;
               overflow: visible !important;
               margin-top: 20px !important;
-              background: rgba(248, 250, 252, 0.8) !important;
+              background: transparent !important;
               border-top: 1px solid rgba(226, 232, 240, 0.5) !important;
-              backdrop-filter: blur(10px) !important;
             }
             .MuiDataGrid-panel {
               overflow: visible !important;
@@ -317,11 +314,11 @@ const AllProducts = () => {
               min-height: 90px !important;
               border-bottom: 1px solid rgba(226, 232, 240, 0.3) !important;
               overflow: visible !important;
-              background: rgba(255, 255, 255, 0.5) !important;
+              background: transparent !important;
               transition: all 0.3s ease !important;
             }
             .MuiDataGrid-cell:hover {
-              background: rgba(255, 255, 255, 0.8) !important;
+              background: rgba(255, 255, 255, 0.1) !important;
               transform: translateY(-1px) !important;
             }
             .MuiDataGrid-columnHeader {
@@ -330,10 +327,9 @@ const AllProducts = () => {
               min-height: 80px !important;
               align-items: center !important;
               white-space: normal !important;
-              background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%) !important;
+              background: transparent !important;
               border-bottom: 2px solid rgba(79, 70, 229, 0.2) !important;
               overflow: visible !important;
-              backdrop-filter: blur(10px) !important;
             }
             .MuiDataGrid-columnHeaderTitle {
               font-weight: 800 !important;

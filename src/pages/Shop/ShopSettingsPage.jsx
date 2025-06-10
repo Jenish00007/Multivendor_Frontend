@@ -11,7 +11,7 @@ const ShopSettingsPage = () => {
             <DashboardHeader setOpenSidebar={setOpenSidebar} openSidebar={openSidebar} />
             <div className="flex items-start justify-between w-full">
                 <div className={`${openSidebar ? 'w-[250px]' : 'w-[80px]'} 800px:w-[330px]`}>
-                    <DashboardSideBar active={10} openSidebar={openSidebar} />
+                    <DashboardSideBar openSidebar={openSidebar} />
                 </div>
                 <ShopSettings />
             </div>
