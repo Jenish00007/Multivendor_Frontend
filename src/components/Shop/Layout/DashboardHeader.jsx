@@ -59,13 +59,13 @@ const DashboardHeader = ({ setOpenSidebar, openSidebar }) => {
                                 }`}
                             >
                                 {item.icon}
-                                <span className="hidden lg:block text-sm font-medium">{item.label}</span>
+                            
                             </Link>
                         ))}
                     </div>
 
-                    {/* <div className="flex items-center gap-3 ml-4">
-                        <Link to="/dashboard-settings">
+                    <div className="flex items-center gap-3 ml-4">
+                        <Link to="/settings">
                             <div className="p-2 hover:bg-blue-50 rounded-lg transition-colors duration-300">
                                 <FiSettings
                                     color="#555"
@@ -84,14 +84,14 @@ const DashboardHeader = ({ setOpenSidebar, openSidebar }) => {
                         <Link to={`/shop/${seller._id}`}>
                             <div className="relative group">
                                 <img
-                                    src={`${backend_url}${seller.avatar}`}
+                                    src={logo}
                                     alt=""
                                     className="w-[45px] h-[45px] rounded-full object-cover border-2 border-transparent group-hover:border-blue-500 transition-all duration-300 shadow-lg group-hover:shadow-xl"
                                 />
                                 <div className="absolute inset-0 rounded-full bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                             </div>
                         </Link>
-                    </div> */}
+                    </div>
                 </div>
             </div>
         </div>
