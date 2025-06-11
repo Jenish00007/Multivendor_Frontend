@@ -37,16 +37,14 @@ const AllOrders = () => {
             headerName: "Order ID", 
             minWidth: 180, 
             flex: 0.8,
-            headerClassName: 'custom-header',
-            cellClassName: 'custom-cell',
             renderCell: (params) => (
-                <div className="flex items-center gap-4 w-full group">
-                    <div className="p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl flex-shrink-0 group-hover:from-blue-100 group-hover:to-blue-200 transition-all duration-300 shadow-sm">
-                        <AiOutlineShoppingCart className="text-blue-600" size={20} />
+                <div className="flex items-center gap-3 w-full">
+                    <div className="p-2.5 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex-shrink-0 shadow-sm">
+                        <AiOutlineShoppingCart className="text-indigo-600" size={20} />
                     </div>
                     <div className="flex flex-col justify-center min-w-[100px]">
-                        <span className="font-semibold text-gray-800 truncate leading-tight group-hover:text-blue-600 transition-colors duration-200">#{params.value.slice(-6)}</span>
-                        <span className="text-xs text-gray-500 leading-tight mt-1">Order ID</span>
+                        <span className="font-semibold text-gray-800 truncate leading-tight">#{params.value.slice(-6)}</span>
+                        <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Order ID</span>
                     </div>
                 </div>
             ),
@@ -56,47 +54,38 @@ const AllOrders = () => {
             headerName: "Status",
             minWidth: 160,
             flex: 0.8,
-            headerClassName: 'custom-header',
-            cellClassName: (params) => {
-                const status = params.getValue(params.id, "status");
-                return `custom-cell status-${status.toLowerCase()}`;
-            },
             renderCell: (params) => {
                 const status = params.getValue(params.id, "status");
                 const statusConfig = {
                     Delivered: {
-                        bg: "bg-gradient-to-r from-green-100 to-emerald-100",
-                        text: "text-green-800",
+                        bg: "bg-gradient-to-r from-green-500 to-emerald-500",
+                        text: "text-white",
                         icon: "✓",
-                        label: "Delivered",
-                        shadow: "shadow-green-100"
+                        label: "Delivered"
                     },
                     Processing: {
-                        bg: "bg-gradient-to-r from-yellow-100 to-amber-100",
-                        text: "text-yellow-800",
+                        bg: "bg-gradient-to-r from-yellow-500 to-amber-500",
+                        text: "text-white",
                         icon: "⟳",
-                        label: "Processing",
-                        shadow: "shadow-yellow-100"
+                        label: "Processing"
                     },
                     Pending: {
-                        bg: "bg-gradient-to-r from-blue-100 to-sky-100",
-                        text: "text-blue-800",
+                        bg: "bg-gradient-to-r from-blue-500 to-sky-500",
+                        text: "text-white",
                         icon: "⏳",
-                        label: "Pending",
-                        shadow: "shadow-blue-100"
+                        label: "Pending"
                     },
                     Cancelled: {
-                        bg: "bg-gradient-to-r from-red-100 to-rose-100",
-                        text: "text-red-800",
+                        bg: "bg-gradient-to-r from-red-500 to-rose-500",
+                        text: "text-white",
                         icon: "✕",
-                        label: "Cancelled",
-                        shadow: "shadow-red-100"
+                        label: "Cancelled"
                     }
                 };
                 const config = statusConfig[status] || statusConfig.Processing;
                 return (
                     <div className="flex items-center justify-center w-full">
-                        <div className={`px-5 py-2.5 rounded-xl text-sm font-semibold ${config.bg} ${config.text} ${config.shadow} flex items-center gap-2.5 min-w-[130px] justify-center shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105`}>
+                        <div className={`px-5 py-2.5 rounded-xl text-sm font-semibold ${config.bg} ${config.text} flex items-center gap-2.5 min-w-[130px] justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105`}>
                             <span className="text-base animate-pulse">{config.icon}</span>
                             {config.label}
                         </div>
@@ -110,16 +99,12 @@ const AllOrders = () => {
             type: "number",
             minWidth: 160,
             flex: 0.8,
-            headerClassName: 'custom-header',
-            cellClassName: 'custom-cell',
             renderCell: (params) => (
-                <div className="flex items-center gap-4 w-full group">
-                    <div className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl flex-shrink-0 group-hover:from-purple-100 group-hover:to-purple-200 transition-all duration-300 shadow-sm">
-                        <AiOutlineShoppingCart className="text-purple-600" size={20} />
-                    </div>
-                    <div className="flex flex-col justify-center min-w-[80px]">
-                        <span className="font-semibold text-gray-800 leading-tight group-hover:text-purple-600 transition-colors duration-200">{params.value}</span>
-                        <span className="text-xs text-gray-500 leading-tight mt-1">Total Items</span>
+                <div className="flex items-center">
+                    <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-4 py-2 rounded-xl shadow-lg">
+                        <div className="flex items-center">
+                            <span className="font-bold text-sm">{params.value} items</span>
+                        </div>
                     </div>
                 </div>
             ),
@@ -130,16 +115,13 @@ const AllOrders = () => {
             type: "number",
             minWidth: 180,
             flex: 0.8,
-            headerClassName: 'custom-header',
-            cellClassName: 'custom-cell',
             renderCell: (params) => (
-                <div className="flex items-center gap-4 w-full group">
-                    <div className="p-3 bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl flex-shrink-0 group-hover:from-green-100 group-hover:to-emerald-200 transition-all duration-300 shadow-sm">
-                        <BsCurrencyRupee className="text-green-600" size={20} />
-                    </div>
-                    <div className="flex flex-col justify-center min-w-[120px]">
-                        <span className="font-semibold text-gray-800 truncate leading-tight group-hover:text-green-600 transition-colors duration-200">{params.value}</span>
-                        <span className="text-xs text-gray-500 leading-tight mt-1">Amount Paid</span>
+                <div className="flex items-center">
+                    <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-xl shadow-lg">
+                        <div className="flex items-center">
+                            <BsCurrencyRupee className="mr-1" size={14} />
+                            <span className="font-bold text-sm">{params.value}</span>
+                        </div>
                     </div>
                 </div>
             ),
@@ -150,16 +132,10 @@ const AllOrders = () => {
             type: "number",
             minWidth: 180,
             flex: 0.8,
-            headerClassName: 'custom-header',
-            cellClassName: 'custom-cell',
             renderCell: (params) => (
-                <div className="flex items-center gap-4 w-full group">
-                    <div className="p-3 bg-gradient-to-br from-gray-50 to-slate-100 rounded-xl flex-shrink-0 group-hover:from-gray-100 group-hover:to-slate-200 transition-all duration-300 shadow-sm">
-                        <MdOutlineTrendingUp className="text-gray-600" size={20} />
-                    </div>
-                    <div className="flex flex-col justify-center min-w-[120px]">
-                        <span className="font-semibold text-gray-800 truncate leading-tight group-hover:text-gray-700 transition-colors duration-200">{params.value}</span>
-                        <span className="text-xs text-gray-500 leading-tight mt-1">Order Date</span>
+                <div className="flex items-center">
+                    <div className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 px-4 py-2 rounded-xl font-semibold text-sm shadow-sm border border-blue-200">
+                        {params.value}
                     </div>
                 </div>
             ),
@@ -171,14 +147,14 @@ const AllOrders = () => {
             headerName: "",
             type: "number",
             sortable: false,
-            headerClassName: 'custom-header',
-            cellClassName: 'custom-cell',
             renderCell: (params) => (
                 <Link to={`/order/${params.id}`}>
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300">
-                        <span>View</span>
-                        <AiOutlineArrowRight className="transform group-hover:translate-x-1 transition-transform" />
-                    </div>
+                    <button 
+                        className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+                        title="View Order"
+                    >
+                        <AiOutlineArrowRight size={18} className="group-hover:scale-110 transition-transform duration-200" />
+                    </button>
                 </Link>
             ),
         },
@@ -198,79 +174,213 @@ const AllOrders = () => {
         });
 
     return (
-        <>
-            {isLoading ? (
-                <Loader />
-            ) : (
-                <div className="w-full p-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen">
-                    <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-2">
-                            <div>
-                                <h6 className="text-[32px] font-Poppins text-gray-800 font-bold flex items-center gap-3">
-                                    <div className="p-2.5 bg-blue-50 rounded-lg">
-                                        <AiOutlineShoppingCart className="text-blue-600" size={28} />
-                                    </div>
-                                    All Orders
-                                </h6>
-                                <p className="text-gray-600 mt-2 ml-1">Manage and monitor all orders</p>
+        <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
+                <div className="relative">
+                    <div className="flex items-center gap-6">
+                        <div className="relative">
+                            <div className="p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl shadow-2xl">
+                                <span className="text-5xl filter drop-shadow-lg">📦</span>
                             </div>
-                            <div className="w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0">
-                                <p className="text-sm text-gray-600">Current Date</p>
-                                <p className="text-lg font-semibold text-gray-800">{new Date().toLocaleDateString('en-IN', { 
-                                    weekday: 'long', 
-                                    year: 'numeric', 
-                                    month: 'long', 
-                                    day: 'numeric' 
-                                })}</p>
-                            </div>
+                            <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-lg"></div>
                         </div>
-
-                        <div className="w-full min-h-[75vh] bg-white rounded-xl shadow-xl p-4 sm:p-6 lg:p-8 transform transition-all duration-300 hover:shadow-2xl">
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-                                <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                                    <div className="relative flex-1 sm:flex-none">
-                                        <input
-                                            type="text"
-                                            placeholder="Search orders..."
-                                            className="w-full sm:w-[300px] pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                        />
-                                        <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                                    </div>
-                                    <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-300">
-                                        <BsFilter size={18} />
-                                        <span className="text-sm font-medium">Filter</span>
-                                    </button>
-                                </div>
+                        <div>
+                            <div className="font-black text-4xl font-Poppins bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 bg-clip-text text-transparent leading-tight">
+                                All Orders
                             </div>
-                            {row.length === 0 ? (
-                                <div className="w-full h-[400px] flex items-center justify-center">
-                                    <div className="text-center">
-                                        <AiOutlineShoppingCart className="mx-auto text-gray-400" size={48} />
-                                        <p className="mt-4 text-gray-600">No orders found</p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="w-full overflow-x-auto">
-                                    <DataGrid
-                                        rows={row}
-                                        columns={columns}
-                                        pageSize={12}
-                                        disableSelectionOnClick
-                                        autoHeight
-                                        className="!border-none !bg-white !rounded-lg w-full"
-                                        componentsProps={{
-                                            pagination: {
-                                                className: "!text-gray-700",
-                                            },
-                                        }}
-                                    />
-                                </div>
-                            )}
+                            <div className="text-gray-600 text-lg mt-2 font-medium">
+                                Manage and monitor all orders
+                            </div>
+                            <div className="text-sm text-gray-500 mt-1">
+                                {orders?.length || 0} orders in your store
+                            </div>
                         </div>
                     </div>
+                    <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
                 </div>
-            )}
-        </>
+            </div>
+
+            {/* Main Content */}
+            <div className="w-full min-h-[70vh] relative overflow-hidden">
+                {/* Background decoration */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-indigo-100/30 to-purple-100/30 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-pink-100/30 to-blue-100/30 rounded-full blur-3xl"></div>
+
+                <style>
+                    {`
+                        .MuiDataGrid-root {
+                            border: none !important;
+                            background: transparent !important;
+                            border-radius: 20px !important;
+                            box-shadow: none !important;
+                            backdrop-filter: none !important;
+                            overflow: visible !important;
+                        }
+                        .MuiDataGrid-main {
+                            overflow: visible !important;
+                        }
+                        .MuiDataGrid-virtualScroller {
+                            margin-top: 8px !important;
+                            overflow: visible !important;
+                        }
+                        .MuiDataGrid-virtualScrollerContent {
+                            padding: 0 12px !important;
+                            overflow: visible !important;
+                        }
+                        .MuiDataGrid-virtualScrollerRenderZone {
+                            transform: none !important;
+                            position: relative !important;
+                            overflow: visible !important;
+                        }
+                        .MuiDataGrid-footerContainer {
+                            position: relative !important;
+                            overflow: visible !important;
+                            margin-top: 20px !important;
+                            background: transparent !important;
+                            border-top: 1px solid rgba(226, 232, 240, 0.5) !important;
+                            backdrop-filter: none !important;
+                        }
+                        .MuiDataGrid-panel {
+                            overflow: visible !important;
+                        }
+                        .MuiDataGrid-panelContent {
+                            overflow: visible !important;
+                        }
+                        .MuiDataGrid-cell {
+                            display: flex !important;
+                            align-items: center !important;
+                            justify-content: flex-start !important;
+                            padding: 20px 24px !important;
+                            height: 100% !important;
+                            min-height: 90px !important;
+                            border-bottom: 1px solid rgba(226, 232, 240, 0.3) !important;
+                            overflow: visible !important;
+                            background: transparent !important;
+                            transition: all 0.3s ease !important;
+                        }
+                        .MuiDataGrid-cell:hover {
+                            background: rgba(255, 255, 255, 0.8) !important;
+                            transform: translateY(-1px) !important;
+                        }
+                        .MuiDataGrid-columnHeader {
+                            padding: 24px !important;
+                            height: auto !important;
+                            min-height: 80px !important;
+                            align-items: center !important;
+                            white-space: normal !important;
+                            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%) !important;
+                            border-bottom: 2px solid rgba(79, 70, 229, 0.2) !important;
+                            overflow: visible !important;
+                            backdrop-filter: blur(10px) !important;
+                        }
+                        .MuiDataGrid-columnHeaderTitle {
+                            font-weight: 800 !important;
+                            color: #1e293b !important;
+                            white-space: normal !important;
+                            line-height: 1.3 !important;
+                            display: flex !important;
+                            align-items: center !important;
+                            text-transform: uppercase !important;
+                            font-size: 0.85rem !important;
+                            letter-spacing: 0.1em !important;
+                            height: auto !important;
+                            min-height: 40px !important;
+                            overflow: visible !important;
+                            text-overflow: unset !important;
+                        }
+                        .MuiDataGrid-columnHeaders {
+                            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%) !important;
+                            border-bottom: 2px solid rgba(79, 70, 229, 0.2) !important;
+                            overflow: visible !important;
+                            backdrop-filter: blur(10px) !important;
+                        }
+                        .MuiDataGrid-row {
+                            min-height: 90px !important;
+                            margin-bottom: 4px !important;
+                            overflow: visible !important;
+                            border-radius: 12px !important;
+                            transition: all 0.3s ease !important;
+                        }
+                        .MuiDataGrid-row:hover {
+                            background: rgba(255, 255, 255, 0.9) !important;
+                            transform: translateY(-2px) !important;
+                            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+                        }
+                        .MuiDataGrid-virtualScrollerContent {
+                            overflow: visible !important;
+                        }
+                        .MuiDataGrid-virtualScrollerRenderZone {
+                            overflow: visible !important;
+                        }
+                        .MuiTablePagination-root {
+                            color: #64748b !important;
+                            font-weight: 600 !important;
+                        }
+                        .MuiTablePagination-selectIcon {
+                            color: #6366f1 !important;
+                        }
+                        .MuiIconButton-root {
+                            color: #6366f1 !important;
+                            transition: all 0.3s ease !important;
+                        }
+                        .MuiIconButton-root:hover {
+                            background: rgba(99, 102, 241, 0.1) !important;
+                            transform: scale(1.1) !important;
+                        }
+                    `}
+                </style>
+
+                {isLoading ? (
+                    <div className="flex items-center justify-center h-96">
+                        <Loader />
+                    </div>
+                ) : (
+                    <div className="w-full relative z-10">
+                        <DataGrid
+                            rows={row}
+                            columns={columns}
+                            pageSize={10}
+                            disableSelectionOnClick
+                            autoHeight
+                            className="!border-none"
+                            getRowHeight={() => 'auto'}
+                            rowHeight={90}
+                            componentsProps={{
+                                footer: {
+                                    sx: {
+                                        position: 'relative',
+                                        overflow: 'visible'
+                                    }
+                                },
+                                panel: {
+                                    sx: {
+                                        overflow: 'visible'
+                                    }
+                                }
+                            }}
+                            sx={{
+                                '& .MuiDataGrid-cell': {
+                                    overflow: 'visible'
+                                },
+                                '& .MuiDataGrid-row': {
+                                    overflow: 'visible'
+                                },
+                                '& .MuiDataGrid-virtualScroller': {
+                                    overflow: 'visible !important'
+                                },
+                                '& .MuiDataGrid-virtualScrollerContent': {
+                                    overflow: 'visible !important'
+                                },
+                                '& .MuiDataGrid-virtualScrollerRenderZone': {
+                                    overflow: 'visible !important'
+                                }
+                            }}
+                        />
+                    </div>
+                )}
+            </div>
+        </div>
     );
 };
 

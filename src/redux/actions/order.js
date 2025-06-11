@@ -78,7 +78,7 @@ export const getAllOrdersOfShop = (shopId) => async (dispatch) => {
     dispatch({
       type: "getAllOrdersShopRequest",
     });
-
+    
     const { data } = await axios.get(
       `${server}/order/get-seller-all-orders/${shopId}`
     );

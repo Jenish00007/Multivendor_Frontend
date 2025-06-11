@@ -69,26 +69,21 @@ export const deleteProduct = (id) => async (dispatch) => {
       }
     );
 
-    if (data.success) {
-      dispatch({
-        type: "deleteProductSuccess",
-        payload: {
-          message: data.message,
-          productId: id
-        },
-      });
-    } else {
-      dispatch({
-        type: "deleteProductFailed",
-        payload: data.message || "Failed to delete product"
-      });
-    }
+    dispatch({
+      type: "deleteProductSuccess",
+      payload: {
+        message: data.message,
+        productId: id
+      },
+    });
+    
+    return { type: "deleteProductSuccess" };
   } catch (error) {
-    console.error('Error deleting product:', error.response || error);
     dispatch({
       type: "deleteProductFailed",
       payload: error.response?.data?.message || "Error deleting product"
     });
+    return { type: "deleteProductFailed" };
   }
 };
 

@@ -1,2 +1,2 @@
-export const server = "https://smartkal.in/api/v2";
-export const backend_url = "https://smartkal.in/api/v2";
+export const server = "http://192.168.2.10:8000/v2";
+export const backend_url = "http://192.168.2.10:8000/v2";

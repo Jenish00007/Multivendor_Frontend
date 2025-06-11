@@ -11,7 +11,7 @@ const ShopAllOrders = () => {
             <DashboardHeader setOpenSidebar={setOpenSidebar} openSidebar={openSidebar} />
             <div className="flex justify-between w-full">
                 <div className={`${openSidebar ? 'w-[250px]' : 'w-[80px]'} 800px:w-[330px]`}>
-                    <DashboardSideBar active={4} openSidebar={openSidebar} />
+                    <DashboardSideBar active={3} openSidebar={openSidebar} />
                 </div>
                 <div className="w-full justify-center flex">
                     <AllOrders />

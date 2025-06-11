@@ -1,7 +1,7 @@
 import { Button } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
 import React, { useEffect, useState } from "react";
-import { AiOutlineDelete, AiOutlineEye, AiOutlineShopping, AiOutlineClose, AiOutlineEdit } from "react-icons/ai";
+import { AiOutlineDelete, AiOutlineEye, AiOutlineShopping, AiOutlineClose, AiOutlineEdit, AiOutlinePlus } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { deleteProduct, getAllProductsShop } from "../../redux/actions/product";
@@ -28,17 +28,13 @@ const AllProducts = () => {
         const response = await dispatch(deleteProduct(id));
         if (response.type === "deleteProductSuccess") {
           toast.success("Product deleted successfully!");
-          const updatedProducts = products.filter((product) => product._id !== id);
-          dispatch({
-            type: "getAllProductsShopSuccess",
-            payload: updatedProducts,
-          });
+          dispatch(getAllProductsShop(seller._id));
         } else {
-          toast.error(response.payload || "Failed to delete product");
+          toast.error("Failed to delete product. Please try again.");
         }
       } catch (error) {
         console.error("Delete error:", error);
-        toast.error(error.response?.data?.message || "Error deleting product");
+        toast.error("Error deleting product. Please try again.");
       }
     }
   };
@@ -76,12 +72,12 @@ const AllProducts = () => {
       flex: 1,
       renderCell: (params) => (
         <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-blue-50 rounded-lg flex-shrink-0">
-            <AiOutlineShopping className="text-blue-600" size={20} />
+          <div className="p-2.5 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex-shrink-0 shadow-sm">
+            <AiOutlineShopping className="text-indigo-600" size={20} />
           </div>
           <div className="flex flex-col justify-center min-w-[100px]">
-            <span className="font-medium text-gray-700 truncate leading-tight">#{params.value.slice(-6)}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Product ID</span>
+            <span className="font-semibold text-gray-800 truncate leading-tight">#{params.value.slice(-6)}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Product ID</span>
           </div>
         </div>
       ),
@@ -92,25 +88,32 @@ const AllProducts = () => {
       minWidth: 100,
       flex: 1,
       renderCell: (params) => (
-        <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
+        <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg ring-2 ring-white">
           <img
             src={params.row.images[0]}
             alt="Product"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
             onError={(e) => {
               e.target.src = "https://via.placeholder.com/50";
             }}
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
         </div>
       ),
     },
     {
       field: "name",
-      headerName: "Name",
-      minWidth: 180,
+      headerName: "Product Name",
+      minWidth: 200,
       flex: 1,
+      headerClassName: 'custom-header',
+      cellClassName: 'custom-cell',
       renderCell: (params) => (
-        <span className="font-medium text-gray-700">{params.value}</span>
+        <div className="flex items-center">
+          <span className="font-semibold text-gray-800 hover:text-indigo-600 transition-colors duration-200 cursor-pointer">
+            {params.value}
+          </span>
+        </div>
       ),
     },
     {
@@ -118,10 +121,16 @@ const AllProducts = () => {
       headerName: "Price",
       minWidth: 130,
       flex: 1,
+      headerClassName: 'custom-header',
+      cellClassName: 'custom-cell',
       renderCell: (params) => (
         <div className="flex items-center">
-          <BsCurrencyRupee className="mr-1" />
-          <span className="font-medium text-gray-700">{params.value}</span>
+          <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1.5 rounded-lg shadow-sm">
+            <div className="flex items-center">
+              <BsCurrencyRupee className="mr-1" size={14} />
+              <span className="font-bold text-sm">{params.value}</span>
+            </div>
+          </div>
         </div>
       ),
     },
@@ -130,11 +139,17 @@ const AllProducts = () => {
       headerName: "Stock",
       minWidth: 130,
       flex: 1,
+      headerClassName: 'custom-header',
+      cellClassName: 'custom-cell',
       renderCell: (params) => (
         <div className="flex items-center">
-          <span className={`font-medium ${params.value > 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {params.value > 0 ? params.value : 'Out of Stock'}
-          </span>
+          <div className={`px-3 py-1.5 rounded-lg font-semibold text-sm shadow-sm ${
+            params.value > 0 
+              ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border border-green-200' 
+              : 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700 border border-red-200'
+          }`}>
+            {params.value > 0 ? `${params.value} units` : 'Out of Stock'}
+          </div>
         </div>
       ),
     },
@@ -143,37 +158,46 @@ const AllProducts = () => {
       headerName: "Sold",
       minWidth: 130,
       flex: 1,
+      headerClassName: 'custom-header',
+      cellClassName: 'custom-cell',
       renderCell: (params) => (
         <div className="flex items-center">
-          <span className="font-medium text-gray-700">{params.value}</span>
+          <div className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 px-3 py-1.5 rounded-lg font-semibold text-sm shadow-sm border border-blue-200">
+            {params.value} sold
+          </div>
         </div>
       ),
     },
     {
       field: "actions",
       headerName: "Actions",
-      minWidth: 150,
+      minWidth: 180,
       flex: 1,
+      headerClassName: 'custom-header',
+      cellClassName: 'custom-cell',
       renderCell: (params) => {
         return (
           <div className="flex items-center justify-start gap-2 w-full">
             <button 
-              className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300"
+              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
               onClick={() => handlePreview(params.row)}
+              title="Preview Product"
             >
-              <AiOutlineEye size={18} />
+              <AiOutlineEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
             </button>
             <button 
-              className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors duration-300"
+              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
               onClick={() => handleEdit(params.row.id)}
+              title="Edit Product"
             >
-              <AiOutlineEdit size={18} />
+              <AiOutlineEdit size={18} className="group-hover:scale-110 transition-transform duration-200" />
             </button>
             <button
-              className="flex items-center justify-center w-10 h-10 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors duration-300"
+              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
               onClick={() => handleDelete(params.row.id)}
+              title="Delete Product"
             >
-              <AiOutlineDelete size={18} />
+              <AiOutlineDelete size={18} className="group-hover:scale-110 transition-transform duration-200" />
             </button>
           </div>
         );
@@ -202,187 +226,173 @@ const AllProducts = () => {
     });
 
   return (
-    <div className="w-full p-8">
+    <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
+      {/* Header Section */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
         <div className="relative">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
-              <span className="text-4xl">📦</span>
+          <div className="flex items-center gap-6">
+            <div className="relative">
+              <div className="p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl shadow-2xl">
+                <span className="text-5xl filter drop-shadow-lg">📦</span>
+              </div>
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-lg"></div>
             </div>
             <div>
-              <div className="font-bold text-[32px] font-Poppins bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+              <div className="font-black text-4xl font-Poppins bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 bg-clip-text text-transparent leading-tight">
                 All Products
               </div>
-              <div className="text-gray-600 text-[18px] mt-1 font-medium">
-                Manage your product inventory
+              <div className="text-gray-600 text-lg mt-2 font-medium">
+                Manage your product inventory with ease
+              </div>
+              <div className="text-sm text-gray-500 mt-1">
+                {products?.length || 0} products in your store
               </div>
             </div>
           </div>
-          <div className="absolute -top-2 -left-2 w-20 h-20 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full opacity-20 blur-xl"></div>
+          <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
         </div>
         <Link to="/dashboard-create-product">
           <Button
             variant="contained"
-            className="!bg-blue-500 !text-white hover:!bg-blue-600 transition-colors duration-300"
+            className="!bg-gradient-to-r !from-indigo-500 !to-purple-600 !text-white hover:!from-indigo-600 hover:!to-purple-700 !transition-all !duration-300 !shadow-xl hover:!shadow-2xl !transform hover:!scale-105 !rounded-xl !px-6 !py-3 !font-semibold"
+            startIcon={<AiOutlinePlus size={20} />}
           >
-            Create Product
+            Create New Product
           </Button>
         </Link>
       </div>
 
-      <div className="w-full min-h-[65vh] bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-8 transform transition-all duration-300 hover:shadow-3xl border border-white/50">
+      {/* Main Content */}
+      <div className="w-full min-h-[70vh] relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-indigo-100/30 to-purple-100/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-pink-100/30 to-blue-100/30 rounded-full blur-3xl"></div>
+        
         <style>
           {`
-            .custom-header {
-              background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
-              color: #1e293b !important;
-              font-weight: 700 !important;
-              font-size: 0.875rem !important;
-              padding: 24px 20px !important;
-              border-bottom: 3px solid #e2e8f0 !important;
-              text-transform: uppercase !important;
-              letter-spacing: 0.1em !important;
-              position: relative !important;
-            }
-            .custom-header::after {
-              content: '';
-              position: absolute;
-              bottom: 0;
-              left: 0;
-              right: 0;
-              height: 3px;
-              background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
-            }
-            .custom-cell {
-              padding: 24px 20px !important;
-              font-size: 0.875rem !important;
-              border-bottom: 1px solid #f1f5f9 !important;
-            }
-            .MuiDataGrid-row {
-              border-bottom: 1px solid #f1f5f9 !important;
-              transition: all 0.3s ease-in-out !important;
-              position: relative !important;
-            }
-            .MuiDataGrid-row:hover {
-              background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-              transform: translateY(-2px) !important;
-              box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
-              border-radius: 12px !important;
-              margin: 2px 8px !important;
-              border: 1px solid #e2e8f0 !important;
-            }
-            .MuiDataGrid-cell:focus {
-              outline: none !important;
-            }
-            .MuiDataGrid-columnSeparator {
-              display: none !important;
-            }
-            .MuiDataGrid-footerContainer {
-              border-top: 2px solid #e2e8f0 !important;
-              padding: 24px 20px !important;
-              margin-top: 12px !important;
-              background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
-            }
-            .MuiTablePagination-root {
-              color: #64748b !important;
-            }
-            .MuiTablePagination-select {
-              color: #1e293b !important;
-              font-weight: 600 !important;
-              padding: 10px 18px !important;
-              border-radius: 8px !important;
-              background-color: #ffffff !important;
-            }
-            .MuiTablePagination-selectIcon {
-              color: #64748b !important;
-            }
-            .MuiIconButton-root {
-              color: #64748b !important;
-              transition: all 0.3s ease-in-out !important;
-              padding: 12px !important;
-              border-radius: 10px !important;
-            }
-            .MuiIconButton-root:hover {
-              background-color: #3b82f6 !important;
-              color: #ffffff !important;
-              transform: scale(1.1) !important;
-              box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
-            }
             .MuiDataGrid-root {
               border: none !important;
-              height: calc(65vh - 100px) !important;
-              border-radius: 16px !important;
+              background: transparent !important;
+              border-radius: 20px !important;
               overflow: hidden !important;
             }
-            .MuiDataGrid-columnHeaders {
-              background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
-              border-bottom: 3px solid #e2e8f0 !important;
+            .MuiDataGrid-main {
+              overflow: visible !important;
+            }
+            .MuiDataGrid-virtualScroller {
+              margin-top: 8px !important;
+              overflow: visible !important;
             }
             .MuiDataGrid-virtualScrollerContent {
-              padding: 8px !important;
+              padding: 0 12px !important;
+              overflow: visible !important;
+            }
+            .MuiDataGrid-virtualScrollerRenderZone {
+              transform: none !important;
+              position: relative !important;
+              overflow: visible !important;
+            }
+            .MuiDataGrid-footerContainer {
+              position: relative !important;
+              overflow: visible !important;
+              margin-top: 20px !important;
+              background: transparent !important;
+              border-top: 1px solid rgba(226, 232, 240, 0.5) !important;
+            }
+            .MuiDataGrid-panel {
+              overflow: visible !important;
+            }
+            .MuiDataGrid-panelContent {
+              overflow: visible !important;
             }
             .MuiDataGrid-cell {
               display: flex !important;
               align-items: center !important;
               justify-content: flex-start !important;
-              padding: 16px 20px !important;
+              padding: 20px 24px !important;
               height: 100% !important;
-              min-height: 80px !important;
-              border-bottom: none !important;
+              min-height: 90px !important;
+              border-bottom: 1px solid rgba(226, 232, 240, 0.3) !important;
+              overflow: visible !important;
+              background: transparent !important;
+              transition: all 0.3s ease !important;
+            }
+            .MuiDataGrid-cell:hover {
+              background: rgba(255, 255, 255, 0.1) !important;
+              transform: translateY(-1px) !important;
             }
             .MuiDataGrid-columnHeader {
-              padding: 20px !important;
-              height: 72px !important;
+              padding: 24px !important;
+              height: auto !important;
+              min-height: 80px !important;
               align-items: center !important;
+              white-space: normal !important;
+              background: transparent !important;
+              border-bottom: 2px solid rgba(79, 70, 229, 0.2) !important;
+              overflow: visible !important;
             }
             .MuiDataGrid-columnHeaderTitle {
-              font-weight: 700 !important;
+              font-weight: 800 !important;
               color: #1e293b !important;
               white-space: normal !important;
               line-height: 1.3 !important;
               display: flex !important;
               align-items: center !important;
               text-transform: uppercase !important;
-              font-size: 0.8rem !important;
+              font-size: 0.85rem !important;
               letter-spacing: 0.1em !important;
+              height: auto !important;
+              min-height: 40px !important;
+              overflow: visible !important;
+              text-overflow: unset !important;
+            }
+            .MuiDataGrid-columnHeaders {
+              background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%) !important;
+              border-bottom: 2px solid rgba(79, 70, 229, 0.2) !important;
+              overflow: visible !important;
+              backdrop-filter: blur(10px) !important;
             }
             .MuiDataGrid-row {
-              min-height: 80px !important;
-              margin-bottom: 8px !important;
+              min-height: 90px !important;
+              margin-bottom: 4px !important;
+              overflow: visible !important;
+              border-radius: 12px !important;
+              transition: all 0.3s ease !important;
             }
-            .MuiDataGrid-virtualScroller {
-              margin-top: 8px !important;
+            .MuiDataGrid-row:hover {
+              background: rgba(255, 255, 255, 0.9) !important;
+              transform: translateY(-2px) !important;
+              box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
             }
             .MuiDataGrid-virtualScrollerContent {
-              padding: 0 8px !important;
+              overflow: visible !important;
             }
             .MuiDataGrid-virtualScrollerRenderZone {
-              transform: none !important;
+              overflow: visible !important;
             }
-            @media (max-width: 768px) {
-              .MuiDataGrid-cell {
-                padding: 12px !important;
-                min-height: 72px !important;
-              }
-              .MuiDataGrid-columnHeader {
-                padding: 12px !important;
-              }
-              .custom-cell {
-                font-size: 0.75rem !important;
-              }
-              .MuiDataGrid-row {
-                min-height: 72px !important;
-              }
-              .MuiDataGrid-columnHeaderTitle {
-                font-size: 0.7rem !important;
-              }
+            .MuiTablePagination-root {
+              color: #64748b !important;
+              font-weight: 600 !important;
+            }
+            .MuiTablePagination-selectIcon {
+              color: #6366f1 !important;
+            }
+            .MuiIconButton-root {
+              color: #6366f1 !important;
+              transition: all 0.3s ease !important;
+            }
+            .MuiIconButton-root:hover {
+              background: rgba(99, 102, 241, 0.1) !important;
+              transform: scale(1.1) !important;
             }
           `}
         </style>
         {isLoading ? (
-          <Loader />
+          <div className="flex items-center justify-center h-96">
+            <Loader />
+          </div>
         ) : (
-          <div className="w-full overflow-x-auto">
+          <div className="w-full relative z-10">
             <DataGrid
               rows={row}
               columns={columns}
@@ -391,48 +401,87 @@ const AllProducts = () => {
               autoHeight
               className="!border-none"
               getRowHeight={() => 'auto'}
-              rowHeight={80}
+              rowHeight={90}
+              componentsProps={{
+                footer: {
+                  sx: {
+                    position: 'relative',
+                    overflow: 'visible'
+                  }
+                },
+                panel: {
+                  sx: {
+                    overflow: 'visible'
+                  }
+                }
+              }}
+              sx={{
+                '& .MuiDataGrid-cell': {
+                  overflow: 'visible'
+                },
+                '& .MuiDataGrid-row': {
+                  overflow: 'visible'
+                },
+                '& .MuiDataGrid-virtualScroller': {
+                  overflow: 'visible !important'
+                },
+                '& .MuiDataGrid-virtualScrollerContent': {
+                  overflow: 'visible !important'
+                },
+                '& .MuiDataGrid-virtualScrollerRenderZone': {
+                  overflow: 'visible !important'
+                }
+              }}
             />
           </div>
         )}
       </div>
 
-      {/* Product Preview Modal */}
+      {/* Enhanced Product Preview Modal */}
       {isModalOpen && selectedProduct && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="fixed inset-0 z-50 overflow-y-auto backdrop-blur-sm">
           <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
             </div>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-2xl font-bold text-gray-900">Product Details</h3>
+            <div className="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full border border-white/20">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                      <AiOutlineEye className="text-white" size={24} />
+                    </div>
+                    Product Preview
+                  </h3>
                   <button
                     onClick={closeModal}
-                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                    className="text-white/80 hover:text-white focus:outline-none transition-all duration-200 p-2 hover:bg-white/20 rounded-xl"
                   >
                     <AiOutlineClose size={24} />
                   </button>
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white px-6 py-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Product Images */}
                   <div className="space-y-4">
-                    <div className="relative w-full h-80 rounded-lg overflow-hidden bg-gray-100">
+                    <div className="relative w-full h-96 rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 shadow-xl">
                       <img
                         src={selectedProduct.images[0]}
                         alt={selectedProduct.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                         onError={(e) => {
                           e.target.src = "https://via.placeholder.com/400";
                         }}
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
                     </div>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 gap-3">
                       {selectedProduct.images.slice(1).map((image, index) => (
-                        <div key={index} className="relative w-full h-20 rounded-lg overflow-hidden bg-gray-100">
+                        <div key={index} className="relative w-full h-24 rounded-xl overflow-hidden bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105">
                           <img
                             src={image}
                             alt={`${selectedProduct.name} ${index + 2}`}
@@ -447,43 +496,53 @@ const AllProducts = () => {
                   </div>
 
                   {/* Product Info */}
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-900">{selectedProduct.name}</h4>
-                      <p className="text-sm text-gray-500">
-                        Category: {typeof selectedProduct.category === 'object' ? selectedProduct.category.name : selectedProduct.category}
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <h4 className="text-3xl font-bold text-gray-900 leading-tight">{selectedProduct.name}</h4>
+                      <div className="inline-block px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 rounded-xl font-semibold text-sm shadow-sm">
+                        {typeof selectedProduct.category === 'object' ? selectedProduct.category.name : selectedProduct.category}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 bg-gradient-to-br from-gray-50 to-blue-50 p-6 rounded-2xl shadow-inner">
+                      <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                        <span className="text-gray-600 font-medium">Original Price:</span>
+                        <span className="text-gray-500 line-through text-lg font-semibold">₹{selectedProduct.originalPrice}</span>
+                      </div>
+                      <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                        <span className="text-gray-600 font-medium">Discount Price:</span>
+                        <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-xl shadow-lg">
+                          <span className="text-xl font-bold">₹{selectedProduct.discountPrice}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between py-2 border-b border-gray-200">
+                        <span className="text-gray-600 font-medium">Stock:</span>
+                        <div className={`px-4 py-2 rounded-xl font-semibold shadow-sm ${
+                          selectedProduct.stock > 0 
+                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700' 
+                            : 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700'
+                        }`}>
+                          {selectedProduct.stock > 0 ? `${selectedProduct.stock} units` : 'Out of Stock'}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between py-2">
+                        <span className="text-gray-600 font-medium">Total Sold:</span>
+                        <div className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 px-4 py-2 rounded-xl font-semibold shadow-sm">
+                          {selectedProduct.sold} units
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h5 className="text-lg font-bold text-gray-900">Description</h5>
+                      <p className="text-gray-600 leading-relaxed bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        {selectedProduct.description}
                       </p>
                     </div>
 
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600">Original Price:</span>
-                        <span className="text-gray-900 line-through">₹{selectedProduct.originalPrice}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600">Discount Price:</span>
-                        <span className="text-xl font-bold text-blue-600">₹{selectedProduct.discountPrice}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600">Stock:</span>
-                        <span className={`font-medium ${selectedProduct.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {selectedProduct.stock > 0 ? selectedProduct.stock : 'Out of Stock'}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600">Sold:</span>
-                        <span className="font-medium text-gray-900">{selectedProduct.sold}</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h5 className="text-sm font-semibold text-gray-900 mb-2">Description</h5>
-                      <p className="text-gray-600 text-sm">{selectedProduct.description}</p>
-                    </div>
-
                     {selectedProduct.tags && (
-                      <div>
-                        <h5 className="text-sm font-semibold text-gray-900 mb-2">Tags</h5>
+                      <div className="space-y-3">
+                        <h5 className="text-lg font-bold text-gray-900">Tags</h5>
                         <div className="flex flex-wrap gap-2">
                           {(typeof selectedProduct.tags === 'string' 
                             ? selectedProduct.tags.split(',').map(tag => tag.trim())
@@ -493,9 +552,9 @@ const AllProducts = () => {
                           ).map((tag, index) => (
                             <span
                               key={index}
-                              className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-full"
+                              className="px-3 py-1.5 text-sm font-semibold text-blue-600 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
                             >
-                              {tag}
+                              #{tag}
                             </span>
                           ))}
                         </div>
@@ -505,13 +564,14 @@ const AllProducts = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+              <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 flex justify-end">
                 <button
                   type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="inline-flex items-center gap-2 rounded-xl border border-transparent shadow-lg px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-base font-semibold text-white hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 hover:scale-105"
                   onClick={closeModal}
                 >
-                  Close
+                  <AiOutlineClose size={18} />
+                  Close Preview
                 </button>
               </div>
             </div>
