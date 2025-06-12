@@ -40,7 +40,7 @@ const ShopLogin = () => {
 
             // Store the seller token
             if (response.data.token) {
-                localStorage.setItem('seller_token', response.data.token);
+                localStorage.setItem('token', response.data.token);
                 console.log('Token stored in localStorage');
                 
                 // Set default authorization header for all future requests
