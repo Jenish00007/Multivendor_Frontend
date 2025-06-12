@@ -66,8 +66,6 @@ import SellerProtectedRoute from "./routes/SellerProtectedRoute";
 import { ShopHomePage } from "./ShopRoutes";
 import { getAllProducts } from "./redux/actions/product";
 import { getAllEvents } from "./redux/actions/event";
-import axios from "axios";
-import { server } from "./server";
 import AdminDashboardSettings from "./pages/AdminDashboardSettings";
 import DeliveryManLogin from "./pages/DeliveryManLogin";
 import DeliveryManRegistration from "./pages/DeliveryManRegistration";
