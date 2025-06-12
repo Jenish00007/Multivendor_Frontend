@@ -181,12 +181,12 @@ const Header = ({ activeHeading }) => {
                 {isAuthenticated ? (
                   <Link to="/profile" className="group">
                     <img
-                      src={user.avatar ? `${backend_url}/${user.avatar}` : "https://via.placeholder.com/40?text=User"}
+                      src={user.avatar ? `${backend_url}/${user.avatar}` : "https://avatar.iran.liara.run/public"}
                       className="w-10 h-10 rounded-full border-2 border-gray-200 group-hover:border-blue-500 transition-all duration-300 group-hover:scale-105 object-cover"
                       alt="Profile"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = "https://via.placeholder.com/40?text=User";
+                        e.target.src = "https://avatar.iran.liara.run/public";
                       }}
                     />
                   </Link>

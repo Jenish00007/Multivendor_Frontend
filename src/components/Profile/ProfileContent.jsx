@@ -83,12 +83,12 @@ const ProfileContent = ({ active }) => {
                         <div className="flex justify-center w-full">
                             <div className='relative'>
                                 <img 
-                                    src={user?.avatar ? `${backend_url}/${user.avatar}` : "https://via.placeholder.com/150?text=User"}
+                                    src={user?.avatar ? `${backend_url}/${user.avatar}` : "https://avatar.iran.liara.run/public/boy"}
                                     className="w-[150px] h-[150px] rounded-full object-cover border-[3px] border-[#3ad132]"
                                     alt="profile img"
                                     onError={(e) => {
                                         e.target.onerror = null;
-                                        e.target.src = "https://via.placeholder.com/150?text=User";
+                                        e.target.src = "https://avatar.iran.liara.run/public/boy";
                                     }}
                                 />
 
