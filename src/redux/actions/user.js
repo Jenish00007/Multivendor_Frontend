@@ -9,12 +9,16 @@ export const loadUser = () => async (dispatch) => {
     dispatch({
       type: "LoadUserRequest",
     });
-    console.log('what is the dispatch: ', dispatch);
+    
     const token = localStorage.getItem('token');
     console.log('loadUser: Token from localStorage:', token);
 
     if (!token) {
-      return
+      dispatch({
+        type: "LoadUserFail",
+        payload: "No token found",
+      });
+      return;
     }
 
     const { data } = await axios.get(`${server}/user/getuser`, {
@@ -26,15 +30,24 @@ export const loadUser = () => async (dispatch) => {
       }
     });
 
-    console.log('what is the data in data:', data);
-    dispatch({
-      type: "LoadUserSuccess",
-      payload: data.user,
-    });
+    console.log('loadUser: User data received:', data);
+    
+    if (data.user) {
+      dispatch({
+        type: "LoadUserSuccess",
+        payload: data.user,
+      });
+    } else {
+      dispatch({
+        type: "LoadUserFail",
+        payload: "User data not found",
+      });
+    }
   } catch (error) {
+    console.error('loadUser: Error occurred:', error);
     dispatch({
       type: "LoadUserFail",
-      payload: error.response.data.message,
+      payload: error.response?.data?.message || "Failed to load user data",
     });
   }
 };

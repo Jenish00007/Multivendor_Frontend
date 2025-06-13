@@ -71,6 +71,7 @@ import DeliveryManLogin from "./pages/DeliveryManLogin";
 import DeliveryManRegistration from "./pages/DeliveryManRegistration";
 import DeliveryManManagement from "./pages/DeliveryManManagement";
 import { getAppSettings } from "./redux/actions/appSettings";
+import AdminLogin from "./components/Login/AdminLogin";
 
 const App = () => {
   useEffect(() => {
@@ -86,6 +87,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/sign-up" element={<SignupPage />} />
         <Route
           path="/activation/:activation_token"
