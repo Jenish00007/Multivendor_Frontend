@@ -1,17 +1,19 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, } from "react-router-dom";
 import { getAllProductsShop } from "../../redux/actions/product";
 import { backend_url, server } from "../../server";
 import styles from "../../styles/styles";
 import Loader from "../Layout/Loader";
+import { useNavigate } from "react-router-dom";
+
 
 const ShopInfo = ({ isOwner }) => {
     const [data, setData] = useState({});
     const { products } = useSelector((state) => state.products);
     const [isLoading, setIsLoading] = useState(false);
-
+    const navigate = useNavigate();
     const { id } = useParams();
     const dispatch = useDispatch();
 
@@ -31,6 +33,8 @@ const ShopInfo = ({ isOwner }) => {
         axios.get(`${server}/shop/logout`, {
             withCredentials: true,
         });
+        localStorage.clear();
+        navigate("/shop-login");
         window.location.reload();
     };
 

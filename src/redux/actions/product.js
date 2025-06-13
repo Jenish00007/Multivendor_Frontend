@@ -56,7 +56,7 @@ export const deleteProduct = (id) => async (dispatch) => {
       type: "deleteProductRequest",
     });
 
-    const token = localStorage.getItem('seller_token');
+    const token = localStorage.getItem('token');
     const { data } = await axios.delete(
       `${server}/product/delete-shop-product/${id}`,
       {

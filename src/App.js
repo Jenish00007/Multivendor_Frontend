@@ -66,13 +66,12 @@ import SellerProtectedRoute from "./routes/SellerProtectedRoute";
 import { ShopHomePage } from "./ShopRoutes";
 import { getAllProducts } from "./redux/actions/product";
 import { getAllEvents } from "./redux/actions/event";
-import axios from "axios";
-import { server } from "./server";
 import AdminDashboardSettings from "./pages/AdminDashboardSettings";
 import DeliveryManLogin from "./pages/DeliveryManLogin";
 import DeliveryManRegistration from "./pages/DeliveryManRegistration";
 import DeliveryManManagement from "./pages/DeliveryManManagement";
 import { getAppSettings } from "./redux/actions/appSettings";
+import AdminLogin from "./components/Login/AdminLogin";
 
 const App = () => {
   useEffect(() => {
@@ -88,6 +87,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/sign-up" element={<SignupPage />} />
         <Route
           path="/activation/:activation_token"

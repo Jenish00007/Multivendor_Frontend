@@ -1,5 +1,7 @@
 import axios from "axios";
 import { server } from "../../server";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // load user
 export const loadUser = () => async (dispatch) => {
@@ -7,7 +9,18 @@ export const loadUser = () => async (dispatch) => {
     dispatch({
       type: "LoadUserRequest",
     });
+    
     const token = localStorage.getItem('token');
+    console.log('loadUser: Token from localStorage:', token);
+
+    if (!token) {
+      dispatch({
+        type: "LoadUserFail",
+        payload: "No token found",
+      });
+      return;
+    }
+
     const { data } = await axios.get(`${server}/user/getuser`, {
       withCredentials: true,
       headers: {
@@ -16,14 +29,25 @@ export const loadUser = () => async (dispatch) => {
         'Accept': 'application/json'
       }
     });
-    dispatch({
-      type: "LoadUserSuccess",
-      payload: data.user,
-    });
+
+    console.log('loadUser: User data received:', data);
+    
+    if (data.user) {
+      dispatch({
+        type: "LoadUserSuccess",
+        payload: data.user,
+      });
+    } else {
+      dispatch({
+        type: "LoadUserFail",
+        payload: "User data not found",
+      });
+    }
   } catch (error) {
+    console.error('loadUser: Error occurred:', error);
     dispatch({
       type: "LoadUserFail",
-      payload: error.response.data.message,
+      payload: error.response?.data?.message || "Failed to load user data",
     });
   }
 };
@@ -31,14 +55,18 @@ export const loadUser = () => async (dispatch) => {
 // load seller
 export const loadSeller = () => async (dispatch) => {
   try {
-    console.log('loadSeller: Starting request...');
+
     dispatch({
       type: "LoadSellerRequest",
     });
-    
-    const token = localStorage.getItem('seller_token');
+    console.log('loadSeller: Starting request...', dispatch);
+    const token = localStorage.getItem('token');
     console.log('loadSeller: Token from localStorage:', token);
-    
+
+    if (!token) {
+      throw new Error('Authentication token is missing. Please log in.');
+    }
+
     const { data } = await axios.get(`${server}/shop/getSeller`, {
       withCredentials: true,
       headers: {
@@ -47,7 +75,7 @@ export const loadSeller = () => async (dispatch) => {
         'Accept': 'application/json'
       }
     });
-    
+
     console.log('loadSeller: Response received:', data);
     dispatch({
       type: "LoadSellerSuccess",
@@ -71,6 +99,9 @@ export const updateUserInformation =
         type: "updateUserInfoRequest",
       });
 
+      const token = localStorage.getItem('token');
+      console.log('updateUserInformation: Token from localStorage:', token);
+
       const { data } = await axios.put(
         `${server}/user/update-user-info`,
         {
@@ -81,12 +112,19 @@ export const updateUserInformation =
         },
         {
           withCredentials: true,
-        }
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        },
       );
+
       dispatch({
         type: "updateUserInfoSuccess",
         payload: data.user,
       });
+      toast.success('Updated successfully');
     } catch (error) {
       dispatch({
         type: "updateUserInfoFailed",
@@ -96,8 +134,7 @@ export const updateUserInformation =
   };
 
 // update user address
-export const updatUserAddress =
-  (country, city, address1, address2, zipCode, addressType) =>
+export const updatUserAddress = (country, city, address1, address2, zipCode, addressType) =>
   async (dispatch) => {
     try {
       dispatch({
