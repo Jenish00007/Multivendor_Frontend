@@ -74,16 +74,14 @@ const AllSellers = () => {
       headerName: "Shop ID", 
       minWidth: 150,
       flex: 1,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
       renderCell: (params) => (
         <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-blue-50 rounded-lg flex-shrink-0">
-            <AiOutlineShop className="text-blue-600" size={20} />
+          <div className="p-2.5 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex-shrink-0 shadow-sm">
+            <AiOutlineShop className="text-indigo-600" size={20} />
           </div>
           <div className="flex flex-col justify-center min-w-[100px]">
-            <span className="font-medium text-gray-700 truncate leading-tight">#{params.row.id.slice(-6)}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Shop ID</span>
+            <span className="font-semibold text-gray-800 truncate leading-tight">#{params.value.slice(-6)}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Shop ID</span>
           </div>
         </div>
       ),
@@ -93,21 +91,22 @@ const AllSellers = () => {
       headerName: "Shop Name",
       minWidth: 200,
       flex: 1.5,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
       renderCell: (params) => (
         <div className="flex items-center gap-3 w-full">
-          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-purple-50 flex-shrink-0">
+          <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg ring-2 ring-white">
             <img
               src={params.row.avatar}
               alt={params.row.name}
-              className="w-full h-full object-cover"
-             
+              className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+              onError={(e) => {
+                e.target.src = "https://via.placeholder.com/50";
+              }}
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
           </div>
           <div className="flex flex-col justify-center min-w-[120px]">
-            <span className="font-medium text-gray-700 truncate leading-tight">{params.row.name}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Shop Name</span>
+            <span className="font-semibold text-gray-800 hover:text-indigo-600 transition-colors duration-200 cursor-pointer truncate leading-tight">{params.row.name}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Shop Name</span>
           </div>
         </div>
       ),
@@ -117,16 +116,14 @@ const AllSellers = () => {
       headerName: "Email",
       minWidth: 250,
       flex: 2,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
       renderCell: (params) => (
         <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-green-50 rounded-lg flex-shrink-0">
+          <div className="p-2.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex-shrink-0 shadow-sm">
             <AiOutlineMail className="text-green-600" size={20} />
           </div>
           <div className="flex flex-col justify-center min-w-[180px]">
-            <span className="font-medium text-gray-700 truncate leading-tight">{params.row.email}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Email Address</span>
+            <span className="font-semibold text-gray-800 truncate leading-tight">{params.row.email}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Email Address</span>
           </div>
         </div>
       ),
@@ -136,16 +133,14 @@ const AllSellers = () => {
       headerName: "Phone Number",
       minWidth: 180,
       flex: 1,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
       renderCell: (params) => (
         <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-orange-50 rounded-lg flex-shrink-0">
+          <div className="p-2.5 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl flex-shrink-0 shadow-sm">
             <AiOutlinePhone className="text-orange-600" size={20} />
           </div>
           <div className="flex flex-col justify-center min-w-[120px]">
-            <span className="font-medium text-gray-700 truncate leading-tight">{params.row.phoneNumber}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Contact Number</span>
+            <span className="font-semibold text-gray-800 truncate leading-tight">{params.row.phoneNumber}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Contact Number</span>
           </div>
         </div>
       ),
@@ -155,17 +150,15 @@ const AllSellers = () => {
       headerName: "Status",
       minWidth: 130,
       flex: 0.8,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
       renderCell: (params) => (
         <div className="flex items-center justify-start w-full">
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+          <div className={`px-3 py-1.5 rounded-lg font-semibold text-sm shadow-sm ${
             params.row.status === "active" 
-              ? "bg-green-100 text-green-700" 
-              : "bg-red-100 text-red-700"
+              ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border border-green-200' 
+              : 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700 border border-red-200'
           }`}>
             {params.row.status || "inactive"}
-          </span>
+          </div>
         </div>
       ),
     },
@@ -174,24 +167,26 @@ const AllSellers = () => {
       headerName: "Actions",
       minWidth: 150,
       flex: 0.8,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
       renderCell: (params) => {
         return (
           <div className="flex items-center justify-start gap-2 w-full">
             <Link to={`/shop/preview/${params.row.id}`}>
-              <button className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300">
-                <AiOutlineEye size={18} />
+              <button 
+                className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+                title="Preview Shop"
+              >
+                <AiOutlineEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
               </button>
             </Link>
             <button
-              className="flex items-center justify-center w-10 h-10 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors duration-300"
+              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
               onClick={() => {
                 setUserId(params.row.id);
                 setOpen(true);
               }}
+              title="Delete Shop"
             >
-              <AiOutlineDelete size={18} />
+              <AiOutlineDelete size={18} className="group-hover:scale-110 transition-transform duration-200" />
             </button>
           </div>
         );
@@ -211,109 +206,181 @@ const AllSellers = () => {
   }
 
   return (
-    <div className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-      <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-2">
-          <div>
-            <h6 className="text-[32px] font-Poppins font-bold flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-              <div className="p-2.5 bg-blue-50 rounded-lg">
-                <AiOutlineShop className="text-blue-600" size={28} />
+    <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
+        <div className="relative">
+          <div className="flex items-center gap-6">
+            <div className="relative">
+              <div className="p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl shadow-2xl">
+                <span className="text-5xl filter drop-shadow-lg">🏬</span>
               </div>
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-lg"></div>
+            </div>
+            <div>
+              <div className="font-black text-4xl font-Poppins bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 bg-clip-text text-transparent leading-tight">
               All Sellers
-            </h6>
-            <p className="text-gray-600 mt-2 ml-1">Manage and monitor all registered sellers</p>
           </div>
-          <div className="w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0">
-            <p className="text-sm text-gray-600">Current Date</p>
-            <p className="text-lg font-semibold text-gray-800">{new Date().toLocaleDateString('en-IN', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}</p>
+              <div className="text-gray-600 text-lg mt-2 font-medium">
+                Manage and monitor all registered sellers
           </div>
-        </div>
+              <div className="text-sm text-gray-500 mt-1">
+                {rows?.length || 0} sellers in your platform
+              </div>
+            </div>
+          </div>
+          <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
+              </div>
+            </div>
+      {/* Main Content */}
+      <div className="w-full min-h-[70vh] relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-indigo-100/30 to-purple-100/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-pink-100/30 to-blue-100/30 rounded-full blur-3xl"></div>
 
-        <div className="w-full min-h-[75vh] bg-white rounded-xl shadow-xl p-4 sm:p-6 lg:p-8 transform transition-all duration-300 hover:shadow-2xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1 sm:flex-none">
-                <input
-                  type="text"
-                  placeholder="Search sellers..."
-                  className="w-full sm:w-[300px] pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              </div>
-              <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-300">
-                <BsFilter size={18} />
-                <span className="text-sm font-medium">Filter</span>
-              </button>
-            </div>
-            <button
-              onClick={() => setOpenAddVendor(true)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300"
-            >
-              <AiOutlinePlus size={18} />
-              <span className="text-sm font-medium">Add Vendor</span>
-            </button>
-          </div>
-          {rows.length === 0 ? (
-            <div className="w-full h-[400px] flex items-center justify-center">
-              <div className="text-center">
-                <AiOutlineShop className="mx-auto text-gray-400" size={48} />
-                <p className="mt-4 text-gray-600">No sellers found</p>
-              </div>
-            </div>
-          ) : (
-            <div className="w-full overflow-x-auto">
+        <div className="w-full relative z-10">
               <DataGrid
                 rows={rows}
                 columns={columns}
-                pageSize={12}
+            pageSize={10}
                 disableSelectionOnClick
                 autoHeight
-                className="!border-none !bg-white !rounded-lg w-full"
+            className="!border-none"
+            getRowHeight={() => 'auto'}
+            rowHeight={90}
                 componentsProps={{
-                  pagination: {
-                    className: "!text-gray-700",
-                  },
-                }}
-              />
-            </div>
-          )}
+              footer: {
+                sx: {
+                  position: 'relative',
+                  overflow: 'visible'
+                }
+              },
+              panel: {
+                sx: {
+                  overflow: 'visible'
+                }
+              }
+            }}
+            sx={{
+              '& .MuiDataGrid-root': {
+                border: 'none !important',
+                background: 'transparent !important',
+                borderRadius: '20px !important',
+                overflow: 'hidden !important'
+              },
+              '& .MuiDataGrid-main': {
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-virtualScroller': {
+                marginTop: '8px !important',
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-virtualScrollerContent': {
+                padding: '0 12px !important',
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-virtualScrollerRenderZone': {
+                transform: 'none !important',
+                position: 'relative !important',
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-footerContainer': {
+                position: 'relative !important',
+                overflow: 'visible !important',
+                marginTop: '20px !important',
+                background: 'transparent !important',
+                borderTop: '1px solid rgba(226, 232, 240, 0.5) !important'
+              },
+              '& .MuiDataGrid-panel': {
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-panelContent': {
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-cell': {
+                display: 'flex !important',
+                alignItems: 'center !important',
+                justifyContent: 'flex-start !important',
+                padding: '20px 24px !important',
+                height: '100% !important',
+                minHeight: '90px !important',
+                borderBottom: '1px solid rgba(226, 232, 240, 0.3) !important',
+                overflow: 'visible !important',
+                background: 'transparent !important',
+                transition: 'all 0.3s ease !important'
+              },
+              '& .MuiDataGrid-cell:hover': {
+                background: 'rgba(255, 255, 255, 0.1) !important',
+                transform: 'translateY(-1px) !important'
+              },
+              '& .MuiDataGrid-columnHeader': {
+                padding: '24px !important',
+                height: 'auto !important',
+                minHeight: '80px !important',
+                alignItems: 'center !important',
+                whiteSpace: 'normal !important',
+                background: 'transparent !important',
+                borderBottom: '2px solid rgba(79, 70, 229, 0.2) !important',
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-columnHeaderTitle': {
+                fontWeight: '800 !important',
+                color: '#1e293b !important',
+                whiteSpace: 'normal !important',
+                lineHeight: '1.3 !important',
+                display: 'flex !important',
+                alignItems: 'center !important',
+                textTransform: 'uppercase !important',
+                fontSize: '0.85rem !important',
+                letterSpacing: '0.1em !important',
+                height: 'auto !important',
+                minHeight: '40px !important',
+                overflow: 'visible !important',
+                textOverflow: 'unset !important'
+              },
+              '& .MuiDataGrid-columnHeaders': {
+                background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%) !important',
+                borderBottom: '2px solid rgba(79, 70, 229, 0.2) !important',
+                overflow: 'visible !important',
+                backdropFilter: 'blur(10px) !important'
+              },
+              '& .MuiDataGrid-row': {
+                minHeight: '90px !important',
+                marginBottom: '4px !important',
+                overflow: 'visible !important',
+                borderRadius: '12px !important',
+                transition: 'all 0.3s ease !important'
+              },
+              '& .MuiDataGrid-row:hover': {
+                background: 'rgba(255, 255, 255, 0.9) !important',
+                transform: 'translateY(-2px) !important',
+                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1) !important'
+              },
+              '& .MuiDataGrid-virtualScrollerContent': {
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-virtualScrollerRenderZone': {
+                overflow: 'visible !important'
+              },
+              '& .MuiTablePagination-root': {
+                color: '#64748b !important',
+                fontWeight: '600 !important'
+              },
+              '& .MuiTablePagination-selectIcon': {
+                color: '#6366f1 !important'
+              },
+              '& .MuiIconButton-root': {
+                color: '#6366f1 !important',
+                transition: 'all 0.3s ease !important'
+              },
+              '& .MuiIconButton-root:hover': {
+                background: 'rgba(99, 102, 241, 0.1) !important',
+                transform: 'scale(1.1) !important'
+              }
+            }}
+          />
         </div>
       </div>
-      {open && (
-        <div className="w-full fixed top-0 left-0 z-[999] bg-[#00000039] flex items-center justify-center h-screen">
-          <div className="w-[95%] 800px:w-[40%] min-h-[20vh] bg-white rounded-lg shadow-lg p-8">
-            <div className="w-full flex justify-end cursor-pointer">
-              <RxCross1 size={25} onClick={() => setOpen(false)} className="text-gray-500 hover:text-gray-700" />
-            </div>
-            <h3 className="text-[25px] text-center py-5 font-Poppins text-[#000000cb]">
-              Are you sure you want to delete this seller?
-            </h3>
-            <div className="w-full flex items-center justify-center gap-4">
-              <button
-                className="px-6 py-2.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors duration-300"
-                onClick={() => setOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-6 py-2.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors duration-300"
-                onClick={() => {
-                  setOpen(false);
-                  handleDelete(userId);
-                }}
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {openAddVendor && <AddVendor setOpen={setOpenAddVendor} />}
     </div>
   );
 };

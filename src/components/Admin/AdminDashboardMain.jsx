@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "../../styles/styles";
-import { AiOutlineArrowRight, AiOutlineMoneyCollect, AiOutlineShoppingCart, AiOutlineLineChart } from "react-icons/ai";
+import { AiOutlineArrowRight, AiOutlineMoneyCollect, AiOutlineShoppingCart, AiOutlineLineChart, AiOutlineEye, AiOutlineClose } from "react-icons/ai";
 import { MdOutlineStorefront, MdOutlineTrendingUp, MdOutlinePeopleAlt, MdOutlineWavingHand } from "react-icons/md";
 import { BsGraphUpArrow, BsCurrencyRupee, BsFilter } from "react-icons/bs";
 import { Link } from "react-router-dom";
@@ -15,6 +15,8 @@ import AdminSideBar from "./Layout/AdminSideBar";
 
 const AdminDashboardMain = () => {
   const dispatch = useDispatch();
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { adminOrders, adminOrderLoading } = useSelector(
     (state) => state.order
@@ -278,6 +280,16 @@ const AdminDashboardMain = () => {
     }
   ];
 
+  const handlePreview = (order) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedOrder(null);
+  };
+
   return (
     <>
       {adminOrderLoading ? (
@@ -398,17 +410,28 @@ const AdminDashboardMain = () => {
             ))}
           </div>
 
-          {/* Enhanced Orders Table Section */}
+          {/* Latest Orders Table */}
           <div className="mt-10">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-8">
-              <h6 className="text-[28px] sm:text-[32px] font-Poppins font-bold flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                  <AiOutlineLineChart className="text-white" size={28} />
+              <div className="flex items-center gap-6">
+                <div className="relative">
+                  <div className="p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl shadow-2xl">
+                    <AiOutlineLineChart className="text-white" size={28} />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-lg"></div>
                 </div>
-                <span className="bg-gradient-to-r from-gray-800 via-blue-800 to-purple-800 bg-clip-text text-transparent">
-                  Latest Orders
-                </span>
-              </h6>
+                <div>
+                  <div className="font-black text-4xl font-Poppins bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 bg-clip-text text-transparent leading-tight">
+                    Latest Orders
+                  </div>
+                  <div className="text-gray-600 text-lg mt-2 font-medium">
+                    Track and manage customer orders
+                  </div>
+                  <div className="text-sm text-gray-500 mt-1">
+                    {adminOrders?.length || 0} total orders
+                  </div>
+                </div>
+              </div>
               <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                 <div className="relative flex-1 sm:flex-none">
                   <input
@@ -418,166 +441,143 @@ const AdminDashboardMain = () => {
                   />
                   <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 </div>
-                <button className="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-3.5 bg-white/80 backdrop-blur-sm border-2 border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                <button className="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-3.5 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                   <BsFilter size={20} />
                   <span className="text-sm font-semibold">Filter</span>
                 </button>
               </div>
             </div>
 
-            {/* Enhanced Data Grid Container */}
-            <div className="w-full min-h-[65vh] bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-8 transform transition-all duration-300 hover:shadow-3xl border border-white/50">
-              <style>
-                {`
-                  .custom-header {
-                    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
-                    color: #1e293b !important;
-                    font-weight: 700 !important;
-                    font-size: 0.875rem !important;
-                    padding: 24px 20px !important;
-                    border-bottom: 3px solid #e2e8f0 !important;
-                    text-transform: uppercase !important;
-                    letter-spacing: 0.1em !important;
-                    position: relative !important;
-                  }
-                  .custom-header::after {
-                    content: '';
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    height: 3px;
-                    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
-                  }
-                  .custom-cell {
-                    padding: 24px 20px !important;
-                    font-size: 0.875rem !important;
-                    border-bottom: 1px solid #f1f5f9 !important;
-                  }
-                  .MuiDataGrid-row {
-                    border-bottom: 1px solid #f1f5f9 !important;
-                    transition: all 0.3s ease-in-out !important;
-                    position: relative !important;
-                  }
-                  .MuiDataGrid-row:hover {
-                    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-                    transform: translateY(-2px) !important;
-                    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
-                    border-radius: 12px !important;
-                    margin: 2px 8px !important;
-                    border: 1px solid #e2e8f0 !important;
-                  }
-                  .MuiDataGrid-cell:focus {
-                    outline: none !important;
-                  }
-                  .MuiDataGrid-columnSeparator {
-                    display: none !important;
-                  }
-                  .MuiDataGrid-footerContainer {
-                    border-top: 2px solid #e2e8f0 !important;
-                    padding: 24px 20px !important;
-                    margin-top: 12px !important;
-                    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
-                  }
-                  .MuiTablePagination-root {
-                    color: #64748b !important;
-                  }
-                  .MuiTablePagination-select {
-                    color: #1e293b !important;
-                    font-weight: 600 !important;
-                    padding: 10px 18px !important;
-                    border-radius: 8px !important;
-                    background-color: #ffffff !important;
-                  }
-                  .MuiTablePagination-selectIcon {
-                    color: #64748b !important;
-                  }
-                  .MuiIconButton-root {
-                    color: #64748b !important;
-                    transition: all 0.3s ease-in-out !important;
-                    padding: 12px !important;
-                    border-radius: 10px !important;
-                  }
-                  .MuiIconButton-root:hover {
-                    background-color: #3b82f6 !important;
-                    color: #ffffff !important;
-                    transform: scale(1.1) !important;
-                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
-                  }
-                  .MuiDataGrid-root {
-                    border: none !important;
-                    height: calc(65vh - 100px) !important;
-                    border-radius: 16px !important;
-                    overflow: hidden !important;
-                  }
-                  .MuiDataGrid-columnHeaders {
-                    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
-                    border-bottom: 3px solid #e2e8f0 !important;
-                  }
-                  .MuiDataGrid-virtualScrollerContent {
-                    padding: 8px !important;
-                  }
-                  .MuiDataGrid-cell {
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: flex-start !important;
-                    padding: 16px 20px !important;
-                    height: 100% !important;
-                    min-height: 80px !important;
-                    border-bottom: none !important;
-                  }
-                  .MuiDataGrid-columnHeader {
-                    padding: 20px !important;
-                    height: 72px !important;
-                    align-items: center !important;
-                  }
-                  .MuiDataGrid-columnHeaderTitle {
-                    font-weight: 700 !important;
-                    color: #1e293b !important;
-                    white-space: normal !important;
-                    line-height: 1.3 !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    text-transform: uppercase !important;
-                    font-size: 0.8rem !important;
-                    letter-spacing: 0.1em !important;
-                  }
-                  .MuiDataGrid-row {
-                    min-height: 80px !important;
-                  }
-                  @media (max-width: 768px) {
-                    .MuiDataGrid-cell {
-                      padding: 12px !important;
-                      min-height: 72px !important;
-                    }
-                    .MuiDataGrid-columnHeader {
-                      padding: 12px !important;
-                    }
-                    .custom-cell {
-                      font-size: 0.75rem !important;
-                    }
-                    .MuiDataGrid-row {
-                      min-height: 72px !important;
-                    }
-                    .MuiDataGrid-columnHeaderTitle {
-                      font-size: 0.7rem !important;
-                    }
-                  }
-                `}
-              </style>
-              <DataGrid
-                rows={row}
-                columns={columns}
-                pageSize={6}
-                disableSelectionOnClick
-                autoHeight
-                className="bg-white"
-                componentsProps={{
-                  pagination: {
-                    className: "text-gray-700",
-                  },
-                }}
-              />
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Order ID</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Items</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Total</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Status</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Date</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {row.slice(0, 5).map((order) => (
+                      <tr key={order.id} className="hover:bg-gray-50/50 transition-colors duration-200">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-gradient-to-br from-gray-100 to-blue-100 rounded-xl flex-shrink-0 shadow-sm">
+                              <AiOutlineShoppingCart className="text-gray-600" size={20} />
+                            </div>
+                            <span className="font-medium text-gray-800">#{order.id.slice(-6)}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-gradient-to-br from-gray-100 to-blue-100 rounded-xl flex-shrink-0 shadow-sm">
+                              <AiOutlineShoppingCart className="text-gray-600" size={20} />
+                            </div>
+                            <span className="font-medium text-gray-800">{order.itemsQty} items</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-gradient-to-br from-gray-100 to-blue-100 rounded-xl flex-shrink-0 shadow-sm">
+                              <BsCurrencyRupee className="text-gray-600" size={20} />
+                            </div>
+                            <span className="font-medium text-gray-800">{order.total}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-4 py-2 rounded-full text-sm font-medium ${
+                            order.status === "Delivered" 
+                              ? "bg-green-100 text-green-800" 
+                              : order.status === "Processing" 
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}>
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-gradient-to-br from-gray-100 to-blue-100 rounded-xl flex-shrink-0 shadow-sm">
+                              <MdOutlineTrendingUp className="text-gray-600" size={20} />
+                            </div>
+                            <span className="font-medium text-gray-800">{order.createdAt}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <button 
+                            onClick={() => handlePreview(order)}
+                            className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+                            title="View Order Details"
+                          >
+                            <AiOutlineEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Order Preview Modal */}
+      {isModalOpen && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-semibold text-gray-800">Order Details</h2>
+              <button
+                onClick={closeModal}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <AiOutlineClose size={24} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Order Information */}
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">Order #{selectedOrder.id.slice(-6)}</h3>
+                  <p className="text-sm text-gray-500">Status: {selectedOrder.status}</p>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Items:</span>
+                    <span className="font-medium">{selectedOrder.itemsQty} items</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Amount:</span>
+                    <span className="font-medium">{selectedOrder.total}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Order Date:</span>
+                    <span className="font-medium">{selectedOrder.createdAt}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Order Details */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-900">Additional Information</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Payment Status:</span>
+                    <span className="font-medium">Paid</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Delivery Status:</span>
+                    <span className="font-medium">{selectedOrder.status}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

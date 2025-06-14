@@ -55,21 +55,19 @@ const AllWithdraw = () => {
   };
 
   const columns = [
-    { 
-      field: "id", 
-      headerName: "Withdraw ID", 
-      minWidth: 150, 
-      flex: 0.7,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
+    {
+      field: "id",
+      headerName: "Withdraw ID",
+      minWidth: 150,
+      flex: 1,
       renderCell: (params) => (
         <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-green-50 rounded-lg flex-shrink-0">
-            <BsCurrencyDollar className="text-green-600" size={20} />
+          <div className="p-2.5 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex-shrink-0 shadow-sm">
+            <BsCurrencyDollar className="text-indigo-600" size={20} />
           </div>
           <div className="flex flex-col justify-center min-w-[100px]">
-            <span className="font-medium text-gray-700 truncate leading-tight">#{params.value.slice(-6)}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Withdraw ID</span>
+            <span className="font-semibold text-gray-800 truncate leading-tight">#{params.value.slice(-6)}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Withdraw ID</span>
           </div>
         </div>
       ),
@@ -77,37 +75,16 @@ const AllWithdraw = () => {
     {
       field: "name",
       headerName: "Shop Name",
-      minWidth: 180,
-      flex: 1.4,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
+      minWidth: 200,
+      flex: 1.5,
       renderCell: (params) => (
         <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-blue-50 rounded-lg flex-shrink-0">
+          <div className="p-2.5 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex-shrink-0 shadow-sm">
             <BsShop className="text-blue-600" size={20} />
           </div>
           <div className="flex flex-col justify-center min-w-[120px]">
-            <span className="font-medium text-gray-700 truncate leading-tight">{params.value}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Shop Name</span>
-          </div>
-        </div>
-      ),
-    },
-    {
-      field: "shopId",
-      headerName: "Shop ID",
-      minWidth: 180,
-      flex: 1.4,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
-      renderCell: (params) => (
-        <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-purple-50 rounded-lg flex-shrink-0">
-            <BsShop className="text-purple-600" size={20} />
-          </div>
-          <div className="flex flex-col justify-center min-w-[100px]">
-            <span className="font-medium text-gray-700 truncate leading-tight">#{params.value.slice(-6)}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Shop ID</span>
+            <span className="font-semibold text-gray-800 hover:text-indigo-600 transition-colors duration-200 cursor-pointer truncate leading-tight">{params.value}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Shop Name</span>
           </div>
         </div>
       ),
@@ -115,18 +92,15 @@ const AllWithdraw = () => {
     {
       field: "amount",
       headerName: "Amount",
-      minWidth: 100,
-      flex: 0.6,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
+      minWidth: 130,
+      flex: 1,
       renderCell: (params) => (
-        <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-green-50 rounded-lg flex-shrink-0">
-            <BsCurrencyDollar className="text-green-600" size={20} />
-          </div>
-          <div className="flex flex-col justify-center min-w-[100px]">
-            <span className="font-medium text-gray-700 truncate leading-tight">{params.value}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Amount</span>
+        <div className="flex items-center">
+          <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1.5 rounded-lg shadow-sm">
+            <div className="flex items-center">
+              <BsCurrencyDollar className="mr-1" size={14} />
+              <span className="font-bold text-sm">{params.value}</span>
+            </div>
           </div>
         </div>
       ),
@@ -134,50 +108,32 @@ const AllWithdraw = () => {
     {
       field: "status",
       headerName: "Status",
-      type: "text",
-      minWidth: 80,
-      flex: 0.5,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
-      renderCell: (params) => {
-        const status = params.value || 'Processing';
-        const statusConfig = {
-          Processing: {
-            bg: "bg-yellow-100",
-            text: "text-yellow-800",
-            icon: <BsClock className="text-yellow-500" />,
-          },
-          Succeed: {
-            bg: "bg-green-100",
-            text: "text-green-800",
-            icon: <BsCheckCircle className="text-green-500" />,
-          },
-        };
-        const config = statusConfig[status] || statusConfig.Processing;
-        return (
-          <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${config.bg} ${config.text}`}>
-            {config.icon}
-            <span className="font-medium">{status}</span>
+      minWidth: 130,
+      flex: 1,
+      renderCell: (params) => (
+        <div className="flex items-center">
+          <div className={`px-3 py-1.5 rounded-lg font-semibold text-sm shadow-sm ${
+            params.value === 'Succeed' 
+              ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border border-green-200' 
+              : 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 border border-yellow-200'
+          }`}>
+            {params.value}
           </div>
-        );
-      },
+        </div>
+      ),
     },
     {
       field: "createdAt",
       headerName: "Request Date",
-      type: "number",
       minWidth: 130,
-      flex: 0.6,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
+      flex: 1,
       renderCell: (params) => (
-        <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-gray-50 rounded-lg flex-shrink-0">
-            <BsClock className="text-gray-600" size={20} />
-          </div>
-          <div className="flex flex-col justify-center min-w-[100px]">
-            <span className="font-medium text-gray-700 truncate leading-tight">{params.value}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Request Date</span>
+        <div className="flex items-center">
+          <div className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 px-3 py-1.5 rounded-lg font-semibold text-sm shadow-sm border border-blue-200">
+            <div className="flex items-center">
+              <BsClock className="mr-1" size={14} />
+              <span>{params.value}</span>
+            </div>
           </div>
         </div>
       ),
@@ -185,33 +141,33 @@ const AllWithdraw = () => {
     {
       field: "actions",
       headerName: "Actions",
-      type: "number",
-      minWidth: 130,
-      flex: 0.6,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
-      renderCell: (params) => (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => handlePreview(params.row)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300"
-          >
-            <span>View</span>
-            <BsEye className="transform group-hover:translate-x-1 transition-transform" />
-          </button>
-          {params.row.status === "Processing" && (
-            <button
-              className="p-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors duration-300"
-              onClick={() => {
-                setWithdrawData(params.row);
-                setOpen(true);
-              }}
+      minWidth: 150,
+      flex: 0.8,
+      renderCell: (params) => {
+        return (
+          <div className="flex items-center justify-start gap-2 w-full">
+            <button 
+              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+              onClick={() => handlePreview(params.row)}
+              title="Preview Withdraw"
             >
-              <BsPencil size={20} />
+              <BsEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
             </button>
-          )}
-        </div>
-      ),
+            {params.row.status === "Processing" && (
+              <button
+                className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+                onClick={() => {
+                  setWithdrawData(params.row);
+                  setOpen(true);
+                }}
+                title="Approve Withdraw"
+              >
+                <BsCheckCircle size={18} className="group-hover:scale-110 transition-transform duration-200" />
+              </button>
+            )}
+          </div>
+        );
+      },
     },
   ];
 
@@ -256,27 +212,202 @@ const AllWithdraw = () => {
     });
 
   return (
-    <div className="w-full mx-8 pt-1 mt-10 bg-white rounded-lg shadow-lg p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <BsCurrencyDollar className="text-green-500" />
-          Withdraw Requests
-        </h1>
-        <p className="text-gray-500 mt-1">Manage and process seller withdrawal requests</p>
+    <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
+        <div className="relative">
+          <div className="flex items-center gap-6">
+            <div className="relative">
+              <div className="p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl shadow-2xl">
+                <span className="text-5xl filter drop-shadow-lg">💰</span>
+              </div>
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-lg"></div>
+            </div>
+            <div>
+              <div className="font-black text-4xl font-Poppins bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 bg-clip-text text-transparent leading-tight">
+                Withdraw Requests
+              </div>
+              <div className="text-gray-600 text-lg mt-2 font-medium">
+                Manage and process seller withdrawal requests
+              </div>
+              <div className="text-sm text-gray-500 mt-1">
+                {data?.length || 0} pending requests
+              </div>
+            </div>
+          </div>
+          <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
+        </div>
       </div>
-      <DataGrid
-        rows={row}
-        columns={columns}
-        pageSize={10}
-        disableSelectionOnClick
-        autoHeight
-        className="!border-none"
-        componentsProps={{
-          pagination: {
-            className: "!text-gray-700",
-          },
-        }}
-      />
+
+      {/* Main Content */}
+      <div className="w-full min-h-[70vh] relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-indigo-100/30 to-purple-100/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-pink-100/30 to-blue-100/30 rounded-full blur-3xl"></div>
+        
+        <style>
+          {`
+            .MuiDataGrid-root {
+              border: none !important;
+              background: transparent !important;
+              border-radius: 20px !important;
+              overflow: hidden !important;
+            }
+            .MuiDataGrid-main {
+              overflow: visible !important;
+            }
+            .MuiDataGrid-virtualScroller {
+              margin-top: 8px !important;
+              overflow: visible !important;
+            }
+            .MuiDataGrid-virtualScrollerContent {
+              padding: 0 12px !important;
+              overflow: visible !important;
+            }
+            .MuiDataGrid-virtualScrollerRenderZone {
+              transform: none !important;
+              position: relative !important;
+              overflow: visible !important;
+            }
+            .MuiDataGrid-footerContainer {
+              position: relative !important;
+              overflow: visible !important;
+              margin-top: 20px !important;
+              background: transparent !important;
+              border-top: 1px solid rgba(226, 232, 240, 0.5) !important;
+            }
+            .MuiDataGrid-panel {
+              overflow: visible !important;
+            }
+            .MuiDataGrid-panelContent {
+              overflow: visible !important;
+            }
+            .MuiDataGrid-cell {
+              display: flex !important;
+              align-items: center !important;
+              justify-content: flex-start !important;
+              padding: 20px 24px !important;
+              height: 100% !important;
+              min-height: 90px !important;
+              border-bottom: 1px solid rgba(226, 232, 240, 0.3) !important;
+              overflow: visible !important;
+              background: transparent !important;
+              transition: all 0.3s ease !important;
+            }
+            .MuiDataGrid-cell:hover {
+              background: rgba(255, 255, 255, 0.1) !important;
+              transform: translateY(-1px) !important;
+            }
+            .MuiDataGrid-columnHeader {
+              padding: 24px !important;
+              height: auto !important;
+              min-height: 80px !important;
+              align-items: center !important;
+              white-space: normal !important;
+              background: transparent !important;
+              border-bottom: 2px solid rgba(79, 70, 229, 0.2) !important;
+              overflow: visible !important;
+            }
+            .MuiDataGrid-columnHeaderTitle {
+              font-weight: 800 !important;
+              color: #1e293b !important;
+              white-space: normal !important;
+              line-height: 1.3 !important;
+              display: flex !important;
+              align-items: center !important;
+              text-transform: uppercase !important;
+              font-size: 0.85rem !important;
+              letter-spacing: 0.1em !important;
+              height: auto !important;
+              min-height: 40px !important;
+              overflow: visible !important;
+              text-overflow: unset !important;
+            }
+            .MuiDataGrid-columnHeaders {
+              background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%) !important;
+              border-bottom: 2px solid rgba(79, 70, 229, 0.2) !important;
+              overflow: visible !important;
+              backdrop-filter: blur(10px) !important;
+            }
+            .MuiDataGrid-row {
+              min-height: 90px !important;
+              margin-bottom: 4px !important;
+              overflow: visible !important;
+              border-radius: 12px !important;
+              transition: all 0.3s ease !important;
+            }
+            .MuiDataGrid-row:hover {
+              background: rgba(255, 255, 255, 0.9) !important;
+              transform: translateY(-2px) !important;
+              box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+            }
+            .MuiDataGrid-virtualScrollerContent {
+              overflow: visible !important;
+            }
+            .MuiDataGrid-virtualScrollerRenderZone {
+              overflow: visible !important;
+            }
+            .MuiTablePagination-root {
+              color: #64748b !important;
+              font-weight: 600 !important;
+            }
+            .MuiTablePagination-selectIcon {
+              color: #6366f1 !important;
+            }
+            .MuiIconButton-root {
+              color: #6366f1 !important;
+              transition: all 0.3s ease !important;
+            }
+            .MuiIconButton-root:hover {
+              background: rgba(99, 102, 241, 0.1) !important;
+              transform: scale(1.1) !important;
+            }
+          `}
+        </style>
+
+        <div className="w-full relative z-10">
+          <DataGrid
+            rows={row}
+            columns={columns}
+            pageSize={10}
+            disableSelectionOnClick
+            autoHeight
+            className="!border-none"
+            getRowHeight={() => 'auto'}
+            rowHeight={90}
+            componentsProps={{
+              footer: {
+                sx: {
+                  position: 'relative',
+                  overflow: 'visible'
+                }
+              },
+              panel: {
+                sx: {
+                  overflow: 'visible'
+                }
+              }
+            }}
+            sx={{
+              '& .MuiDataGrid-cell': {
+                overflow: 'visible'
+              },
+              '& .MuiDataGrid-row': {
+                overflow: 'visible'
+              },
+              '& .MuiDataGrid-virtualScroller': {
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-virtualScrollerContent': {
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-virtualScrollerRenderZone': {
+                overflow: 'visible !important'
+              }
+            }}
+          />
+        </div>
+      </div>
 
       {/* Withdraw Preview Modal */}
       {isPreviewOpen && selectedWithdraw && (
@@ -295,28 +426,30 @@ const AllWithdraw = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Withdraw Information */}
               <div className="space-y-4">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Withdraw Information</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 shadow-lg">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Withdraw Information</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
                       <span className="text-gray-600">Withdraw ID:</span>
-                      <span className="font-medium">#{selectedWithdraw.id.slice(-6)}</span>
+                      <span className="font-medium bg-gradient-to-r from-indigo-100 to-purple-100 px-3 py-1 rounded-lg">#{selectedWithdraw.id.slice(-6)}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-gray-600">Amount:</span>
-                      <span className="font-medium">{selectedWithdraw.amount}</span>
+                      <span className="font-medium bg-gradient-to-r from-green-100 to-emerald-100 px-3 py-1 rounded-lg">{selectedWithdraw.amount}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-gray-600">Status:</span>
-                      <span className={`font-medium px-3 py-1 rounded-full ${
-                        selectedWithdraw.status === 'Succeed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                      <span className={`font-medium px-3 py-1 rounded-lg ${
+                        selectedWithdraw.status === 'Succeed' 
+                          ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700' 
+                          : 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700'
                       }`}>
                         {selectedWithdraw.status}
                       </span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-gray-600">Request Date:</span>
-                      <span className="font-medium">{selectedWithdraw.createdAt}</span>
+                      <span className="font-medium bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-lg">{selectedWithdraw.createdAt}</span>
                     </div>
                   </div>
                 </div>
@@ -324,35 +457,16 @@ const AllWithdraw = () => {
 
               {/* Shop Information */}
               <div className="space-y-4">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Shop Information</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Shop ID:</span>
-                      <span className="font-medium">#{selectedWithdraw.shopId.slice(-6)}</span>
-                    </div>
-                    <div className="flex justify-between">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 shadow-lg">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Shop Information</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
                       <span className="text-gray-600">Shop Name:</span>
-                      <span className="font-medium">{selectedWithdraw.name}</span>
+                      <span className="font-medium bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-lg">{selectedWithdraw.name}</span>
                     </div>
-                  </div>
-                </div>
-
-                {/* Bank Information */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Bank Information</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Bank Name:</span>
-                      <span className="font-medium">{selectedWithdraw.bankName || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Account Number:</span>
-                      <span className="font-medium">{selectedWithdraw.bankAccountNumber || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">IFSC Code:</span>
-                      <span className="font-medium">{selectedWithdraw.bankIfscCode || 'N/A'}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Shop ID:</span>
+                      <span className="font-medium bg-gradient-to-r from-indigo-100 to-purple-100 px-3 py-1 rounded-lg">#{selectedWithdraw.shopId.slice(-6)}</span>
                     </div>
                   </div>
                 </div>

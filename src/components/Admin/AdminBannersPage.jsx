@@ -102,11 +102,16 @@ const AdminBannersPage = () => {
       field: "id",
       headerName: "Banner ID",
       minWidth: 150,
-      flex: 0.7,
+      flex: 1,
       renderCell: (params) => (
-        <div className="flex items-center gap-2">
-          <AiOutlineAppstore className="text-blue-500" />
-          <span className="text-gray-700">#{params.value ? params.value.slice(-6) : 'N/A'}</span>
+        <div className="flex items-center gap-3 w-full">
+          <div className="p-2.5 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex-shrink-0 shadow-sm">
+            <AiOutlineAppstore className="text-indigo-600" size={20} />
+          </div>
+          <div className="flex flex-col justify-center min-w-[100px]">
+            <span className="font-semibold text-gray-800 truncate leading-tight">#{params.value ? params.value.slice(-6) : 'N/A'}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Banner ID</span>
+          </div>
         </div>
       ),
     },
@@ -114,12 +119,12 @@ const AdminBannersPage = () => {
       field: "image",
       headerName: "Image",
       minWidth: 100,
-      flex: 0.8,
+      flex: 1,
       renderCell: (params) => (
-        <div className="w-[50px] h-[50px] rounded-lg overflow-hidden">
+        <div className="w-[50px] h-[50px] rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
           <img
             src={params.value}
-            alt={params?.row.title}
+            alt={params.row.title}
             className="w-full h-full object-cover"
             onError={(e) => {
               e.target.src = "https://via.placeholder.com/50";
@@ -132,10 +137,16 @@ const AdminBannersPage = () => {
       field: "title",
       headerName: "Title",
       minWidth: 180,
-      flex: 1.4,
+      flex: 1.5,
       renderCell: (params) => (
-        <div className="font-medium text-gray-800 hover:text-blue-500 transition-colors duration-300">
-          {params.value || 'N/A'}
+        <div className="flex items-center gap-3 w-full">
+          <div className="p-2.5 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex-shrink-0 shadow-sm">
+            <AiOutlineAppstore className="text-blue-600" size={20} />
+          </div>
+          <div className="flex flex-col justify-center min-w-[120px]">
+            <span className="font-semibold text-gray-800 hover:text-indigo-600 transition-colors duration-200 cursor-pointer truncate leading-tight">{params.value || 'N/A'}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Banner Title</span>
+          </div>
         </div>
       ),
     },
@@ -145,8 +156,10 @@ const AdminBannersPage = () => {
       minWidth: 200,
       flex: 1.2,
       renderCell: (params) => (
-        <div className="text-gray-600">
-          {params.value || 'N/A'}
+        <div className="flex items-center">
+          <div className="bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 px-3 py-1.5 rounded-lg font-medium text-sm shadow-sm border border-gray-200">
+            {params.value || 'N/A'}
+          </div>
         </div>
       ),
     },
@@ -154,10 +167,12 @@ const AdminBannersPage = () => {
       field: "link",
       headerName: "Link",
       minWidth: 150,
-      flex: 1,
+      flex: 1.2,
       renderCell: (params) => (
-        <div className="text-gray-600">
-          {params.value || 'N/A'}
+        <div className="flex items-center">
+          <div className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 px-3 py-1.5 rounded-lg font-medium text-sm shadow-sm border border-green-200">
+            {params.value || 'N/A'}
+          </div>
         </div>
       ),
     },
@@ -177,21 +192,22 @@ const AdminBannersPage = () => {
       headerName: "Actions",
       minWidth: 150,
       flex: 0.8,
-      sortable: false,
       renderCell: (params) => (
-        <div className="flex items-center gap-2">
-          <Button
+        <div className="flex items-center justify-start gap-2 w-full">
+          <button 
+            className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
             onClick={() => handleEdit(params.row)}
-            className="!bg-blue-500 !text-white hover:!bg-blue-600 transition-colors duration-300"
+            title="Edit Banner"
           >
-            <AiOutlineEdit size={20} />
-          </Button>
-          <Button
+            <AiOutlineEdit size={18} className="group-hover:scale-110 transition-transform duration-200" />
+          </button>
+          <button
+            className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
             onClick={() => handleDelete(params.row._id)}
-            className="!bg-red-500 !text-white hover:!bg-red-600 transition-colors duration-300"
+            title="Delete Banner"
           >
-            <AiOutlineDelete size={20} />
-          </Button>
+            <AiOutlineDelete size={18} className="group-hover:scale-110 transition-transform duration-200" />
+          </button>
         </div>
       ),
     },
@@ -213,89 +229,127 @@ const AdminBannersPage = () => {
   }
 
   return (
-    <div className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
       <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-2">
-          <div>
-            <h6 className="text-[32px] font-Poppins text-gray-800 font-bold flex items-center gap-3">
-              <div className="p-2.5 bg-blue-50 rounded-lg">
-                <AiOutlineAppstore className="text-blue-600" size={28} />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
+          <div className="relative">
+            <div className="flex items-center gap-6">
+              <div className="relative">
+                <div className="p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl shadow-2xl">
+                  <AiOutlineAppstore className="text-4xl text-white filter drop-shadow-lg" />
+                </div>
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-lg"></div>
               </div>
-              All Banners
-            </h6>
-            <p className="text-gray-600 mt-2 ml-1">Manage and monitor all banners</p>
-          </div>
-          <div className="w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0">
-            <p className="text-sm text-gray-600">Current Date</p>
-            <p className="text-lg font-semibold text-gray-800">{new Date().toLocaleDateString('en-IN', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}</p>
+              <div>
+                <div className="font-black text-4xl font-Poppins bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 bg-clip-text text-transparent leading-tight">
+                  All Banners
+                </div>
+                <div className="text-gray-600 text-lg mt-2 font-medium">
+                  Manage and monitor all promotional banners
+                </div>
+                <div className="text-sm text-gray-500 mt-1">
+                  {banners?.length || 0} total banners
+                </div>
+              </div>
+            </div>
+            <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
           </div>
         </div>
 
-        <div className="w-full min-h-[75vh] bg-white rounded-xl shadow-xl p-4 sm:p-6 lg:p-8 transform transition-all duration-300 hover:shadow-2xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1 sm:flex-none">
-                <input
-                  type="text"
-                  placeholder="Search banners..."
-                  className="w-full sm:w-[300px] pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+        <div className="w-full min-h-[70vh] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-indigo-100/30 to-purple-100/30 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-pink-100/30 to-blue-100/30 rounded-full blur-3xl"></div>
+          
+          <div className="w-full relative z-10">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+              <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="relative flex-1 sm:flex-none">
+                  <input
+                    type="text"
+                    placeholder="Search banners..."
+                    className="w-full sm:w-[300px] pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
+                  />
+                  <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                </div>
+                <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-sm hover:shadow-md">
+                  <BsFilter size={18} />
+                  <span className="text-sm font-medium">Filter</span>
+                </button>
               </div>
-              <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-300">
-                <BsFilter size={18} />
-                <span className="text-sm font-medium">Filter</span>
+              <button
+                onClick={() => {
+                  setSelectedBanner(null);
+                  setFormData({ title: "", description: "", link: "", image: null });
+                  setOpen(true);
+                }}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                <AiOutlineAppstore size={18} />
+                <span className="text-sm font-medium">Add New Banner</span>
               </button>
             </div>
-            <button
-              onClick={() => {
-                setSelectedBanner(null);
-                setFormData({ title: "", description: "", link: "", image: null });
-                setOpen(true);
-              }}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300"
-            >
-              <AiOutlineAppstore size={18} />
-              <span className="text-sm font-medium">Add New Banner</span>
-            </button>
-          </div>
 
-          {rows.length === 0 ? (
-            <div className="w-full h-[400px] flex items-center justify-center">
-              <div className="text-center">
-                <AiOutlineAppstore className="mx-auto text-gray-400" size={48} />
-                <p className="mt-4 text-gray-600">No banners found</p>
+            {loading ? (
+              <Loader />
+            ) : rows.length === 0 ? (
+              <div className="w-full h-[400px] flex items-center justify-center bg-white rounded-xl shadow-lg">
+                <div className="text-center">
+                  <AiOutlineAppstore className="mx-auto text-gray-400" size={48} />
+                  <p className="mt-4 text-gray-600">No banners found</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="w-full overflow-x-auto">
-              <DataGrid
-                rows={rows}
-                columns={columns}
-                pageSize={12}
-                disableSelectionOnClick
-                autoHeight
-                className="!border-none !bg-white !rounded-lg w-full"
-                componentsProps={{
-                  pagination: {
-                    className: "!text-gray-700",
-                  },
-                }}
-              />
-            </div>
-          )}
+            ) : (
+              <div className="w-full overflow-x-auto bg-white rounded-xl shadow-lg p-4">
+                <DataGrid
+                  rows={rows}
+                  columns={columns}
+                  pageSize={12}
+                  disableSelectionOnClick
+                  autoHeight
+                  className="!border-none"
+                  getRowHeight={() => 'auto'}
+                  rowHeight={90}
+                  componentsProps={{
+                    footer: {
+                      sx: {
+                        position: 'relative',
+                        overflow: 'visible'
+                      }
+                    },
+                    panel: {
+                      sx: {
+                        overflow: 'visible'
+                      }
+                    }
+                  }}
+                  sx={{
+                    '& .MuiDataGrid-cell': {
+                      overflow: 'visible'
+                    },
+                    '& .MuiDataGrid-row': {
+                      overflow: 'visible'
+                    },
+                    '& .MuiDataGrid-virtualScroller': {
+                      overflow: 'visible !important'
+                    },
+                    '& .MuiDataGrid-virtualScrollerContent': {
+                      overflow: 'visible !important'
+                    },
+                    '& .MuiDataGrid-virtualScrollerRenderZone': {
+                      overflow: 'visible !important'
+                    }
+                  }}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {open && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+            <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 bg-clip-text text-transparent">
               {selectedBanner ? "Edit Banner" : "Add New Banner"}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -308,7 +362,7 @@ const AdminBannersPage = () => {
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
                   required
                 />
               </div>
@@ -320,7 +374,7 @@ const AdminBannersPage = () => {
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
                   rows="3"
                   required
                 />
@@ -334,7 +388,7 @@ const AdminBannersPage = () => {
                   name="link"
                   value={formData.link}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
                 />
               </div>
               <div>
@@ -343,28 +397,23 @@ const AdminBannersPage = () => {
                 </label>
                 <input
                   type="file"
-                  accept="image/*"
                   onChange={handleImageChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
+                  accept="image/*"
                   required={!selectedBanner}
                 />
-                {selectedBanner && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    Leave empty to keep current image
-                  </p>
-                )}
               </div>
               <div className="flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                  className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
                   {selectedBanner ? "Update" : "Create"}
                 </button>
