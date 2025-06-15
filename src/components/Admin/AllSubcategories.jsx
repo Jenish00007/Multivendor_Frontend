@@ -21,6 +21,7 @@ const AllSubcategories = () => {
     categoryId: "",
     image: null,
   });
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     fetchSubcategories();
@@ -108,6 +109,30 @@ const AllSubcategories = () => {
       setLoading(false);
       toast.error(error.response?.data?.error || "Error deleting subcategory");
     }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleEdit = (subcategory) => {
+    setSelectedSubcategory(subcategory);
+    setFormData({
+      name: subcategory.name,
+      description: subcategory.description,
+      categoryId: subcategory.category?._id || "",
+      image: null
+    });
+    setImagePreview(subcategory.image);
+    setOpen(true);
   };
 
   const columns = [
@@ -198,15 +223,7 @@ const AllSubcategories = () => {
         <div className="flex items-center justify-start gap-2 w-full">
           <button 
             className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
-            onClick={() => {
-              setSelectedSubcategory(params.row);
-              setFormData({
-                name: params.row.name,
-                description: params.row.description,
-                categoryId: params.row.category?._id,
-              });
-              setOpen(true);
-            }}
+            onClick={() => handleEdit(params.row)}
             title="Edit Subcategory"
           >
             <AiOutlineEdit size={18} className="group-hover:scale-110 transition-transform duration-200" />
@@ -228,8 +245,7 @@ const AllSubcategories = () => {
     _id: subcategory._id,
     name: subcategory.name,
     description: subcategory.description,
-    categoryId: subcategory.category?._id,
-    categoryName: subcategory.category?.name || 'N/A',
+    category: subcategory.category,
     image: subcategory.image,
     createdAt: subcategory.createdAt,
   })) || [];
@@ -288,6 +304,7 @@ const AllSubcategories = () => {
               onClick={() => {
                 setSelectedSubcategory(null);
                 setFormData({ name: "", description: "", categoryId: "", image: null });
+                setImagePreview(null);
                 setOpen(true);
               }}
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl"
@@ -412,15 +429,45 @@ const AllSubcategories = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Image
                 </label>
-                <input
-                  type="file"
-                  onChange={(e) =>
-                    setFormData({ ...formData, image: e.target.files[0] })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
-                  accept="image/*"
-                  required={!selectedSubcategory}
-                />
+                <div className="flex flex-col items-center justify-center w-full">
+                  <div className="w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                    {imagePreview ? (
+                      <div className="relative w-full h-full">
+                        <img
+                          src={imagePreview}
+                          alt="Subcategory preview"
+                          className="w-full h-full object-contain"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImagePreview(null);
+                            setFormData({ ...formData, image: null });
+                          }}
+                          className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
+                        >
+                          <AiOutlineDelete size={20} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <AiOutlinePlus size={30} className="text-gray-400" />
+                          <p className="mb-2 text-sm text-gray-500">
+                            <span className="font-semibold">Click to upload</span> or drag and drop
+                          </p>
+                          <p className="text-xs text-gray-500">PNG, JPG or JPEG (MAX. 2MB)</p>
+                        </div>
+                        <input
+                          type="file"
+                          className="hidden"
+                          onChange={handleImageChange}
+                          accept="image/*"
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="flex justify-end gap-3">
                 <button

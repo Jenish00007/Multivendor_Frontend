@@ -164,12 +164,22 @@ const AllOrders = () => {
 
     orders &&
         orders.forEach((item) => {
+            const orderDate = new Date(item.createdAt);
+            const formattedDate = orderDate.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+            
             row.push({
                 id: item._id,
                 itemsQty: item.cart.length,
                 total: formatIndianCurrency(item.totalPrice),
                 status: item.status,
-                createdAt: item.createdAt.slice(0, 10),
+                createdAt: formattedDate,
             });
         });
 

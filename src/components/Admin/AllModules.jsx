@@ -19,6 +19,7 @@ const AllModules = () => {
     description: "",
     image: null
   });
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     fetchModules();
@@ -93,6 +94,29 @@ const AllModules = () => {
       setLoading(false);
       toast.error(error.response?.data?.error || "Error deleting module");
     }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleEdit = (module) => {
+    setSelectedModule(module);
+    setFormData({
+      name: module.name,
+      description: module.description,
+      image: null
+    });
+    setImagePreview(module.image);
+    setOpen(true);
   };
 
   const columns = [
@@ -186,14 +210,7 @@ const AllModules = () => {
         <div className="flex items-center justify-start gap-2 w-full">
           <button 
             className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
-            onClick={() => {
-              setSelectedModule(params.row);
-              setFormData({
-                name: params.row.name,
-                description: params.row.description,
-              });
-              setOpen(true);
-            }}
+            onClick={() => handleEdit(params.row)}
             title="Edit Module"
           >
             <AiOutlineEdit size={18} className="group-hover:scale-110 transition-transform duration-200" />
@@ -376,15 +393,45 @@ const AllModules = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Image
                 </label>
-                <input
-                  type="file"
-                  onChange={(e) =>
-                    setFormData({ ...formData, image: e.target.files[0] })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
-                  accept="image/*"
-                  required={!selectedModule}
-                />
+                <div className="flex flex-col items-center justify-center w-full">
+                  <div className="w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                    {imagePreview ? (
+                      <div className="relative w-full h-full">
+                        <img
+                          src={imagePreview}
+                          alt="Module preview"
+                          className="w-full h-full object-contain"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImagePreview(null);
+                            setFormData({ ...formData, image: null });
+                          }}
+                          className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
+                        >
+                          <AiOutlineDelete size={20} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <AiOutlinePlus size={30} className="text-gray-400" />
+                          <p className="mb-2 text-sm text-gray-500">
+                            <span className="font-semibold">Click to upload</span> or drag and drop
+                          </p>
+                          <p className="text-xs text-gray-500">PNG, JPG or JPEG (MAX. 2MB)</p>
+                        </div>
+                        <input
+                          type="file"
+                          className="hidden"
+                          onChange={handleImageChange}
+                          accept="image/*"
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="flex justify-end gap-3">
                 <button

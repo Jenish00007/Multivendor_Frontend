@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "../../styles/styles";
-import { AiOutlineArrowRight, AiOutlineMoneyCollect, AiOutlineShoppingCart, AiOutlineLineChart, AiOutlineEye, AiOutlineClose } from "react-icons/ai";
-import { MdOutlineStorefront, MdOutlineTrendingUp, MdOutlinePeopleAlt, MdOutlineWavingHand } from "react-icons/md";
+import { AiOutlineArrowRight, AiOutlineMoneyCollect, AiOutlineShoppingCart, AiOutlineLineChart, AiOutlineEye, AiOutlineClose, AiOutlineMail, AiOutlinePhone, AiOutlineEnvironment } from "react-icons/ai";
+import { MdOutlineStorefront, MdOutlineTrendingUp, MdOutlinePeopleAlt } from "react-icons/md";
 import { BsGraphUpArrow, BsCurrencyRupee, BsFilter } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { DataGrid } from "@material-ui/data-grid";
@@ -12,6 +12,7 @@ import Loader from "../Layout/Loader";
 import { getAllSellers } from "../../redux/actions/sellers";
 import { FiSearch } from "react-icons/fi";
 import AdminSideBar from "./Layout/AdminSideBar";
+import OrderPreviewModal from "./OrderPreviewModal";
 
 const AdminDashboardMain = () => {
   const dispatch = useDispatch();
@@ -79,6 +80,25 @@ const AdminDashboardMain = () => {
       ),
     },
     {
+      field: "customerName",
+      headerName: "Customer Name",
+      minWidth: 180,
+      flex: 0.8,
+      headerClassName: 'custom-header',
+      cellClassName: 'custom-cell',
+      renderCell: (params) => (
+        <div className="flex items-center gap-4 w-full group">
+          <div className="p-3 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl flex-shrink-0 group-hover:from-indigo-100 group-hover:to-indigo-200 transition-all duration-300 shadow-sm">
+            <MdOutlinePeopleAlt className="text-indigo-600" size={20} />
+          </div>
+          <div className="flex flex-col justify-center min-w-[120px]">
+            <span className="font-semibold text-gray-800 truncate leading-tight group-hover:text-indigo-600 transition-colors duration-200">{params.value}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-1">Customer</span>
+          </div>
+        </div>
+      ),
+    },
+    {
       field: "status",
       headerName: "Status",
       minWidth: 160,
@@ -132,26 +152,6 @@ const AdminDashboardMain = () => {
       },
     },
     {
-      field: "itemsQty",
-      headerName: "Items",
-      type: "number",
-      minWidth: 160,
-      flex: 0.8,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
-      renderCell: (params) => (
-        <div className="flex items-center gap-4 w-full group">
-          <div className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl flex-shrink-0 group-hover:from-purple-100 group-hover:to-purple-200 transition-all duration-300 shadow-sm">
-            <AiOutlineShoppingCart className="text-purple-600" size={20} />
-          </div>
-          <div className="flex flex-col justify-center min-w-[80px]">
-            <span className="font-semibold text-gray-800 leading-tight group-hover:text-purple-600 transition-colors duration-200">{params.value}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-1">Total Items</span>
-          </div>
-        </div>
-      ),
-    },
-    {
       field: "total",
       headerName: "Total Amount",
       type: "number",
@@ -198,10 +198,14 @@ const AdminDashboardMain = () => {
     adminOrders.forEach((item) => {
       row.push({
         id: item._id,
-        itemsQty: item?.cart?.reduce((acc, item) => acc + item.qty, 0),
+        customerName: item?.user?.name || "N/A",
         total: formatIndianCurrency(item?.totalPrice),
         status: item?.status,
-        createdAt: item?.createdAt.slice(0, 10),
+        createdAt: new Date(item?.createdAt).toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        }),
       });
     });
 
@@ -454,70 +458,74 @@ const AdminDashboardMain = () => {
                   <thead>
                     <tr className="bg-gradient-to-r from-gray-50 to-gray-100">
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Order ID</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Items</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Total</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Customer Name</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Status</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Total</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Date</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {row.slice(0, 5).map((order) => (
-                      <tr key={order.id} className="hover:bg-gray-50/50 transition-colors duration-200">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-gradient-to-br from-gray-100 to-blue-100 rounded-xl flex-shrink-0 shadow-sm">
-                              <AiOutlineShoppingCart className="text-gray-600" size={20} />
+                    {row.slice(0, 5).map((orderRow) => {
+                      // Find the full order object from adminOrders
+                      const fullOrder = adminOrders.find(o => o._id === orderRow.id);
+                      return (
+                        <tr key={orderRow.id} className="hover:bg-gray-50/50 transition-colors duration-200">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2.5 bg-gradient-to-br from-gray-100 to-blue-100 rounded-xl flex-shrink-0 shadow-sm">
+                                <AiOutlineShoppingCart className="text-gray-600" size={20} />
+                              </div>
+                              <span className="font-medium text-gray-800">#{orderRow.id.slice(-6)}</span>
                             </div>
-                            <span className="font-medium text-gray-800">#{order.id.slice(-6)}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-gradient-to-br from-gray-100 to-blue-100 rounded-xl flex-shrink-0 shadow-sm">
-                              <AiOutlineShoppingCart className="text-gray-600" size={20} />
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2.5 bg-gradient-to-br from-gray-100 to-indigo-100 rounded-xl flex-shrink-0 shadow-sm">
+                                <MdOutlinePeopleAlt className="text-indigo-600" size={20} />
+                              </div>
+                              <span className="font-medium text-gray-800">{orderRow.customerName}</span>
                             </div>
-                            <span className="font-medium text-gray-800">{order.itemsQty} items</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-gradient-to-br from-gray-100 to-blue-100 rounded-xl flex-shrink-0 shadow-sm">
-                              <BsCurrencyRupee className="text-gray-600" size={20} />
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`px-4 py-2 rounded-full text-sm font-medium ${
+                              orderRow.status === "Delivered" 
+                                ? "bg-green-100 text-green-800" 
+                                : orderRow.status === "Processing" 
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}>
+                              {orderRow.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2.5 bg-gradient-to-br from-gray-100 to-blue-100 rounded-xl flex-shrink-0 shadow-sm">
+                                <BsCurrencyRupee className="text-gray-600" size={20} />
+                              </div>
+                              <span className="font-medium text-gray-800">{orderRow.total}</span>
                             </div>
-                            <span className="font-medium text-gray-800">{order.total}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                            order.status === "Delivered" 
-                              ? "bg-green-100 text-green-800" 
-                              : order.status === "Processing" 
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}>
-                            {order.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-gradient-to-br from-gray-100 to-blue-100 rounded-xl flex-shrink-0 shadow-sm">
-                              <MdOutlineTrendingUp className="text-gray-600" size={20} />
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2.5 bg-gradient-to-br from-gray-100 to-blue-100 rounded-xl flex-shrink-0 shadow-sm">
+                                <MdOutlineTrendingUp className="text-gray-600" size={20} />
+                              </div>
+                              <span className="font-medium text-gray-800">{orderRow.createdAt}</span>
                             </div>
-                            <span className="font-medium text-gray-800">{order.createdAt}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <button 
-                            onClick={() => handlePreview(order)}
-                            className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
-                            title="View Order Details"
-                          >
-                            <AiOutlineEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="px-6 py-4">
+                            <button 
+                              onClick={() => handlePreview(fullOrder)}
+                              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+                              title="View Order Details"
+                            >
+                              <AiOutlineEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -527,61 +535,11 @@ const AdminDashboardMain = () => {
       )}
 
       {/* Order Preview Modal */}
-      {isModalOpen && selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold text-gray-800">Order Details</h2>
-              <button
-                onClick={closeModal}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <AiOutlineClose size={24} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Order Information */}
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">Order #{selectedOrder.id.slice(-6)}</h3>
-                  <p className="text-sm text-gray-500">Status: {selectedOrder.status}</p>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Items:</span>
-                    <span className="font-medium">{selectedOrder.itemsQty} items</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total Amount:</span>
-                    <span className="font-medium">{selectedOrder.total}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Order Date:</span>
-                    <span className="font-medium">{selectedOrder.createdAt}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Additional Order Details */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Additional Information</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Payment Status:</span>
-                    <span className="font-medium">Paid</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Delivery Status:</span>
-                    <span className="font-medium">{selectedOrder.status}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <OrderPreviewModal 
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        order={selectedOrder}
+      />
     </>
   );
 };

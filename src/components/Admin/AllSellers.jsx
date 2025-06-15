@@ -9,19 +9,21 @@ import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
 import { getAllSellers } from "../../redux/actions/sellers";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
 import { BsFilter } from "react-icons/bs";
 import AddVendor from "./AddVendor";
 
 const AllSellers = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { sellers = [], isLoading = true } = useSelector((state) => state.seller || {});
   const [open, setOpen] = useState(false);
   const [openAddVendor, setOpenAddVendor] = useState(false);
   const [userId, setUserId] = useState("");
   const [rows, setRows] = useState([]);
   const [stats, setStats] = useState({});
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     dispatch(getAllSellers());
@@ -60,12 +62,20 @@ const AllSellers = () => {
 
   const handleDelete = async (id) => {
     try {
+      setIsDeleting(true);
       const res = await axios.delete(`${server}/shop/delete-seller/${id}`, { withCredentials: true });
       toast.success(res.data.message);
       dispatch(getAllSellers());
+      setOpen(false);
     } catch (error) {
       toast.error(error.response?.data?.message || "Error deleting seller");
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handlePreview = (id) => {
+    navigate(`/shop/preview/${id}`);
   };
 
   const columns = [
@@ -146,23 +156,6 @@ const AllSellers = () => {
       ),
     },
     {
-      field: "status",
-      headerName: "Status",
-      minWidth: 130,
-      flex: 0.8,
-      renderCell: (params) => (
-        <div className="flex items-center justify-start w-full">
-          <div className={`px-3 py-1.5 rounded-lg font-semibold text-sm shadow-sm ${
-            params.row.status === "active" 
-              ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border border-green-200' 
-              : 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700 border border-red-200'
-          }`}>
-            {params.row.status || "inactive"}
-          </div>
-        </div>
-      ),
-    },
-    {
       field: "actions",
       headerName: "Actions",
       minWidth: 150,
@@ -170,14 +163,13 @@ const AllSellers = () => {
       renderCell: (params) => {
         return (
           <div className="flex items-center justify-start gap-2 w-full">
-            <Link to={`/shop/preview/${params.row.id}`}>
-              <button 
-                className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
-                title="Preview Shop"
-              >
-                <AiOutlineEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
-              </button>
-            </Link>
+            <button 
+              onClick={() => handlePreview(params.row.id)}
+              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+              title="Preview Shop"
+            >
+              <AiOutlineEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
+            </button>
             <button
               className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
               onClick={() => {
@@ -207,6 +199,42 @@ const AllSellers = () => {
 
   return (
     <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
+      {/* Delete Confirmation Modal */}
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 transform transition-all">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Delete Seller</h3>
+              <button
+                onClick={() => setOpen(false)}
+                className="text-gray-400 hover:text-gray-500 transition-colors"
+              >
+                <RxCross1 size={24} />
+              </button>
+            </div>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this seller? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setOpen(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(userId)}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
         <div className="relative">

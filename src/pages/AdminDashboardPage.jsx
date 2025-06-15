@@ -12,7 +12,7 @@ const AdminDashboardPage = () => {
       <div className="w-full flex">
         <div className="flex items-start justify-between w-full">
           <div className={`${openSidebar ? 'w-[250px]' : 'w-[80px]'} 800px:w-[330px]`}>
-            <AdminSideBar active={1} openSidebar={openSidebar} />
+            <AdminSideBar openSidebar={openSidebar} />
           </div>
           <AdminDashboardMain />
         </div>

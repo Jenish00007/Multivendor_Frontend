@@ -6,6 +6,7 @@ import { AiOutlineShoppingCart, AiOutlineDollar, AiOutlineShop, AiOutlineUser, A
 import { useDispatch, useSelector } from "react-redux";
 import { getAllOrdersOfAdmin } from "../../redux/actions/order";
 import Loader from "../Layout/Loader";
+import OrderPreviewModal from "./OrderPreviewModal";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -173,7 +174,11 @@ const Dashboard = () => {
                         {formatIndianCurrency(order.totalPrice)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(order.createdAt).toLocaleDateString()}
+                        {new Date(order.createdAt).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <button
@@ -193,90 +198,11 @@ const Dashboard = () => {
       </div>
 
       {/* Order Preview Modal */}
-      {isModalOpen && selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold text-gray-800">Order Details</h2>
-              <button
-                onClick={closeModal}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <AiOutlineClose size={24} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Order Information */}
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">Order #{selectedOrder._id.slice(-6)}</h3>
-                  <p className="text-sm text-gray-500">Status: {selectedOrder.status}</p>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Customer:</span>
-                    <span className="font-medium">{selectedOrder.user?.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Email:</span>
-                    <span className="font-medium">{selectedOrder.user?.email}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Phone:</span>
-                    <span className="font-medium">{selectedOrder.user?.phoneNumber}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Order Date:</span>
-                    <span className="font-medium">{new Date(selectedOrder.createdAt).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total Amount:</span>
-                    <span className="font-medium text-green-600">{formatIndianCurrency(selectedOrder.totalPrice)}</span>
-                  </div>
-                </div>
-
-                {selectedOrder.shippingAddress && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-900 mb-2">Shipping Address</h4>
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600">{selectedOrder.shippingAddress.address1}</p>
-                      {selectedOrder.shippingAddress.address2 && (
-                        <p className="text-sm text-gray-600">{selectedOrder.shippingAddress.address2}</p>
-                      )}
-                      <p className="text-sm text-gray-600">
-                        {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.country} {selectedOrder.shippingAddress.zipCode}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Order Items */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium text-gray-900">Order Items</h4>
-                <div className="space-y-3">
-                  {selectedOrder.cart?.map((item, index) => (
-                    <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                      <img
-                        src={item.images[0]?.url}
-                        alt={item.name}
-                        className="w-16 h-16 object-cover rounded-lg"
-                      />
-                      <div className="flex-1">
-                        <h5 className="text-sm font-medium text-gray-900">{item.name}</h5>
-                        <p className="text-sm text-gray-500">Quantity: {item.qty}</p>
-                        <p className="text-sm text-gray-600">{formatIndianCurrency(item.discountPrice)}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <OrderPreviewModal 
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        order={selectedOrder}
+      />
     </div>
   );
 };

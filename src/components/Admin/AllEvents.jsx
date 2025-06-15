@@ -5,17 +5,56 @@ import { AiOutlineEye, AiOutlineCalendar, AiOutlineDollar, AiOutlineStock, AiOut
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllEventsAdmin } from "../../redux/actions/event";
+import { getAllCategories } from "../../redux/actions/category";
 import Loader from "../Layout/Loader";
 import { toast } from "react-toastify";
+
+const styles = `
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes scaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .animate-scaleIn {
+    animation: scaleIn 0.3s ease-out;
+  }
+`;
+
+const styleSheet = document.createElement("style");
+styleSheet.innerText = styles;
+document.head.appendChild(styleSheet);
 
 const AllEvents = () => {
   const dispatch = useDispatch();
   const { allEvents, isLoading } = useSelector((state) => state.events);
+  const { categories } = useSelector((state) => state.category);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Add date formatting function
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+    return date.toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   useEffect(() => {
     dispatch(getAllEventsAdmin());
+    dispatch(getAllCategories());
   }, [dispatch]);
 
   const handlePreview = (event) => {
@@ -66,10 +105,11 @@ const AllEvents = () => {
         <div className="flex items-center gap-3 w-full">
           <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg ring-2 ring-white">
             <img
-              src={params.row.images?.[0]?.url || "https://via.placeholder.com/50"}
+              src={params?.row?.images && params.row.images[0] ? (params.row.images[0].url || params.row.images[0]) : "https://via.placeholder.com/50"}
               alt={params.value}
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
               onError={(e) => {
+                e.target.onerror = null;
                 e.target.src = "https://via.placeholder.com/50";
               }}
             />
@@ -78,6 +118,19 @@ const AllEvents = () => {
           <div className="flex flex-col justify-center min-w-[120px]">
             <span className="font-semibold text-gray-800 hover:text-indigo-600 transition-colors duration-200 cursor-pointer truncate leading-tight">{params.value}</span>
             <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Event Name</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      field: "category",
+      headerName: "Category",
+      minWidth: 150,
+      flex: 1,
+      renderCell: (params) => (
+        <div className="flex items-center">
+          <div className="bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 px-3 py-1.5 rounded-lg font-semibold text-sm shadow-sm border border-purple-200">
+            {params.row.category?.name || 'Uncategorized'}
           </div>
         </div>
       ),
@@ -136,14 +189,13 @@ const AllEvents = () => {
       renderCell: (params) => {
         return (
           <div className="flex items-center justify-start gap-2 w-full">
-            <Link to={`/event/${params.row.id}`}>
-              <button 
-                className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
-                title="Preview Event"
-              >
-                <AiOutlineEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
-              </button>
-            </Link>
+            <button 
+              onClick={() => handlePreview(params.row)}
+              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+              title="Preview Event"
+            >
+              <AiOutlineEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
+            </button>
           </div>
         );
       },
@@ -160,7 +212,10 @@ const AllEvents = () => {
         price: formatIndianCurrency(item.discountPrice),
         stock: item.stock,
         sold: item.sold_out,
-        images: item.images,
+        images: item.images || [],
+        category: item.category,
+        startDate: item.startDate,
+        endDate: item.endDate,
         ...item
       });
     });
@@ -387,66 +442,128 @@ const AllEvents = () => {
 
       {/* Event Preview Modal */}
       {isModalOpen && selectedEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold text-gray-800">Event Details</h2>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
+          <div className="bg-white rounded-2xl p-8 max-w-5xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 animate-scaleIn">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl shadow-lg">
+                  <AiOutlineCalendar className="text-white" size={24} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">{selectedEvent.name}</h2>
+                  <p className="text-sm text-gray-500 mt-1">Event ID: {selectedEvent._id}</p>
+                </div>
+              </div>
               <button
                 onClick={closeModal}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-full transition-all duration-300 hover:rotate-90"
               >
-                <AiOutlineClose size={24} />
+                <AiOutlineClose size={24} className="text-gray-600" />
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Event Information */}
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">{selectedEvent.name}</h3>
-                  <p className="text-sm text-gray-500">Event ID: {selectedEvent._id}</p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Event Image Section */}
+              <div className="space-y-6">
+                <div className="relative group">
+                  <div className="aspect-w-16 aspect-h-9 rounded-xl overflow-hidden shadow-xl">
+                    <img
+                      src={selectedEvent.images && Array.isArray(selectedEvent.images) && selectedEvent.images.length > 0 ? 
+                        (selectedEvent.images[0].url || selectedEvent.images[0]) : 
+                        "https://via.placeholder.com/400x300?text=No+Image"}
+                      alt={selectedEvent.name}
+                      className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+                      onError={(e) => {
+                        e.target.src = "https://via.placeholder.com/400x300?text=No+Image";
+                      }}
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Price:</span>
-                    <span className="font-medium text-green-600">{formatIndianCurrency(selectedEvent.discountPrice)}</span>
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <AiOutlineDollar className="text-green-600" size={20} />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Price</p>
+                        <p className="font-semibold text-green-700">{selectedEvent.price}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Stock:</span>
-                    <span className="font-medium">{selectedEvent.stock}</span>
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <AiOutlineStock className="text-blue-600" size={20} />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Stock</p>
+                        <p className="font-semibold text-blue-700">{selectedEvent.stock} units</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Sold Out:</span>
-                    <span className="font-medium">{selectedEvent.sold_out}</span>
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-100">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <AiOutlineCalendar className="text-purple-600" size={20} />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Start Date</p>
+                        <p className="font-semibold text-purple-700">{selectedEvent.startDate ? formatDate(selectedEvent.startDate) : 'Not set'}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Start Date:</span>
-                    <span className="font-medium">{new Date(selectedEvent.startDate).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">End Date:</span>
-                    <span className="font-medium">{new Date(selectedEvent.endDate).toLocaleDateString()}</span>
+                  <div className="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-xl border border-orange-100">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-orange-100 rounded-lg">
+                        <AiOutlineCalendar className="text-orange-600" size={20} />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">End Date</p>
+                        <p className="font-semibold text-orange-700">{selectedEvent.endDate ? formatDate(selectedEvent.endDate) : 'Not set'}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                {selectedEvent.description && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-900 mb-2">Description</h4>
-                    <p className="text-sm text-gray-600">{selectedEvent.description}</p>
-                  </div>
-                )}
               </div>
 
-              {/* Event Image */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium text-gray-900">Event Image</h4>
-                <div className="aspect-w-16 aspect-h-9">
-                  <img
-                    src={selectedEvent.images[0]?.url}
-                    alt={selectedEvent.name}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
+              {/* Event Details Section */}
+              <div className="space-y-6">
+                {/* Description */}
+                {selectedEvent.description && (
+                  <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Description</h3>
+                    <p className="text-gray-600 leading-relaxed">{selectedEvent.description}</p>
+                  </div>
+                )}
+
+                {/* Additional Details */}
+                <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Event Details</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <span className="text-gray-600">Start Date</span>
+                      <span className="font-medium text-gray-800">{selectedEvent.startDate ? formatDate(selectedEvent.startDate) : 'Not set'}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <span className="text-gray-600">End Date</span>
+                      <span className="font-medium text-gray-800">{selectedEvent.endDate ? formatDate(selectedEvent.endDate) : 'Not set'}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <span className="text-gray-600">Status</span>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        selectedEvent.stock > 0 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                        {selectedEvent.stock > 0 ? 'Active' : 'Out of Stock'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

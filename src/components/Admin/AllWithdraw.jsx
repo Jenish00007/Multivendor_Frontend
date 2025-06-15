@@ -24,6 +24,7 @@ const AllWithdraw = () => {
         });
         if (res.data && res.data.withdraws) {
           setData(res.data.withdraws);
+          console.log(res.data.withdraws);
         }
       } catch (error) {
         console.error("Error fetching withdrawals:", error);
@@ -42,6 +43,32 @@ const AllWithdraw = () => {
       maximumFractionDigits: 2,
     });
     return formatter.format(amount);
+  };
+
+  // Function to format time only
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  // Function to format date and time
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    const formattedDate = date.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+    const formattedTime = date.toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+    return `${formattedDate} ${formattedTime}`;
   };
 
   const handlePreview = (withdraw) => {
@@ -73,18 +100,17 @@ const AllWithdraw = () => {
       ),
     },
     {
-      field: "name",
+      field: "shopName",
       headerName: "Shop Name",
-      minWidth: 200,
-      flex: 1.5,
+      minWidth: 150,
+      flex: 0.7,
       renderCell: (params) => (
-        <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex-shrink-0 shadow-sm">
-            <BsShop className="text-blue-600" size={20} />
-          </div>
-          <div className="flex flex-col justify-center min-w-[120px]">
-            <span className="font-semibold text-gray-800 hover:text-indigo-600 transition-colors duration-200 cursor-pointer truncate leading-tight">{params.value}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Shop Name</span>
+        <div className="flex items-center">
+          <div className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-3 py-1.5 rounded-lg font-semibold text-sm shadow-sm border border-purple-200">
+            <div className="flex items-center">
+              <BsShop className="mr-1" size={14} />
+              <span>{params.row.seller?.name || "N/A"}</span>
+            </div>
           </div>
         </div>
       ),
@@ -93,13 +119,13 @@ const AllWithdraw = () => {
       field: "amount",
       headerName: "Amount",
       minWidth: 130,
-      flex: 1,
+      flex: 0.7,
       renderCell: (params) => (
         <div className="flex items-center">
-          <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1.5 rounded-lg shadow-sm">
+          <div className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 px-3 py-1.5 rounded-lg font-semibold text-sm shadow-sm border border-green-200">
             <div className="flex items-center">
               <BsCurrencyDollar className="mr-1" size={14} />
-              <span className="font-bold text-sm">{params.value}</span>
+              <span>{formatIndianCurrency(params.value)}</span>
             </div>
           </div>
         </div>
@@ -124,7 +150,7 @@ const AllWithdraw = () => {
     },
     {
       field: "createdAt",
-      headerName: "Request Date",
+      headerName: "Request Time",
       minWidth: 130,
       flex: 1,
       renderCell: (params) => (
@@ -132,7 +158,7 @@ const AllWithdraw = () => {
           <div className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 px-3 py-1.5 rounded-lg font-semibold text-sm shadow-sm border border-blue-200">
             <div className="flex items-center">
               <BsClock className="mr-1" size={14} />
-              <span>{params.value}</span>
+              <span>{formatTime(params.value)}</span>
             </div>
           </div>
         </div>
@@ -172,25 +198,29 @@ const AllWithdraw = () => {
   ];
 
   const handleSubmit = async () => {
-    if (!withdrawData) return;
-
     try {
       const res = await axios.put(
         `${server}/withdraw/update-withdraw-request/${withdrawData.id}`,
         {
-          sellerId: withdrawData.shopId,
+          sellerId: withdrawData.seller._id,
         },
         { withCredentials: true }
       );
       
-      if (res.data && res.data.withdraws) {
-        setData(res.data.withdraws);
+      if (res.data && res.data.success) {
+        // Update the local data state
+        const updatedData = data.map((item) => 
+          item._id === withdrawData.id 
+            ? { ...item, status: "succeed", updatedAt: new Date() }
+            : item
+        );
+        setData(updatedData);
         toast.success("Withdraw request updated successfully!");
         setOpen(false);
       }
     } catch (error) {
       console.error("Error updating withdrawal:", error);
-      toast.error("Failed to update withdrawal request");
+      toast.error(error.response?.data?.message || "Failed to update withdrawal request");
     }
   };
 
@@ -202,11 +232,19 @@ const AllWithdraw = () => {
         row.push({
           id: item._id || '',
           shopId: item.seller._id || '',
-          name: item.seller.name || 'N/A',
+          name: item.seller.shopName || item.seller.name || 'N/A',
           amount: formatIndianCurrency(item.amount || 0),
           status: item.status || 'Processing',
-          createdAt: item.createdAt ? item.createdAt.slice(0, 10) : 'N/A',
-          ...item // Include all withdraw data for the modal
+          createdAt: item.createdAt ? formatTime(item.createdAt) : 'N/A',
+          updatedAt: item.updatedAt ? formatTime(item.updatedAt) : 'N/A',
+          bankName: item.bankName || 'N/A',
+          bankAccountNumber: item.bankAccountNumber || 'N/A',
+          bankIfscCode: item.bankIfscCode || 'N/A',
+          transactionId: item.transactionId || 'N/A',
+          paymentMethod: item.paymentMethod || 'Bank Transfer',
+          processingFee: item.processingFee || 0,
+          seller: item.seller,
+          ...item
         });
       }
     });
@@ -449,7 +487,38 @@ const AllWithdraw = () => {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Request Date:</span>
-                      <span className="font-medium bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-lg">{selectedWithdraw.createdAt}</span>
+                      <span className="font-medium bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-lg">{formatDateTime(selectedWithdraw.createdAt)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Last Updated:</span>
+                      <span className="font-medium bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-lg">
+                        {formatDateTime(selectedWithdraw.updatedAt)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bank Information */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 shadow-lg">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Bank Information</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Bank Name:</span>
+                      <span className="font-medium bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-lg">
+                        {selectedWithdraw.bankName}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Account Number:</span>
+                      <span className="font-medium bg-gradient-to-r from-indigo-100 to-purple-100 px-3 py-1 rounded-lg">
+                        {selectedWithdraw.bankAccountNumber}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">IFSC Code:</span>
+                      <span className="font-medium bg-gradient-to-r from-green-100 to-emerald-100 px-3 py-1 rounded-lg">
+                        {selectedWithdraw.bankIfscCode}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -462,16 +531,69 @@ const AllWithdraw = () => {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Shop Name:</span>
-                      <span className="font-medium bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-lg">{selectedWithdraw.name}</span>
+                      <span className="font-medium bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-lg">{selectedWithdraw.seller?.name || 'N/A'}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Shop ID:</span>
                       <span className="font-medium bg-gradient-to-r from-indigo-100 to-purple-100 px-3 py-1 rounded-lg">#{selectedWithdraw.shopId.slice(-6)}</span>
                     </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Email:</span>
+                      <span className="font-medium bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-lg">
+                        {selectedWithdraw.seller?.email || 'N/A'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Phone:</span>
+                      <span className="font-medium bg-gradient-to-r from-green-100 to-emerald-100 px-3 py-1 rounded-lg">
+                        {selectedWithdraw.seller?.phoneNumber || 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Transaction Details */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 shadow-lg">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Transaction Details</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Transaction ID:</span>
+                      <span className="font-medium bg-gradient-to-r from-indigo-100 to-purple-100 px-3 py-1 rounded-lg">
+                        {selectedWithdraw.transactionId}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Payment Method:</span>
+                      <span className="font-medium bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-lg">
+                        {selectedWithdraw.paymentMethod}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Processing Fee:</span>
+                      <span className="font-medium bg-gradient-to-r from-green-100 to-emerald-100 px-3 py-1 rounded-lg">
+                        {formatIndianCurrency(selectedWithdraw.processingFee)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Action Buttons */}
+            {selectedWithdraw.status === "Processing" && (
+              <div className="mt-6 flex justify-end gap-4">
+                <button
+                  onClick={() => {
+                    setWithdrawData(selectedWithdraw);
+                    setOpen(true);
+                    setIsPreviewOpen(false);
+                  }}
+                  className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  Approve Withdraw
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

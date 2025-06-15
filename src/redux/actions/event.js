@@ -1,5 +1,6 @@
 import axios from "axios";
 import { server } from "../../server";
+import { toast } from "react-toastify";
 
 // create event
 export const createevent = (newForm) => async (dispatch) => {
@@ -19,11 +20,47 @@ export const createevent = (newForm) => async (dispatch) => {
       type: "eventCreateSuccess",
       payload: data.event,
     });
+    toast.success("Event created successfully!");
   } catch (error) {
     dispatch({
       type: "eventCreateFail",
-      payload: error.response.data.message,
+      payload: error.response?.data?.message || "Failed to create event",
     });
+    toast.error(error.response?.data?.message || "Failed to create event");
+  }
+};
+
+// create event by admin
+export const createAdminEvent = (newForm) => async (dispatch) => {
+  try {
+    dispatch({
+      type: "eventCreateRequest",
+    });
+
+    const config = { 
+      headers: { 
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      } 
+    };
+
+    const { data } = await axios.post(
+      `${server}/event/admin-create-event`,
+      newForm,
+      config
+    );
+
+    dispatch({
+      type: "eventCreateSuccess",
+      payload: data.event,
+    });
+    toast.success("Event created successfully!");
+  } catch (error) {
+    dispatch({
+      type: "eventCreateFail",
+      payload: error.response?.data?.message || "Failed to create event",
+    });
+    toast.error(error.response?.data?.message || "Failed to create event");
   }
 };
 

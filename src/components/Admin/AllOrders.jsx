@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { server } from "../../server";
-import { AiOutlineShoppingCart, AiOutlineArrowRight, AiOutlineClose } from "react-icons/ai";
+import { AiOutlineShoppingCart, AiOutlineArrowRight, AiOutlineClose, AiOutlineEye } from "react-icons/ai";
 import { MdOutlineTrendingUp } from "react-icons/md";
 import { BsCurrencyRupee, BsFilter } from "react-icons/bs";
 import { FiSearch } from "react-icons/fi";
@@ -31,22 +31,46 @@ const AllOrders = () => {
     setSelectedOrder(null);
   };
 
+  // Function to format time only
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  // Function to format date and time
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    const formattedDate = date.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+    const formattedTime = date.toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+    return `${formattedDate} ${formattedTime}`;
+  };
+
   const columns = [
     {
       field: "id",
       headerName: "Order ID",
       minWidth: 180,
-      flex: 0.8,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
+      flex: 1,
       renderCell: (params) => (
         <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-blue-50 rounded-lg flex-shrink-0">
-            <AiOutlineShoppingCart className="text-blue-600" size={20} />
+          <div className="p-2.5 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex-shrink-0 shadow-sm">
+            <AiOutlineShoppingCart className="text-indigo-600" size={20} />
           </div>
           <div className="flex flex-col justify-center min-w-[100px]">
-            <span className="font-medium text-gray-700 truncate leading-tight">#{params.value.slice(-6)}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Order ID</span>
+            <span className="font-semibold text-gray-800 truncate leading-tight">#{params.value.slice(-6)}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Order ID</span>
           </div>
         </div>
       ),
@@ -55,45 +79,43 @@ const AllOrders = () => {
       field: "status",
       headerName: "Status",
       minWidth: 160,
-      flex: 0.8,
-      headerClassName: 'custom-header',
-      cellClassName: (params) => {
-        const status = params.getValue(params.id, "status");
-        return `custom-cell status-${status.toLowerCase()}`;
-      },
+      flex: 1,
       renderCell: (params) => {
         const status = params.getValue(params.id, "status");
         const statusConfig = {
           Delivered: {
-            bg: "bg-green-100",
-            text: "text-green-800",
+            bg: "from-green-100 to-emerald-100",
+            text: "text-green-700",
+            border: "border-green-200",
             icon: "✓",
             label: "Delivered"
           },
           Processing: {
-            bg: "bg-yellow-100",
-            text: "text-yellow-800",
+            bg: "from-yellow-100 to-amber-100",
+            text: "text-yellow-700",
+            border: "border-yellow-200",
             icon: "⟳",
             label: "Processing"
           },
           Pending: {
-            bg: "bg-blue-100",
-            text: "text-blue-800",
+            bg: "from-blue-100 to-indigo-100",
+            text: "text-blue-700",
+            border: "border-blue-200",
             icon: "⏳",
             label: "Pending"
           },
           Cancelled: {
-            bg: "bg-red-100",
-            text: "text-red-800",
+            bg: "from-red-100 to-pink-100",
+            text: "text-red-700",
+            border: "border-red-200",
             icon: "✕",
             label: "Cancelled"
           }
         };
         const config = statusConfig[status] || statusConfig.Processing;
         return (
-          <div className="flex items-center justify-center w-full">
-            <div className={`px-4 py-2 rounded-lg text-sm font-medium ${config.bg} ${config.text} flex items-center gap-2 min-w-[120px] justify-center`}>
-              <span className="text-lg">{config.icon}</span>
+          <div className="flex items-center justify-start w-full">
+            <div className={`px-3 py-1.5 rounded-lg font-semibold text-sm shadow-sm bg-gradient-to-r ${config.bg} ${config.text} border ${config.border}`}>
               {config.label}
             </div>
           </div>
@@ -105,17 +127,15 @@ const AllOrders = () => {
       headerName: "Items",
       type: "number",
       minWidth: 160,
-      flex: 0.8,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
+      flex: 1,
       renderCell: (params) => (
         <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-purple-50 rounded-lg flex-shrink-0">
+          <div className="p-2.5 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex-shrink-0 shadow-sm">
             <AiOutlineShoppingCart className="text-purple-600" size={20} />
           </div>
           <div className="flex flex-col justify-center min-w-[80px]">
-            <span className="font-medium text-gray-700 leading-tight">{params.value}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Total Items</span>
+            <span className="font-semibold text-gray-800 leading-tight">{params.value} {params.value === 1 ? 'Item' : 'Items'}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Total Items</span>
           </div>
         </div>
       ),
@@ -125,59 +145,55 @@ const AllOrders = () => {
       headerName: "Total Amount",
       type: "number",
       minWidth: 180,
-      flex: 0.8,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
+      flex: 1,
       renderCell: (params) => (
         <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-green-50 rounded-lg flex-shrink-0">
+          <div className="p-2.5 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex-shrink-0 shadow-sm">
             <BsCurrencyRupee className="text-green-600" size={20} />
           </div>
           <div className="flex flex-col justify-center min-w-[120px]">
-            <span className="font-medium text-gray-700 truncate leading-tight">{params.value}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Amount Paid</span>
+            <span className="font-semibold text-gray-800 truncate leading-tight">{params.value}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Amount Paid</span>
           </div>
         </div>
       ),
     },
     {
       field: "createdAt",
-      headerName: "Order Date",
+      headerName: "Order Time",
       type: "number",
       minWidth: 180,
-      flex: 0.8,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
+      flex: 1,
       renderCell: (params) => (
         <div className="flex items-center gap-3 w-full">
-          <div className="p-2.5 bg-gray-50 rounded-lg flex-shrink-0">
+          <div className="p-2.5 bg-gradient-to-br from-gray-100 to-slate-100 rounded-xl flex-shrink-0 shadow-sm">
             <MdOutlineTrendingUp className="text-gray-600" size={20} />
           </div>
           <div className="flex flex-col justify-center min-w-[120px]">
-            <span className="font-medium text-gray-700 truncate leading-tight">{params.value}</span>
-            <span className="text-xs text-gray-500 leading-tight mt-0.5">Order Date</span>
+            <span className="font-semibold text-gray-800 truncate leading-tight">{formatTime(params.value)}</span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Order Time</span>
           </div>
         </div>
       ),
     },
     {
-      field: "Preview",
+      field: "actions",
+      headerName: "Actions",
+      minWidth: 150,
       flex: 0.8,
-      minWidth: 100,
-      headerName: "",
-      type: "number",
-      sortable: false,
-      headerClassName: 'custom-header',
-      cellClassName: 'custom-cell',
-      renderCell: (params) => (
+      renderCell: (params) => {
+        return (
+          <div className="flex items-center justify-start gap-2 w-full">
         <button
           onClick={() => handlePreview(params.row)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300"
+              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+              title="View Order Details"
         >
-          <span>View</span>
-          <AiOutlineArrowRight className="transform group-hover:translate-x-1 transition-transform" />
+              <AiOutlineEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
         </button>
-      ),
+          </div>
+        );
+      },
     },
   ];
 
@@ -190,76 +206,186 @@ const AllOrders = () => {
         status: item.status || 'N/A',
         itemsQty: Array.isArray(item.cart) ? item.cart.length : 0,
         total: item.totalPrice ? `₹${item.totalPrice}` : 'N/A',
-        createdAt: item.createdAt ? new Date(item.createdAt).toISOString().slice(0, 10) : 'N/A',
-        ...item // Include all order data for the modal
+        createdAt: item.createdAt || 'N/A',
+        ...item
       });
     });
 
   return (
-    <div className="w-full p-4 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-      <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-2">
-          <div>
-            <h6 className="text-[32px] font-Poppins text-gray-800 font-bold flex items-center gap-3">
-              <div className="p-2.5 bg-blue-50 rounded-lg">
-                <AiOutlineShoppingCart className="text-blue-600" size={28} />
+    <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
+        <div className="relative">
+          <div className="flex items-center gap-6">
+            <div className="relative">
+              <div className="p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl shadow-2xl">
+                <span className="text-5xl filter drop-shadow-lg">🛍️</span>
               </div>
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-lg"></div>
+            </div>
+            <div>
+              <div className="font-black text-4xl font-Poppins bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 bg-clip-text text-transparent leading-tight">
               All Orders
-            </h6>
-            <p className="text-gray-600 mt-2 ml-1">Manage and monitor all orders</p>
           </div>
-          <div className="w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0">
-            <p className="text-sm text-gray-600">Current Date</p>
-            <p className="text-lg font-semibold text-gray-800">{new Date().toLocaleDateString('en-IN', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}</p>
+              <div className="text-gray-600 text-lg mt-2 font-medium">
+                Manage and monitor all orders
           </div>
-        </div>
+              <div className="text-sm text-gray-500 mt-1">
+                {row?.length || 0} orders in your platform
+              </div>
+            </div>
+          </div>
+          <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
+              </div>
+            </div>
 
-        <div className="w-full min-h-[75vh] bg-white rounded-xl shadow-xl p-4 sm:p-6 lg:p-8 transform transition-all duration-300 hover:shadow-2xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1 sm:flex-none">
-                <input
-                  type="text"
-                  placeholder="Search orders..."
-                  className="w-full sm:w-[300px] pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                />
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              </div>
-              <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-300">
-                <BsFilter size={18} />
-                <span className="text-sm font-medium">Filter</span>
-              </button>
-            </div>
-          </div>
-          {row.length === 0 ? (
-            <div className="w-full h-[400px] flex items-center justify-center">
-              <div className="text-center">
-                <AiOutlineShoppingCart className="mx-auto text-gray-400" size={48} />
-                <p className="mt-4 text-gray-600">No orders found</p>
-              </div>
-            </div>
-          ) : (
-            <div className="w-full overflow-x-auto">
+      {/* Main Content */}
+      <div className="w-full min-h-[70vh] relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-indigo-100/30 to-purple-100/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-pink-100/30 to-blue-100/30 rounded-full blur-3xl"></div>
+
+        <div className="w-full relative z-10">
               <DataGrid
                 rows={row}
                 columns={columns}
-                pageSize={12}
+            pageSize={10}
                 disableSelectionOnClick
                 autoHeight
-                className="!border-none !bg-white !rounded-lg w-full"
+            className="!border-none"
+            getRowHeight={() => 'auto'}
+            rowHeight={90}
                 componentsProps={{
-                  pagination: {
-                    className: "!text-gray-700",
-                  },
-                }}
-              />
-            </div>
-          )}
+              footer: {
+                sx: {
+                  position: 'relative',
+                  overflow: 'visible'
+                }
+              },
+              panel: {
+                sx: {
+                  overflow: 'visible'
+                }
+              }
+            }}
+            sx={{
+              '& .MuiDataGrid-root': {
+                border: 'none !important',
+                background: 'transparent !important',
+                borderRadius: '20px !important',
+                overflow: 'hidden !important'
+              },
+              '& .MuiDataGrid-main': {
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-virtualScroller': {
+                marginTop: '8px !important',
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-virtualScrollerContent': {
+                padding: '0 12px !important',
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-virtualScrollerRenderZone': {
+                transform: 'none !important',
+                position: 'relative !important',
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-footerContainer': {
+                position: 'relative !important',
+                overflow: 'visible !important',
+                marginTop: '20px !important',
+                background: 'transparent !important',
+                borderTop: '1px solid rgba(226, 232, 240, 0.5) !important'
+              },
+              '& .MuiDataGrid-panel': {
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-panelContent': {
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-cell': {
+                display: 'flex !important',
+                alignItems: 'center !important',
+                justifyContent: 'flex-start !important',
+                padding: '20px 24px !important',
+                height: '100% !important',
+                minHeight: '90px !important',
+                borderBottom: '1px solid rgba(226, 232, 240, 0.3) !important',
+                overflow: 'visible !important',
+                background: 'transparent !important',
+                transition: 'all 0.3s ease !important'
+              },
+              '& .MuiDataGrid-cell:hover': {
+                background: 'rgba(255, 255, 255, 0.1) !important',
+                transform: 'translateY(-1px) !important'
+              },
+              '& .MuiDataGrid-columnHeader': {
+                padding: '24px !important',
+                height: 'auto !important',
+                minHeight: '80px !important',
+                alignItems: 'center !important',
+                whiteSpace: 'normal !important',
+                background: 'transparent !important',
+                borderBottom: '2px solid rgba(79, 70, 229, 0.2) !important',
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-columnHeaderTitle': {
+                fontWeight: '800 !important',
+                color: '#1e293b !important',
+                whiteSpace: 'normal !important',
+                lineHeight: '1.3 !important',
+                display: 'flex !important',
+                alignItems: 'center !important',
+                textTransform: 'uppercase !important',
+                fontSize: '0.85rem !important',
+                letterSpacing: '0.1em !important',
+                height: 'auto !important',
+                minHeight: '40px !important',
+                overflow: 'visible !important',
+                textOverflow: 'unset !important'
+              },
+              '& .MuiDataGrid-columnHeaders': {
+                background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%) !important',
+                borderBottom: '2px solid rgba(79, 70, 229, 0.2) !important',
+                overflow: 'visible !important',
+                backdropFilter: 'blur(10px) !important'
+              },
+              '& .MuiDataGrid-row': {
+                minHeight: '90px !important',
+                marginBottom: '4px !important',
+                overflow: 'visible !important',
+                borderRadius: '12px !important',
+                transition: 'all 0.3s ease !important'
+              },
+              '& .MuiDataGrid-row:hover': {
+                background: 'rgba(255, 255, 255, 0.9) !important',
+                transform: 'translateY(-2px) !important',
+                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1) !important'
+              },
+              '& .MuiDataGrid-virtualScrollerContent': {
+                overflow: 'visible !important'
+              },
+              '& .MuiDataGrid-virtualScrollerRenderZone': {
+                overflow: 'visible !important'
+              },
+              '& .MuiTablePagination-root': {
+                color: '#64748b !important',
+                fontWeight: '600 !important'
+              },
+              '& .MuiTablePagination-selectIcon': {
+                color: '#6366f1 !important'
+              },
+              '& .MuiIconButton-root': {
+                color: '#6366f1 !important',
+                transition: 'all 0.3s ease !important'
+              },
+              '& .MuiIconButton-root:hover': {
+                background: 'rgba(99, 102, 241, 0.1) !important',
+                transform: 'scale(1.1) !important'
+              }
+            }}
+          />
         </div>
       </div>
 
@@ -280,37 +406,38 @@ const AllOrders = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Order Information */}
               <div className="space-y-4">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Order Information</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 shadow-lg">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Order Information</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
                       <span className="text-gray-600">Order ID:</span>
-                      <span className="font-medium">#{selectedOrder.id.slice(-6)}</span>
+                      <span className="font-medium bg-gradient-to-r from-indigo-100 to-purple-100 px-3 py-1 rounded-lg">#{selectedOrder.id.slice(-6)}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Total Amount:</span>
+                      <span className="font-medium bg-gradient-to-r from-green-100 to-emerald-100 px-3 py-1 rounded-lg">{selectedOrder.total}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
                       <span className="text-gray-600">Status:</span>
-                      <span className={`font-medium px-3 py-1 rounded-full ${
-                        selectedOrder.status === 'Delivered' ? 'bg-green-100 text-green-800' :
-                        selectedOrder.status === 'Processing' ? 'bg-yellow-100 text-yellow-800' :
-                        selectedOrder.status === 'Pending' ? 'bg-blue-100 text-blue-800' :
-                        'bg-red-100 text-red-800'
+                      <span className={`font-medium px-3 py-1 rounded-lg ${
+                        selectedOrder.status === 'Delivered' 
+                          ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700' 
+                          : selectedOrder.status === 'Processing'
+                          ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700'
+                          : 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700'
                       }`}>
                         {selectedOrder.status}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Order Date:</span>
-                      <span className="font-medium">{new Date(selectedOrder.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Total Amount:</span>
-                      <span className="font-medium">{selectedOrder.total}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Order Date & Time:</span>
+                      <span className="font-medium bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-lg">{formatDateTime(selectedOrder.createdAt)}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Customer Information */}
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">Customer Information</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between">
@@ -331,22 +458,34 @@ const AllOrders = () => {
 
               {/* Order Items */}
               <div className="space-y-4">
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">Order Items</h3>
                   <div className="space-y-4">
                     {selectedOrder.cart?.map((item, index) => (
-                      <div key={index} className="flex items-center gap-4 p-3 bg-white rounded-lg">
-                        <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                      <div key={index} className="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 shadow-md">
                           <img
                             src={item.images[0]}
                             alt={item.name}
                             className="w-full h-full object-cover"
                           />
                         </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-800">{item.name}</h4>
-                          <p className="text-sm text-gray-600">Quantity: {item.qty}</p>
-                          <p className="text-sm text-gray-600">Price: ₹{item.price}</p>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-800 text-lg mb-1 truncate">{item.name}</h4>
+                          <div className="flex flex-wrap gap-4 text-sm">
+                            <div className="flex items-center gap-1">
+                              <span className="text-gray-500">Quantity:</span>
+                              <span className="font-medium text-gray-700">{item.qty}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="text-gray-500">Price:</span>
+                              <span className="font-medium text-gray-700">₹{item.price}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="text-gray-500">Total:</span>
+                              <span className="font-medium text-gray-700">₹{item.price * item.qty}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -354,7 +493,7 @@ const AllOrders = () => {
                 </div>
 
                 {/* Shipping Information */}
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">Shipping Information</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between">

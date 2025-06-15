@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { getAllUsers } from "../../redux/actions/user";
+import { getAllUsers, deleteUser } from "../../redux/actions/user";
 import { DataGrid } from "@material-ui/data-grid";
 import { AiOutlineDelete, AiOutlineUser, AiOutlineMail, AiOutlinePhone, AiOutlineEye } from "react-icons/ai";
 import { Button } from "@material-ui/core";
@@ -17,32 +17,31 @@ import { AiOutlineClose } from "react-icons/ai";
 
 const AllUsers = () => {
   const dispatch = useDispatch();
-  const { users, isLoading } = useSelector((state) => state.user);
+  const { users, isLoading, deleteUserLoading } = useSelector((state) => state.user);
   const [open, setOpen] = useState(false);
   const [userId, setUserId] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   useEffect(() => {
     dispatch(getAllUsers());
   }, [dispatch]);
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
+  const handleDelete = async (user) => {
+    setUserToDelete(user);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (userToDelete) {
       try {
-        const token = localStorage.getItem('token');
-        await axios.delete(`${server}/admin/user/${id}`, {
-          withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-        toast.success("User deleted successfully!");
-        dispatch(getAllUsers());
+        await dispatch(deleteUser(userToDelete.id));
+        setDeleteConfirmOpen(false);
+        setUserToDelete(null);
       } catch (error) {
-        toast.error(error.response?.data?.message || "Failed to delete user");
+        toast.error("Failed to delete user. Please try again.");
       }
     }
   };
@@ -148,7 +147,7 @@ const AllUsers = () => {
             </button>
             <button
               className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
-              onClick={() => handleDelete(params.row.id)}
+              onClick={() => handleDelete(params.row)}
               title="Delete User"
             >
               <AiOutlineDelete size={18} className="group-hover:scale-110 transition-transform duration-200" />
@@ -171,6 +170,40 @@ const AllUsers = () => {
         ...item
       });
     });
+
+  const DeleteConfirmationModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-gray-900">Confirm Deletion</h3>
+          <button
+            onClick={() => setDeleteConfirmOpen(false)}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <AiOutlineClose size={24} />
+          </button>
+        </div>
+        <p className="text-gray-600 mb-6">
+          Are you sure you want to delete user {userToDelete?.name}? This action cannot be undone.
+        </p>
+        <div className="flex justify-end gap-4">
+          <button
+            onClick={() => setDeleteConfirmOpen(false)}
+            className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={confirmDelete}
+            disabled={deleteUserLoading}
+            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium disabled:opacity-50"
+          >
+            {deleteUserLoading ? "Deleting..." : "Delete"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
@@ -451,6 +484,9 @@ const AllUsers = () => {
           </div>
         </div>
       )}
+
+      {/* Add the delete confirmation modal */}
+      {deleteConfirmOpen && <DeleteConfirmationModal />}
     </div>
   );
 };

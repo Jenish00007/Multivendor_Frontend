@@ -49,21 +49,29 @@ const EditProduct = () => {
   useEffect(() => {
     const product = products?.find((item) => item._id === id);
     if (product) {
-      setFormData({
-        name: product.name,
-        description: product.description,
-        category: product.category?._id || product.category,
-        subcategory: product.subcategory?._id || product.subcategory,
-        tags: product.tags,
-        originalPrice: product.originalPrice,
-        discountPrice: product.discountPrice,
-        stock: product.stock,
-        unit: product.unit,
-        maxPurchaseQuantity: product.maxPurchaseQuantity
-      });
-      setImages(product.images);
+      console.log("Found product:", product); // Debug log
+      const updatedFormData = {
+        name: product.name || "",
+        description: product.description || "",
+        category: product.category?._id || product.category || "",
+        subcategory: product.subcategory?._id || product.subcategory || "",
+        tags: product.tags || "",
+        originalPrice: product.originalPrice || "",
+        discountPrice: product.discountPrice || "",
+        stock: product.stock || "",
+        unit: product.unit || "",
+        maxPurchaseQuantity: product.maxPurchaseQuantity || ""
+      };
+      console.log("Setting form data:", updatedFormData); // Debug log
+      setFormData(updatedFormData);
+      setImages(product.images || []);
     }
   }, [products, id]);
+
+  // Add a debug effect to monitor formData changes
+  useEffect(() => {
+    console.log("Current form data:", formData);
+  }, [formData]);
 
   const fetchCategories = async () => {
     try {

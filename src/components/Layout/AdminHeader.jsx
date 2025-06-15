@@ -56,9 +56,13 @@ const AdminHeader = ({ setOpenSidebar, openSidebar }) => {
             />
           </Link>
           <img
-            src={`${backend_url}${user?.avatar}`}
+            src={user?.avatar || "https://avatar.iran.liara.run/public/boy"}
             alt=""
-            className="w-[50px] h-[50px] rounded-full object-cover"
+            className="w-[50px] h-[50px] rounded-full object-cover border-2 border-gray-200 hover:border-blue-500 transition-all duration-300"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://avatar.iran.liara.run/public/boy";
+            }}
           />
         </div>
       </div>

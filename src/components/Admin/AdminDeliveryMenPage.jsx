@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAllDeliveryMen, approveDeliveryMan, rejectDeliveryMan } from "../../redux/actions/deliveryman";
 import { server } from "../../server";
 import { toast } from "react-toastify";
-import { FaTruck, FaCheck, FaTimes, FaUserPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaTruck, FaCheck, FaTimes, FaUserPlus, FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import { BsFilter } from "react-icons/bs";
 import { motion } from "framer-motion";
@@ -15,7 +15,9 @@ const AdminDeliveryMenPage = () => {
   const { deliveryMen, loading, error } = useSelector((state) => state.deliveryman);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [selectedDeliveryMan, setSelectedDeliveryMan] = useState(null);
+  const [previewData, setPreviewData] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -206,6 +208,26 @@ const AdminDeliveryMenPage = () => {
     }
   };
 
+  const handlePreview = async (id) => {
+    try {
+      const response = await axios.get(
+        `${server}/admin/delivery-man/${id}`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.success) {
+        setPreviewData(response.data.deliveryMan);
+        setShowPreviewModal(true);
+      } else {
+        toast.error(response.data.message || "Error fetching delivery man details");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error fetching delivery man details");
+    }
+  };
+
   return (
     <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
       {/* Header Section */}
@@ -232,6 +254,15 @@ const AdminDeliveryMenPage = () => {
           </div>
           <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
         </div>
+
+        {/* Add Delivery Man Button */}
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+        >
+          <FaUserPlus className="text-xl" />
+          <span>Add Delivery Man</span>
+        </button>
       </div>
 
       {/* Main Content */}
@@ -256,13 +287,6 @@ const AdminDeliveryMenPage = () => {
                 <span className="text-sm font-medium">Filter</span>
               </button>
             </div>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl"
-            >
-              <FaUserPlus size={18} />
-              <span className="text-sm font-medium">Add New Delivery Man</span>
-            </button>
           </div>
 
           {loading ? (
@@ -317,15 +341,13 @@ const AdminDeliveryMenPage = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center gap-2">
-                          {!deliveryMan.isApproved && (
-                            <button
-                              onClick={() => handleApprove(deliveryMan._id)}
-                              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
-                              title="Approve Delivery Man"
-                            >
-                              <FaCheck size={16} className="group-hover:scale-110 transition-transform duration-200" />
-                            </button>
-                          )}
+                          <button
+                            onClick={() => handlePreview(deliveryMan._id)}
+                            className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+                            title="Preview"
+                          >
+                            <FaEye size={16} className="group-hover:scale-110 transition-transform duration-200" />
+                          </button>
                           <button
                             onClick={() => handleEdit(deliveryMan)}
                             className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
@@ -333,13 +355,24 @@ const AdminDeliveryMenPage = () => {
                           >
                             <FaEdit size={16} className="group-hover:scale-110 transition-transform duration-200" />
                           </button>
-                          <button
-                            onClick={() => handleDelete(deliveryMan._id)}
-                            className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
-                            title="Delete Delivery Man"
-                          >
-                            <FaTrash size={16} className="group-hover:scale-110 transition-transform duration-200" />
-                          </button>
+                          {!deliveryMan.isApproved && (
+                            <>
+                              <button
+                                onClick={() => handleApprove(deliveryMan._id)}
+                                className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+                                title="Approve Delivery Man"
+                              >
+                                <FaCheck size={16} className="group-hover:scale-110 transition-transform duration-200" />
+                              </button>
+                              <button
+                                onClick={() => handleReject(deliveryMan._id)}
+                                className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+                                title="Reject Delivery Man"
+                              >
+                                <FaTimes size={16} className="group-hover:scale-110 transition-transform duration-200" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -351,259 +384,409 @@ const AdminDeliveryMenPage = () => {
         </div>
         </div>
 
+        {/* Add Delivery Man Modal */}
         {showAddForm && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-8 rounded-xl shadow-lg mb-8"
-          >
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">Add New Delivery Man</h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                  <input
-                    type="tel"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Type</label>
-                  <input
-                    type="text"
-                    name="vehicleType"
-                    value={formData.vehicleType}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Number</label>
-                  <input
-                    type="text"
-                    name="vehicleNumber"
-                    value={formData.vehicleNumber}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">License Number</label>
-                  <input
-                    type="text"
-                    name="licenseNumber"
-                    value={formData.licenseNumber}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">ID Proof</label>
-                  <input
-                    type="file"
-                    name="idProof"
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  type="submit"
-                  className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Add New Delivery Man</h2>
+                <button
+                  onClick={() => setShowAddForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  Register
-                </motion.button>
+                  <FaTimes className="text-xl" />
+                </button>
               </div>
-            </form>
-          </motion.div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                    <input
+                      type="tel"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                    <input
+                      type="text"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Type</label>
+                    <select
+                      name="vehicleType"
+                      value={formData.vehicleType}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    >
+                      <option value="">Select Vehicle Type</option>
+                      <option value="bike">Bike</option>
+                      <option value="scooter">Scooter</option>
+                      <option value="bicycle">Bicycle</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Number</label>
+                    <input
+                      type="text"
+                      name="vehicleNumber"
+                      value={formData.vehicleNumber}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">License Number</label>
+                    <input
+                      type="text"
+                      name="licenseNumber"
+                      value={formData.licenseNumber}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">ID Proof</label>
+                    <input
+                      type="file"
+                      name="idProof"
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-4 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddForm(false)}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600"
+                  >
+                    Add Delivery Man
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         )}
 
+        {/* Edit Delivery Man Modal */}
         {showEditForm && selectedDeliveryMan && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-8 rounded-xl shadow-lg mb-8"
-          >
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">Edit Delivery Man</h2>
-            <form onSubmit={handleEditSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                  <input
-                    type="tel"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Type</label>
-                  <input
-                    type="text"
-                    name="vehicleType"
-                    value={formData.vehicleType}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Number</label>
-                  <input
-                    type="text"
-                    name="vehicleNumber"
-                    value={formData.vehicleNumber}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">License Number</label>
-                  <input
-                    type="text"
-                    name="licenseNumber"
-                    value={formData.licenseNumber}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Current ID Proof</label>
-                  {formData.currentPhoto && (
-                    <img
-                      src={formData.currentPhoto}
-                      alt="Current ID Proof"
-                      className="w-full h-32 object-cover rounded-lg mb-2"
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Edit Delivery Man</h2>
+                <button
+                  onClick={() => setShowEditForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <FaTimes className="text-xl" />
+                </button>
+              </div>
+
+              <form onSubmit={handleEditSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
                     />
-                  )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                    <input
+                      type="tel"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                    <input
+                      type="text"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Type</label>
+                    <select
+                      name="vehicleType"
+                      value={formData.vehicleType}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    >
+                      <option value="">Select Vehicle Type</option>
+                      <option value="bike">Bike</option>
+                      <option value="scooter">Scooter</option>
+                      <option value="bicycle">Bicycle</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Number</label>
+                    <input
+                      type="text"
+                      name="vehicleNumber"
+                      value={formData.vehicleNumber}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">License Number</label>
+                    <input
+                      type="text"
+                      name="licenseNumber"
+                      value={formData.licenseNumber}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">ID Proof</label>
+                    {formData.currentPhoto && (
+                      <div className="mb-4">
+                        <img
+                          src={formData.currentPhoto}
+                          alt="Current ID Proof"
+                          className="w-32 h-32 object-cover rounded-lg"
+                        />
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      name="idProof"
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                    <p className="mt-1 text-sm text-gray-500">Leave empty to keep current ID proof</p>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">New ID Proof (Optional)</label>
-                  <input
-                    type="file"
-                    name="idProof"
-                    onChange={handleInputChange}
-                    accept="image/*"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  />
+
+                <div className="flex justify-end gap-4 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditForm(false)}
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600"
+                  >
+                    Update Delivery Man
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Preview Modal */}
+        {showPreviewModal && previewData && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Delivery Man Details</h2>
+                <button
+                  onClick={() => setShowPreviewModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <FaTimes className="text-xl" />
+                </button>
+              </div>
+              
+              <div className="space-y-6">
+                {/* Basic Information */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Name</p>
+                      <p className="font-medium">{previewData.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Email</p>
+                      <p className="font-medium">{previewData.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Phone Number</p>
+                      <p className="font-medium">{previewData.phoneNumber}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Address</p>
+                      <p className="font-medium">{previewData.address}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vehicle Information */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Vehicle Information</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Vehicle Type</p>
+                      <p className="font-medium capitalize">{previewData.vehicleType}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Vehicle Number</p>
+                      <p className="font-medium">{previewData.vehicleNumber}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">License Number</p>
+                      <p className="font-medium">{previewData.licenseNumber}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ID Proof */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">ID Proof</h3>
+                  <div className="aspect-w-16 aspect-h-9">
+                    <img
+                      src={previewData.idProof}
+                      alt="ID Proof"
+                      className="object-cover rounded-lg"
+                    />
+                  </div>
+                </div>
+
+                {/* Statistics */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Statistics</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Total Deliveries</p>
+                      <p className="font-medium">{previewData.totalDeliveries}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Rating</p>
+                      <p className="font-medium">{previewData.rating.toFixed(1)} / 5.0</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Status</p>
+                      <p className="font-medium">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          previewData.isApproved 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {previewData.isApproved ? 'Approved' : 'Pending'}
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Availability</p>
+                      <p className="font-medium">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          previewData.isAvailable 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {previewData.isAvailable ? 'Available' : 'Unavailable'}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="flex justify-end space-x-4">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  type="button"
-                  onClick={() => {
-                    setShowEditForm(false);
-                    setSelectedDeliveryMan(null);
-                  }}
-                  className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors shadow-lg"
-                >
-                  Cancel
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  type="submit"
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
-                >
-                  Update
-                </motion.button>
-              </div>
-            </form>
-          </motion.div>
+            </div>
+          </div>
         )}
     </div>
   );

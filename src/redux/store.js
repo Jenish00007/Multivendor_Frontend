@@ -10,6 +10,7 @@ import { appSettingsReducer } from "./reducers/appSettings";
 import adminBannerReducer from "./reducers/adminBanner";
 import bannerReducer from "./reducers/banner";
 import { deliverymanReducer } from "./reducers/deliveryman";
+import { categoryReducer } from "./reducers/category";
 
 const Store = configureStore({
   reducer: {
@@ -25,6 +26,7 @@ const Store = configureStore({
     adminBanner: adminBannerReducer,
     banner: bannerReducer,
     deliveryman: deliverymanReducer,
+    category: categoryReducer,
   },
 });
 

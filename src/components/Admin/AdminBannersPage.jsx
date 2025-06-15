@@ -9,7 +9,7 @@ import {
 } from "../../redux/actions/adminBanner";
 import { DataGrid } from "@material-ui/data-grid";
 import { Button } from "@material-ui/core";
-import { AiOutlineDelete, AiOutlineEdit, AiOutlineAppstore } from "react-icons/ai";
+import { AiOutlineDelete, AiOutlineEdit, AiOutlineAppstore, AiOutlinePlus } from "react-icons/ai";
 import { FiSearch } from "react-icons/fi";
 import { BsFilter } from "react-icons/bs";
 import { server } from "../../server";
@@ -26,6 +26,7 @@ const AdminBannersPage = () => {
     link: "",
     image: null,
   });
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     dispatch(getAllAdminBanners());
@@ -39,10 +40,15 @@ const AdminBannersPage = () => {
   };
 
   const handleImageChange = (e) => {
-    setFormData({
-      ...formData,
-      image: e.target.files[0],
-    });
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -92,8 +98,9 @@ const AdminBannersPage = () => {
       title: banner.title || "",
       description: banner.description || "",
       link: banner.link || "",
-      image: null,
+      image: null
     });
+    setImagePreview(banner.image);
     setOpen(true);
   };
 
@@ -395,13 +402,45 @@ const AdminBannersPage = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Image
                 </label>
-                <input
-                  type="file"
-                  onChange={handleImageChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
-                  accept="image/*"
-                  required={!selectedBanner}
-                />
+                <div className="flex flex-col items-center justify-center w-full">
+                  <div className="w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                    {imagePreview ? (
+                      <div className="relative w-full h-full">
+                        <img
+                          src={imagePreview}
+                          alt="Banner preview"
+                          className="w-full h-full object-contain"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImagePreview(null);
+                            setFormData({ ...formData, image: null });
+                          }}
+                          className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
+                        >
+                          <AiOutlineDelete size={20} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <AiOutlinePlus size={30} className="text-gray-400" />
+                          <p className="mb-2 text-sm text-gray-500">
+                            <span className="font-semibold">Click to upload</span> or drag and drop
+                          </p>
+                          <p className="text-xs text-gray-500">PNG, JPG or JPEG (MAX. 2MB)</p>
+                        </div>
+                        <input
+                          type="file"
+                          className="hidden"
+                          onChange={handleImageChange}
+                          accept="image/*"
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="flex justify-end gap-3">
                 <button

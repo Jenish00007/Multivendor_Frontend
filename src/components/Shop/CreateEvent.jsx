@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { AiOutlinePlusCircle, AiOutlineMenu, AiOutlineClose } from "react-icons/ai";
 import { FiGift, FiCalendar, FiDollarSign, FiPackage, FiTag } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import { createevent } from "../../redux/actions/event";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const CreateEvent = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { isLoading, success } = useSelector((state) => state.events);
+
     // Mock data for categories
     const categoriesData = [
         { title: "Electronics" },
@@ -45,6 +53,25 @@ const CreateEvent = () => {
     const handleImageChange = (e) => {
         e.preventDefault();
         let files = Array.from(e.target.files);
+        
+        // Validate file types
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        const invalidFiles = files.filter(file => !allowedTypes.includes(file.type));
+        
+        if (invalidFiles.length > 0) {
+            toast.error('Only JPEG, PNG, GIF and WEBP images are allowed');
+            return;
+        }
+        
+        // Validate file sizes (5MB limit)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const oversizedFiles = files.filter(file => file.size > maxSize);
+        
+        if (oversizedFiles.length > 0) {
+            toast.error('Some files are too large. Maximum size is 5MB');
+            return;
+        }
+        
         setImages((prevImages) => [...prevImages, ...files]);
     };
 
@@ -52,15 +79,66 @@ const CreateEvent = () => {
         e.preventDefault();
         
         if (!startDate || !endDate) {
-            alert("Please select both start and end dates");
+            toast.error("Please select both start and end dates");
             return;
         }
 
-        // Handle form submission here
-        console.log("Form submitted with data:", {
-            name, description, category, tags, originalPrice, discountPrice, stock, startDate, endDate, images
+        if (!name || !description || !category || !originalPrice || !discountPrice || !stock || images.length === 0) {
+            toast.error("Please fill in all required fields");
+            return;
+        }
+
+        // Validate dates
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const now = new Date();
+
+        if (start < now) {
+            toast.error("Start date cannot be in the past");
+            return;
+        }
+
+        if (end <= start) {
+            toast.error("End date must be after start date");
+            return;
+        }
+
+        // Validate prices
+        if (parseFloat(discountPrice) >= parseFloat(originalPrice)) {
+            toast.error("Discount price must be less than original price");
+            return;
+        }
+
+        // Validate stock
+        if (parseInt(stock) <= 0) {
+            toast.error("Stock must be greater than 0");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("description", description);
+        formData.append("category", category);
+        formData.append("tags", tags);
+        formData.append("originalPrice", originalPrice);
+        formData.append("discountPrice", discountPrice);
+        formData.append("stock", stock);
+        formData.append("start_Date", startDate);
+        formData.append("Finish_Date", endDate);
+        
+        images.forEach((image) => {
+            formData.append("images", image);
         });
+
+        dispatch(createevent(formData));
     };
+
+    useEffect(() => {
+        if (success) {
+            toast.success("Event created successfully!");
+            navigate("/shop-events");
+        }
+    }, [success, navigate]);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);

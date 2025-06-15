@@ -3,13 +3,14 @@ import { FiShoppingBag, FiUsers, FiSettings, FiSearch } from "react-icons/fi";
 import { GrWorkshop } from "react-icons/gr";
 import { RxDashboard } from "react-icons/rx";
 import { CiMoneyBill } from "react-icons/ci";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { BsHandbag, BsGraphUp, BsGrid, BsListUl, BsListNested, BsImages } from "react-icons/bs";
 import { MdOutlineLocalOffer } from "react-icons/md";
 import { FaTruck } from "react-icons/fa";
 
-const AdminSideBar = ({ active, openSidebar }) => {
+const AdminSideBar = ({ openSidebar }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const location = useLocation();
 
   const menuItems = [
     { id: 1, title: "Dashboard", icon: <RxDashboard size={22} />, path: "/admin/dashboard" },
@@ -31,6 +32,10 @@ const AdminSideBar = ({ active, openSidebar }) => {
     item.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
   return (
     <div className={`${openSidebar ? 'block' : 'hidden'} md:block w-full h-screen bg-white shadow-xl sidebar-shadow overflow-y-scroll hide-scrollbar sticky top-0 left-0 z-10`}>
       <div className="p-6 border-b bg-gradient-to-r from-blue-500 to-blue-600">
@@ -49,12 +54,12 @@ const AdminSideBar = ({ active, openSidebar }) => {
         {filteredMenuItems.map((item) => (
           <div key={item.id} className="w-full flex items-center p-4 hover:bg-blue-50 rounded-lg transition-all duration-300 group">
             <Link to={item.path} className="w-full flex items-center">
-              <div className={`p-2 rounded-lg ${active === item.id ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 group-hover:bg-blue-100'}`}>
+              <div className={`p-2 rounded-lg ${isActive(item.path) ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 group-hover:bg-blue-100'}`}>
                 {item.icon}
               </div>
               <h5
                 className={`pl-4 text-[16px] font-medium ${
-                  active === item.id ? "text-blue-500" : "text-gray-600 group-hover:text-blue-500"
+                  isActive(item.path) ? "text-blue-500 font-semibold" : "text-gray-600 group-hover:text-blue-500"
                 }`}
               >
                 {item.title}

@@ -10,6 +10,7 @@ import AdminDashboardCategories from "../pages/AdminDashboardCategories";
 import AdminDashboardSubcategories from "../pages/AdminDashboardSubcategories";
 import AdminDashboardBanners from "../pages/AdminDashboardBanners";
 import AdminDashboardDeliveryMen from "../pages/AdminDashboardDeliveryMen";
+import AdminCreateEvent from "../pages/AdminCreateEvent";
 
 export {
   AdminDashboardPage,
@@ -24,4 +25,5 @@ export {
   AdminDashboardSubcategories,
   AdminDashboardBanners,
   AdminDashboardDeliveryMen,
+  AdminCreateEvent,
 };
