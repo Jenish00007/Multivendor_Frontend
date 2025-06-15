@@ -25,7 +25,6 @@ const ProductCard = ({ data, isEvent }) => {
     const { cart } = useSelector((state) => state.cart);
     const [click, setClick] = useState(false);
     const [open, setOpen] = useState(false);
-    const [imageError, setImageError] = useState(false);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -52,7 +51,7 @@ const ProductCard = ({ data, isEvent }) => {
             toast.error("Item already in cart!")
         } else {
             if (data.stock < 1) {
-                toast.error("Product stock limited!");
+                toast.error("Product stock limited!")
             } else {
                 const cartData = { ...data, qty: 1 };
                 dispatch(addTocart(cartData));
@@ -85,7 +84,7 @@ const ProductCard = ({ data, isEvent }) => {
     };
 
     return (
-        <div className='w-full h-auto min-h-[370px] bg-white rounded-lg shadow-sm p-3 relative cursor-pointer transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1'>
+        <div className='w-full h-auto min-h-[370px] bg-white rounded-lg shadow-sm p-3 relative cursor-pointer'>
             <div className='flex justify-end'>
                 {click ? (
                     <AiFillHeart
@@ -113,7 +112,6 @@ const ProductCard = ({ data, isEvent }) => {
                         onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = "https://via.placeholder.com/400x400?text=No+Image";
-                            setImageError(true);
                         }}
                     />
                     {data.discountPrice && (
@@ -128,15 +126,15 @@ const ProductCard = ({ data, isEvent }) => {
             <Link to={`${isEvent === true ? `/product/${data._id}?isEvent=true` : `/product/${data._id}`}`}>
                 <div className="flex items-center mt-2">
                     <img 
-                        src={data.shop.avatar ? data.shop.avatar : "https://via.placeholder.com/30x30?text=Shop"}
-                        alt={data.shop.name}
+                        src={data?.shop?.avatar ? data.shop.avatar : "https://via.placeholder.com/30x30?text=Shop"}
+                        alt={data?.shop?.name || "Shop"}
                         className="w-6 h-6 rounded-full object-cover mr-2"
                         onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = "https://via.placeholder.com/30x30?text=Shop";
                         }}
                     />
-                    <h5 className={`${styles.shop_name} text-blue-500 truncate`}>{data.shop.name}</h5>
+                    <h5 className={`${styles.shop_name} text-blue-500 truncate`}>{data?.shop?.name || "Shop"}</h5>
                 </div>
             </Link>
 
@@ -160,13 +158,6 @@ const ProductCard = ({ data, isEvent }) => {
                                 {data.originalPrice}₹
                             </h4>
                         )}
-                    </div>
-
-                    <div className="flex items-center text-orange-500">
-                        <AiOutlineFire className="mr-1 flex-shrink-0" />
-                        <span className="font-medium">
-                            {data?.sold_out} sold
-                        </span>
                     </div>
                 </div>
             </Link>

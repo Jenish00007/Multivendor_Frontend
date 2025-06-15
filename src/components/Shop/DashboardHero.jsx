@@ -16,7 +16,6 @@ const DashboardHero = () => {
     const { seller } = useSelector((state) => state.seller);
     const { products } = useSelector((state) => state.products);
     const [isLoading, setIsLoading] = useState(false);
-    const [timeRange, setTimeRange] = useState("today");
 
     useEffect(() => {
         dispatch(getAllOrdersOfShop(seller._id));
@@ -36,19 +35,6 @@ const DashboardHero = () => {
         return formatter.format(amount);
     };
 
-    const getTimeRangeLabel = () => {
-        switch (timeRange) {
-            case "today":
-                return "Today's Overview";
-            case "week":
-                return "This Week's Overview";
-            case "month":
-                return "This Month's Overview";
-            default:
-                return "Dashboard Overview";
-        }
-    };
-
     return (
         <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 min-h-screen relative overflow-hidden">
             {/* Background decorative elements */}
@@ -66,7 +52,7 @@ const DashboardHero = () => {
                         </div>
                         <div>
                             <div className="font-bold text-[32px] font-Poppins bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
-                                {getTimeRangeLabel()}
+                                Dashboard Overview
                             </div>
                             <div className="text-gray-600 text-[18px] mt-1 font-medium">
                                 Welcome back, {seller?.name}!
@@ -87,39 +73,23 @@ const DashboardHero = () => {
                             })}
                         </p>
                     </div>
-
-                    <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md rounded-xl p-1 shadow-lg">
-                        {["today", "week", "month"].map((range) => (
-                            <button
-                                key={range}
-                                onClick={() => setTimeRange(range)}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                                    timeRange === range
-                                        ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
-                                        : "text-gray-600 hover:bg-blue-50"
-                                }`}
-                            >
-                                {range.charAt(0).toUpperCase() + range.slice(1)}
-                            </button>
-                        ))}
-                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-white/50 group">
                     <div className="flex items-center justify-between mb-4">
                         <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg transform group-hover:scale-110 transition-all duration-300">
                             <AiOutlineMoneyCollect className="text-white" size={24} />
                         </div>
-                        <div className="text-sm text-gray-600 font-medium">Available Balance</div>
+                        <div className="text-sm text-gray-600 font-medium">Total Revenue</div>
                     </div>
                     <div className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors duration-300">
                         {formatIndianCurrency(availableBalance)}
                     </div>
                     <div className="flex items-center text-blue-600 text-sm font-medium">
                         <BsGraphUpArrow className="mr-1 animate-pulse" />
-                        <span>Active Balance</span>
+                        <span>Available Balance</span>
                     </div>
                 </div>
 
@@ -152,22 +122,6 @@ const DashboardHero = () => {
                     <div className="flex items-center text-green-600 text-sm font-medium">
                         <AiOutlineLineChart className="mr-1 animate-pulse" />
                         <span>Active Products</span>
-                    </div>
-                </div>
-
-                <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-white/50 group">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg transform group-hover:scale-110 transition-all duration-300">
-                            <MdOutlinePeopleAlt className="text-white" size={24} />
-                        </div>
-                        <div className="text-sm text-gray-600 font-medium">Total Customers</div>
-                    </div>
-                    <div className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition-colors duration-300">
-                        {orders ? new Set(orders.map(order => order.user?._id)).size : 0}
-                    </div>
-                    <div className="flex items-center text-orange-600 text-sm font-medium">
-                        <MdOutlineWavingHand className="mr-1 animate-pulse" />
-                        <span>Active Customers</span>
                     </div>
                 </div>
             </div>

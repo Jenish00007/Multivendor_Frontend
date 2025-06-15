@@ -72,7 +72,17 @@ export const userReducer = createReducer(initialState, {
     state.usersLoading = false;
     state.error = action.payload;
   },
-
+  // delete user --- admin
+  deleteUserRequest: (state) => {
+    state.deleteUserLoading = true;
+  },
+  deleteUserSuccess: (state) => {
+    state.deleteUserLoading = false;
+  },
+  deleteUserFailed: (state, action) => {
+    state.deleteUserLoading = false;
+    state.error = action.payload;
+  },
   clearErrors: (state) => {
     state.error = null;
   },

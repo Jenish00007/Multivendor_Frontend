@@ -484,10 +484,21 @@ const AllEvents = () => {
               </div>
 
               {/* Event Image */}
-              {selectedEvent.images && selectedEvent.images[0] && (
+              {selectedEvent.images && Array.isArray(selectedEvent.images) && selectedEvent.images.length > 0 && selectedEvent.images[0]?.url ? (
                 <div className="relative">
                   <img
-                    src={selectedEvent.images[0]}
+                    src={selectedEvent.images[0].url}
+                    alt={selectedEvent.name}
+                    className="w-full h-64 object-cover rounded-lg shadow-lg"
+                    onError={(e) => {
+                      e.target.src = "https://via.placeholder.com/400x300?text=No+Image";
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="relative">
+                  <img
+                    src="https://via.placeholder.com/400x300?text=No+Image"
                     alt={selectedEvent.name}
                     className="w-full h-64 object-cover rounded-lg shadow-lg"
                   />

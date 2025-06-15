@@ -84,9 +84,13 @@ const DashboardHeader = ({ setOpenSidebar, openSidebar }) => {
                         <Link to={`/shop/${seller._id}`}>
                             <div className="relative group">
                                 <img
-                                    src={logo}
+                                    src={seller?.avatar || "https://avatar.iran.liara.run/public/boy"}
                                     alt=""
                                     className="w-[45px] h-[45px] rounded-full object-cover border-2 border-transparent group-hover:border-blue-500 transition-all duration-300 shadow-lg group-hover:shadow-xl"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = "https://avatar.iran.liara.run/public/boy";
+                                    }}
                                 />
                                 <div className="absolute inset-0 rounded-full bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                             </div>

@@ -33,6 +33,7 @@ const ShopSettings = () => {
             await axios.put(`${server}/shop/update-shop-avatar`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
                 withCredentials: true,
             });
@@ -56,7 +57,12 @@ const ShopSettings = () => {
                 zipCode,
                 phoneNumber,
                 description,
-            }, { withCredentials: true });
+            }, { 
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                withCredentials: true 
+            });
             toast.success("Shop info updated successfully!");
             dispatch(loadSeller());
         } catch (error) {

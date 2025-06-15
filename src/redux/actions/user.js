@@ -226,6 +226,38 @@ export const getAllUsers = () => async (dispatch) => {
   }
 };
 
+// delete user --- admin
+export const deleteUser = (id) => async (dispatch) => {
+  try {
+    dispatch({
+      type: "deleteUserRequest",
+    });
+
+    const token = localStorage.getItem('token');
+    await axios.delete(`${server}/user/delete-user/${id}`, {
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    dispatch({
+      type: "deleteUserSuccess",
+    });
+    
+    toast.success("User deleted successfully!");
+    dispatch(getAllUsers()); // Refresh the users list after deletion
+  } catch (error) {
+    dispatch({
+      type: "deleteUserFailed",
+      payload: error.response?.data?.message || "Failed to delete user",
+    });
+    toast.error(error.response?.data?.message || "Failed to delete user");
+  }
+};
+
 // what is action in redux ?
 // Trigger an event , and call reducer
 // action is a plain object that contains information about an event that has occurred

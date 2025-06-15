@@ -72,6 +72,7 @@ import DeliveryManRegistration from "./pages/DeliveryManRegistration";
 import DeliveryManManagement from "./pages/DeliveryManManagement";
 import { getAppSettings } from "./redux/actions/appSettings";
 import AdminLogin from "./components/Login/AdminLogin";
+import AdminCreateEvent from "./pages/AdminCreateEvent";
 
 const App = () => {
   useEffect(() => {
@@ -348,6 +349,14 @@ const App = () => {
           element={
             <ProtectedAdminRoute>
               <AdminDashboardEvents />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/admin-create-event"
+          element={
+            <ProtectedAdminRoute>
+              <AdminCreateEvent />
             </ProtectedAdminRoute>
           }
         />

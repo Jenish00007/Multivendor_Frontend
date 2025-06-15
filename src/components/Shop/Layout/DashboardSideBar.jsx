@@ -17,13 +17,14 @@ const DashboardSideBar = ({ openSidebar }) => {
     const menuItems = [
         { id: 1, title: "Dashboard", icon: <RxDashboard size={22} />, path: "/dashboard" },
         { id: 2, title: "All Products", icon: <FiShoppingBag size={22} />, path: "/dashboard-products" },
-        { id: 3, title: "All Orders", icon: <FiPackage size={22} />, path: "/dashboard-orders" },
-        { id: 4, title: "All Events", icon: <MdOutlineLocalOffer size={22} />, path: "/dashboard-events" },
-        { id: 5, title: "All Coupons", icon: <AiOutlineGift size={22} />, path: "/dashboard-coupouns" },
-        { id: 6, title: "Refunds", icon: <HiOutlineReceiptRefund size={22} />, path: "/dashboard-refunds" },
-        { id: 7, title: "Messages", icon: <BiMessageSquareDetail size={22} />, path: "/dashboard-messages" },
-        { id: 8, title: "Withdraw", icon: <CiMoneyBill size={22} />, path: "/dashboard-withdraw-money" },
-        { id: 9, title: "Settings", icon: <CiSettings size={22} />, path: "/settings" },
+        { id: 3, title: "Create Product", icon: <AiOutlineFolderAdd size={22} />, path: "/dashboard-create-product" },
+        { id: 4, title: "All Orders", icon: <FiPackage size={22} />, path: "/dashboard-orders" },
+        { id: 5, title: "All Events", icon: <MdOutlineLocalOffer size={22} />, path: "/dashboard-events" },
+        { id: 6, title: "All Coupons", icon: <AiOutlineGift size={22} />, path: "/dashboard-coupouns" },
+        { id: 7, title: "Refunds", icon: <HiOutlineReceiptRefund size={22} />, path: "/dashboard-refunds" },
+        { id: 8, title: "Messages", icon: <BiMessageSquareDetail size={22} />, path: "/dashboard-messages" },
+        { id: 9, title: "Withdraw", icon: <CiMoneyBill size={22} />, path: "/dashboard-withdraw-money" },
+        { id: 10, title: "Settings", icon: <CiSettings size={22} />, path: "/settings" },
     ];
 
     const filteredMenuItems = menuItems.filter((item) =>

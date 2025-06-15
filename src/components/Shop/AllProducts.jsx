@@ -185,8 +185,8 @@ const AllProducts = () => {
             >
               <AiOutlineEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
             </button>
-            <button 
-              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+            <button
+              className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
               onClick={() => handleEdit(params.row.id)}
               title="Edit Product"
             >
@@ -251,14 +251,12 @@ const AllProducts = () => {
           </div>
           <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
         </div>
-        <Link to="/dashboard-create-product">
-          <Button
-            variant="contained"
-            className="!bg-gradient-to-r !from-indigo-500 !to-purple-600 !text-white hover:!from-indigo-600 hover:!to-purple-700 !transition-all !duration-300 !shadow-xl hover:!shadow-2xl !transform hover:!scale-105 !rounded-xl !px-6 !py-3 !font-semibold"
-            startIcon={<AiOutlinePlus size={20} />}
-          >
-            Create New Product
-          </Button>
+        <Link
+          to="/dashboard-create-product"
+          className="group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+        >
+          <AiOutlinePlus size={20} className="group-hover:rotate-90 transition-transform duration-300" />
+          Create Product
         </Link>
       </div>
 
