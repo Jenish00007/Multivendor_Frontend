@@ -255,7 +255,11 @@ const AllOrders = () => {
             minWidth: 130,
             flex: 0.8,
             renderCell: (params) => {
-                return new Date(params.getValue(params.id, "createdAt")).toLocaleDateString();
+                return new Date(params.getValue(params.id, "createdAt")).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
             }
         },
         {
@@ -357,7 +361,11 @@ const AllRefundOrders = () => {
             minWidth: 130,
             flex: 0.8,
             renderCell: (params) => {
-                return new Date(params.getValue(params.id, "createdAt")).toLocaleDateString();
+                return new Date(params.getValue(params.id, "createdAt")).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
             }
         },
 
@@ -458,7 +466,11 @@ const TrackOrder = () => {
             minWidth: 130,
             flex: 0.8,
             renderCell: (params) => {
-                return new Date(params.getValue(params.id, "createdAt")).toLocaleDateString();
+                return new Date(params.getValue(params.id, "createdAt")).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
             }
         },
 

@@ -207,13 +207,14 @@ const AllEvents = () => {
 
   dataSource &&
     dataSource.forEach((item) => {
+      const { _id, ...itemWithoutId } = item;
       row.push({
-        id: item._id,
+        id: _id,
         name: item.name,
         price: formatIndianCurrency(item.discountPrice),
         Stock: item.stock,
         sold: item.sold_out,
-        ...item // Include all event data for the modal
+        ...itemWithoutId // Include all event data for the modal
       });
     });
 
@@ -467,11 +468,19 @@ const AllEvents = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Start Date:</span>
-                    <span className="font-medium">{new Date(selectedEvent.startDate).toLocaleDateString()}</span>
+                    <span className="font-medium">{new Date(selectedEvent.startDate).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric'
+                    })}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">End Date:</span>
-                    <span className="font-medium">{new Date(selectedEvent.endDate).toLocaleDateString()}</span>
+                    <span className="font-medium">{new Date(selectedEvent.endDate).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric'
+                    })}</span>
                   </div>
                 </div>
 

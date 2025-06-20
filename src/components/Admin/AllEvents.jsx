@@ -206,8 +206,9 @@ const AllEvents = () => {
 
   allEvents &&
     allEvents.forEach((item) => {
+      const { _id, ...itemWithoutId } = item;
       row.push({
-        id: item._id,
+        id: _id,
         name: item.name,
         price: formatIndianCurrency(item.discountPrice),
         stock: item.stock,
@@ -216,7 +217,7 @@ const AllEvents = () => {
         category: item.category,
         startDate: item.startDate,
         endDate: item.endDate,
-        ...item
+        ...itemWithoutId
       });
     });
 

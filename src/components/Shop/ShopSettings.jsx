@@ -7,6 +7,7 @@ import styles from "../../styles/styles";
 import axios from "axios";
 import { loadSeller } from "../../redux/actions/user";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const ShopSettings = () => {
     const { seller } = useSelector((state) => state.seller);
@@ -19,6 +20,7 @@ const ShopSettings = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const handleImage = async (e) => {
         e.preventDefault();
@@ -69,6 +71,17 @@ const ShopSettings = () => {
             toast.error(error.response.data.message);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await axios.get(`${server}/shop/logout`, { withCredentials: true });
+            dispatch({ type: "SELLER_LOGOUT_SUCCESS" });
+            toast.success("Logged out successfully!");
+            navigate("/");
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Logout failed");
         }
     };
 
@@ -246,6 +259,13 @@ const ShopSettings = () => {
                             </button>
                         </div>
                     </form>
+                    {/* Logout Button */}
+                    <button
+                        onClick={handleLogout}
+                        className="w-full mt-6 bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-600 shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                        Logout
+                    </button>
                 </div>
             </div>
         </div>

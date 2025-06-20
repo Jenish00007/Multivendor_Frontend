@@ -229,8 +229,9 @@ const AllWithdraw = () => {
   data &&
     data.forEach((item) => {
       if (item && item.seller) {
+        const { _id, ...itemWithoutId } = item;
         row.push({
-          id: item._id || '',
+          id: _id || '',
           shopId: item.seller._id || '',
           name: item.seller.shopName || item.seller.name || 'N/A',
           amount: formatIndianCurrency(item.amount || 0),
@@ -244,7 +245,7 @@ const AllWithdraw = () => {
           paymentMethod: item.paymentMethod || 'Bank Transfer',
           processingFee: item.processingFee || 0,
           seller: item.seller,
-          ...item
+          ...itemWithoutId
         });
       }
     });

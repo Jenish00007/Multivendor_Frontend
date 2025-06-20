@@ -247,11 +247,19 @@ const ShopProfileData = ({ isOwner }) => {
                                             <div className="flex items-center justify-between">
                                                 <div className="text-sm text-gray-500">
                                                     <AiFillCalendar className="inline-block mr-1" />
-                                                    {new Date(event.startDate).toLocaleDateString()}
+                                                    {new Date(event.startDate).toLocaleDateString('en-GB', {
+                                                        day: 'numeric',
+                                                        month: 'short',
+                                                        year: 'numeric'
+                                                    })}
                                                 </div>
                                                 <div className="text-sm text-gray-500">
                                                     Ends:{" "}
-                                                    {new Date(event.endDate).toLocaleDateString()}
+                                                    {new Date(event.endDate).toLocaleDateString('en-GB', {
+                                                        day: 'numeric',
+                                                        month: 'short',
+                                                        year: 'numeric'
+                                                    })}
                                                 </div>
                                             </div>
                                         </div>

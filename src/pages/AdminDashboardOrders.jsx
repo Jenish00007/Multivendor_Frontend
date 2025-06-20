@@ -9,12 +9,15 @@ import { BsCurrencyRupee } from "react-icons/bs";
 import Loader from "../components/Layout/Loader";
 import OrderPreviewModal from "../components/Admin/OrderPreviewModal";
 import { Link } from "react-router-dom";
+import { FiSearch } from "react-icons/fi";
 
 const AdminDashboardOrders = () => {
   const dispatch = useDispatch();
   const [openSidebar, setOpenSidebar] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
 
   const { adminOrders, adminOrderLoading } = useSelector(
     (state) => state.order
@@ -44,6 +47,24 @@ const AdminDashboardOrders = () => {
     });
     return formatter.format(amount);
   };
+
+  // Filter orders based on search term and date range
+  const filteredOrders = (adminOrders || []).filter((order) => {
+    const customerName = order.user?.name?.toLowerCase() || "";
+    const orderId = order._id?.toLowerCase() || "";
+    const status = order.status?.toLowerCase() || "";
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch = customerName.includes(search) || orderId.includes(search) || status.includes(search);
+
+    const orderDate = new Date(order.createdAt);
+    const start = startDate ? new Date(startDate) : null;
+
+    // Only filter by start date, or show all if no start date
+    const matchesDate = (!start || orderDate >= start);
+
+    return matchesSearch && matchesDate;
+  });
 
   return (
     <div>
@@ -75,7 +96,30 @@ const AdminDashboardOrders = () => {
                         Track and manage customer orders
                       </div>
                       <div className="text-sm text-gray-500 mt-1">
-                        {adminOrders?.length || 0} total orders
+                        {filteredOrders?.length || 0} total orders
+                      </div>
+                    </div>
+                  </div>
+                  {/* Search and Filter Section */}
+                  <div className="w-full sm:w-auto mt-4 sm:mt-0 flex flex-col sm:flex-row items-center gap-4">
+                    <div className="relative w-full sm:w-72">
+                      <input
+                        type="text"
+                        placeholder="Search by Order ID, Customer Name, or Status..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="px-5 py-3 pl-10 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full shadow-sm"
+                      />
+                      <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    </div>
+                    <div className="flex gap-4 w-full sm:w-auto">
+                      <div className="relative w-full sm:w-auto">
+                        <input
+                          type="date"
+                          value={startDate}
+                          onChange={(e) => setStartDate(e.target.value)}
+                          className="px-5 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full shadow-lg bg-gradient-to-br from-blue-500 to-indigo-500 text-white placeholder-white"
+                        />
                       </div>
                     </div>
                   </div>
@@ -96,7 +140,7 @@ const AdminDashboardOrders = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {adminOrders?.map((order) => (
+                        {filteredOrders?.map((order) => (
                           <tr key={order._id} className="hover:bg-gray-50/50 transition-colors duration-200">
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">

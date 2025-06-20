@@ -190,7 +190,11 @@ const AdminBannersPage = () => {
       flex: 0.8,
       renderCell: (params) => (
         <div className="text-gray-600">
-          {new Date(params.value).toLocaleDateString()}
+          {new Date(params.value).toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          })}
         </div>
       ),
     },

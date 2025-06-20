@@ -18,6 +18,9 @@ const AdminDashboardMain = () => {
   const dispatch = useDispatch();
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [latestOrderSearch, setLatestOrderSearch] = useState("");
+  const [selectedOrderDate, setSelectedOrderDate] = useState("");
+  const [selectedOrderDateISO, setSelectedOrderDateISO] = useState("");
 
   const { adminOrders, adminOrderLoading } = useSelector(
     (state) => state.order
@@ -48,6 +51,9 @@ const AdminDashboardMain = () => {
   // Get unique customers count
   const uniqueCustomers = adminOrders ? new Set(adminOrders.map(order => order.user?._id)).size : 0;
 
+  // Get unique order dates from the latest orders (as displayed)
+  const uniqueOrderDates = Array.from(new Set((adminOrders || []).map(order => order.createdAt)));
+
   // Function to format currency in Indian format
   const formatIndianCurrency = (amount) => {
     const formatter = new Intl.NumberFormat('en-IN', {
@@ -57,6 +63,13 @@ const AdminDashboardMain = () => {
       maximumFractionDigits: 2,
     });
     return formatter.format(amount);
+  };
+
+  // Helper to format a Date object to '7 Jun 2025'
+  const formatDisplayDate = (dateObj) => {
+    return dateObj
+      ? dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+      : '';
   };
 
   const columns = [
@@ -284,6 +297,18 @@ const AdminDashboardMain = () => {
     }
   ];
 
+  // Filter latest orders by order ID and selected date (formatted as '7 Jun 2025')
+  const filteredLatestOrders = row.filter(orderRow => {
+    const matchesOrderId = ("#" + orderRow.id.slice(-6)).toLowerCase().includes(latestOrderSearch.toLowerCase());
+    let matchesDate = true;
+    if (selectedOrderDateISO) {
+      const pickedDate = new Date(selectedOrderDateISO);
+      const formattedPickedDate = formatDisplayDate(pickedDate);
+      matchesDate = orderRow.createdAt === formattedPickedDate;
+    }
+    return matchesOrderId && matchesDate;
+  });
+
   const handlePreview = (order) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
@@ -436,19 +461,25 @@ const AdminDashboardMain = () => {
                   </div>
                 </div>
               </div>
-              <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+              <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-end mr-12">
                 <div className="relative flex-1 sm:flex-none">
                   <input
                     type="text"
-                    placeholder="Search orders..."
+                    placeholder="Search by Order ID (e.g. #643d89)..."
                     className="w-full sm:w-[300px] pl-12 pr-6 py-3.5 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white/80 backdrop-blur-sm shadow-lg"
+                    value={latestOrderSearch}
+                    onChange={e => setLatestOrderSearch(e.target.value)}
                   />
                   <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 </div>
-                <button className="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-3.5 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                  <BsFilter size={20} />
-                  <span className="text-sm font-semibold">Filter</span>
-                </button>
+                <div className="relative">
+                  <input
+                    type="date"
+                    className="w-full sm:w-auto px-4 py-3.5 rounded-xl border-2 border-blue-400 focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-200 bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg datepicker-left"
+                    value={selectedOrderDateISO}
+                    onChange={e => setSelectedOrderDateISO(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
 
@@ -466,7 +497,7 @@ const AdminDashboardMain = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {row.slice(0, 5).map((orderRow) => {
+                    {filteredLatestOrders.slice(0, 5).map((orderRow) => {
                       // Find the full order object from adminOrders
                       const fullOrder = adminOrders.find(o => o._id === orderRow.id);
                       return (

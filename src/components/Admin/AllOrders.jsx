@@ -12,6 +12,9 @@ const AllOrders = () => {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     axios
@@ -56,6 +59,23 @@ const AllOrders = () => {
     });
     return `${formattedDate} ${formattedTime}`;
   };
+
+  const filteredOrders = orders.filter((order) => {
+    const customerName = order.user?.name?.toLowerCase() || "";
+    const orderId = order._id?.toLowerCase() || "";
+    const status = order.status?.toLowerCase() || "";
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch = customerName.includes(search) || orderId.includes(search) || status.includes(search);
+
+    const orderDate = new Date(order.createdAt);
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate) : null;
+
+    const matchesDate = (!start || orderDate >= start) && (!end || orderDate <= new Date(end.setDate(end.getDate() + 1))); // Add one day to end date to include the whole day
+
+    return matchesSearch && matchesDate;
+  });
 
   const columns = [
     {
@@ -199,15 +219,20 @@ const AllOrders = () => {
 
   const row = [];
 
-  orders &&
-    orders.forEach((item) => {
+  filteredOrders &&
+    filteredOrders.forEach((item) => {
+      const { _id, ...itemWithoutId } = item;
       row.push({
-        id: item._id || '',
+        id: _id || '',
         status: item.status || 'N/A',
         itemsQty: Array.isArray(item.cart) ? item.cart.length : 0,
         total: item.totalPrice ? `₹${item.totalPrice}` : 'N/A',
-        createdAt: item.createdAt || 'N/A',
-        ...item
+        createdAt: new Date(item.createdAt).toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        }),
+        ...itemWithoutId
       });
     });
 
@@ -231,11 +256,42 @@ const AllOrders = () => {
                 Manage and monitor all orders
           </div>
               <div className="text-sm text-gray-500 mt-1">
-                {row?.length || 0} orders in your platform
+                {filteredOrders?.length || 0} orders in your platform
               </div>
             </div>
           </div>
           <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
+              </div>
+              {/* Search and Filter Section */}
+              <div className="w-full sm:w-auto mt-4 sm:mt-0 flex flex-col sm:flex-row items-center gap-4">
+                  <div className="relative w-full sm:w-72">
+                      <input
+                          type="text"
+                          placeholder="Search by Order ID, Customer Name, or Status..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="px-4 py-2 pl-10 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full shadow-sm"
+                      />
+                      <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  </div>
+                  <div className="flex gap-4 w-full sm:w-auto">
+                      <div className="relative w-1/2 sm:w-auto">
+                          <input
+                              type="date"
+                              value={startDate}
+                              onChange={(e) => setStartDate(e.target.value)}
+                              className="px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full shadow-sm"
+                          />
+                      </div>
+                      <div className="relative w-1/2 sm:w-auto">
+                          <input
+                              type="date"
+                              value={endDate}
+                              onChange={(e) => setEndDate(e.target.value)}
+                              className="px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full shadow-sm"
+                          />
+                      </div>
+                  </div>
               </div>
             </div>
 

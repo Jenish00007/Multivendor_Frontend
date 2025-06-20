@@ -9,6 +9,7 @@ import { Link, useLocation } from "react-router-dom";
 import { BiMessageSquareDetail } from "react-icons/bi";
 import { HiOutlineReceiptRefund } from "react-icons/hi";
 import { BsGraphUp } from "react-icons/bs";
+import { AiOutlineClockCircle } from "react-icons/ai";
 
 const DashboardSideBar = ({ openSidebar }) => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -19,12 +20,13 @@ const DashboardSideBar = ({ openSidebar }) => {
         { id: 2, title: "All Products", icon: <FiShoppingBag size={22} />, path: "/dashboard-products" },
         { id: 3, title: "Create Product", icon: <AiOutlineFolderAdd size={22} />, path: "/dashboard-create-product" },
         { id: 4, title: "All Orders", icon: <FiPackage size={22} />, path: "/dashboard-orders" },
-        { id: 5, title: "All Events", icon: <MdOutlineLocalOffer size={22} />, path: "/dashboard-events" },
-        { id: 6, title: "All Coupons", icon: <AiOutlineGift size={22} />, path: "/dashboard-coupouns" },
-        { id: 7, title: "Refunds", icon: <HiOutlineReceiptRefund size={22} />, path: "/dashboard-refunds" },
-        { id: 8, title: "Messages", icon: <BiMessageSquareDetail size={22} />, path: "/dashboard-messages" },
-        { id: 9, title: "Withdraw", icon: <CiMoneyBill size={22} />, path: "/dashboard-withdraw-money" },
-        { id: 10, title: "Settings", icon: <CiSettings size={22} />, path: "/settings" },
+        { id: 5, title: "Recent Orders", icon: <AiOutlineClockCircle size={22} />, path: "/dashboard-recent-orders" },
+        { id: 6, title: "All Events", icon: <MdOutlineLocalOffer size={22} />, path: "/dashboard-events" },
+        { id: 7, title: "All Coupons", icon: <AiOutlineGift size={22} />, path: "/dashboard-coupouns" },
+        { id: 8, title: "Refunds", icon: <HiOutlineReceiptRefund size={22} />, path: "/dashboard-refunds" },
+        { id: 9, title: "Messages", icon: <BiMessageSquareDetail size={22} />, path: "/dashboard-messages" },
+        { id: 10, title: "Withdraw", icon: <CiMoneyBill size={22} />, path: "/dashboard-withdraw-money" },
+        { id: 11, title: "Settings", icon: <CiSettings size={22} />, path: "/settings" },
     ];
 
     const filteredMenuItems = menuItems.filter((item) =>

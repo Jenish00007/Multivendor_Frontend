@@ -161,13 +161,14 @@ const AllUsers = () => {
   const row = [];
   users &&
     users.forEach((item) => {
+      const { _id, ...itemWithoutId } = item;
       row.push({
-        id: item._id,
+        id: _id,
         name: item.name,
         email: item.email,
         phoneNumber: item.phoneNumber,
         role: item.role,
-        ...item
+        ...itemWithoutId
       });
     });
 

@@ -31,6 +31,7 @@ import {
   ShopAllCoupouns,
   ShopPreviewPage,
   ShopAllOrders,
+  ShopRecentOrders,
   ShopOrderDetails,
   ShopAllRefunds,
   ShopSettingsPage,
@@ -193,6 +194,15 @@ const App = () => {
           element={
             <SellerProtectedRoute>
               <ShopAllOrders />
+            </SellerProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard-recent-orders"
+          element={
+            <SellerProtectedRoute>
+              <ShopRecentOrders />
             </SellerProtectedRoute>
           }
         />

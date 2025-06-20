@@ -6,6 +6,7 @@ import ShopAllEvents from "../pages/Shop/ShopAllEvents";
 import ShopAllCoupouns from "../pages/Shop/ShopAllCoupouns";
 import ShopPreviewPage from "../pages/Shop/ShopPreviewPage";
 import ShopAllOrders from "../pages/Shop/ShopAllOrders";
+import ShopRecentOrders from "../pages/Shop/ShopRecentOrders";
 import ShopOrderDetails from "../pages/Shop/ShopOrderDetails";
 import ShopAllRefunds from "../pages/Shop/ShopAllRefunds";
 import ShopSettingsPage from "../pages/Shop/ShopSettingsPage";
@@ -25,6 +26,7 @@ export {
   ShopAllCoupouns,
   ShopPreviewPage,
   ShopAllOrders,
+  ShopRecentOrders,
   ShopOrderDetails,
   ShopAllRefunds,
   ShopSettingsPage,

@@ -6,6 +6,7 @@ import styles from "../../styles/styles";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { loadUser } from "../../redux/actions/user";
+import { useNavigate } from "react-router-dom";
 
 const AdminSettings = () => {
   const { user } = useSelector((state) => state.user);
@@ -17,6 +18,7 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -93,6 +95,17 @@ const AdminSettings = () => {
       toast.error(error.response?.data?.message || "Failed to update profile");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await axios.get(`${server}/user/logout`, { withCredentials: true });
+      dispatch({ type: "LOGOUT_SUCCESS" });
+      toast.success("Logged out successfully!");
+      navigate("/login");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Logout failed");
     }
   };
 
@@ -200,6 +213,12 @@ const AdminSettings = () => {
               {loading ? "Updating..." : "Update Profile"}
             </button>
           </form>
+          <button
+            onClick={handleLogout}
+            className="w-full max-w-2xl mt-6 bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 rounded-lg font-semibold transition-colors duration-300 hover:from-blue-600 hover:to-indigo-600 shadow-lg"
+          >
+            Logout
+          </button>
         </div>
       </div>
     </div>

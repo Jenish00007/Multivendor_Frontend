@@ -30,6 +30,8 @@ const AdminDeliveryMenPage = () => {
     idProof: null,
     currentPhoto: null,
   });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
 
   useEffect(() => {
     dispatch(getAllDeliveryMen());
@@ -228,6 +230,23 @@ const AdminDeliveryMenPage = () => {
     }
   };
 
+  const filteredDeliveryMen = (deliveryMen || []).filter((man) => {
+    const search = searchTerm.toLowerCase();
+    const matchesSearch =
+      (man.name?.toLowerCase().includes(search) || "") ||
+      (man.email?.toLowerCase().includes(search) || "") ||
+      (man.phoneNumber?.toLowerCase().includes(search) || "") ||
+      (man.status?.toLowerCase().includes(search) || "") ||
+      (man.vehicleType?.toLowerCase().includes(search) || "");
+
+    const joinedDate = man.createdAt ? new Date(man.createdAt) : null;
+    const start = startDate ? new Date(startDate) : null;
+
+    const matchesDate = (!start || (joinedDate && joinedDate >= start));
+
+    return matchesSearch && matchesDate;
+  });
+
   return (
     <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
       {/* Header Section */}
@@ -272,20 +291,27 @@ const AdminDeliveryMenPage = () => {
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-pink-100/30 to-blue-100/30 rounded-full blur-3xl"></div>
         
         <div className="w-full relative z-10">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1 sm:flex-none">
+          {/* Filter/Search Bar */}
+          <div className="w-full sm:w-auto mt-4 sm:mt-0 flex flex-col sm:flex-row items-center gap-4 mb-6">
+            <div className="relative w-full sm:w-72">
+              <input
+                type="text"
+                placeholder="Search the delivery men here"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="px-4 py-2 pl-10 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full shadow-sm"
+              />
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            </div>
+            <div className="flex gap-4 w-full sm:w-auto">
+              <div className="relative w-full sm:w-auto">
                 <input
-                  type="text"
-                  placeholder="Search delivery men..."
-                  className="w-full sm:w-[300px] pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="px-5 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full shadow-lg bg-gradient-to-br from-blue-500 to-indigo-500 text-white placeholder-white"
                 />
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               </div>
-              <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-sm hover:shadow-md">
-                <BsFilter size={18} />
-                <span className="text-sm font-medium">Filter</span>
-              </button>
             </div>
           </div>
 
@@ -304,7 +330,7 @@ const AdminDeliveryMenPage = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {deliveryMen?.map((deliveryMan) => (
+                  {filteredDeliveryMen?.map((deliveryMan) => (
                     <tr key={deliveryMan._id} className="hover:bg-gray-50 transition-colors duration-200">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">

@@ -235,15 +235,18 @@ const AllCoupons = () => {
         },
     ];
 
-    const rows = coupons.map((item) => ({
-        id: item._id,
-        name: item.name,
-        value: item.value,
-        minAmount: item.minAmount,
-        maxAmount: item.maxAmount,
-        selectedProducts: item.selectedProducts,
-        ...item // Include all coupon data for the modal
-    }));
+    const rows = coupons.map((item) => {
+        const { _id, ...itemWithoutId } = item;
+        return {
+            id: _id,
+            name: item.name,
+            value: item.value,
+            minAmount: item.minAmount,
+            maxAmount: item.maxAmount,
+            selectedProducts: item.selectedProducts,
+            ...itemWithoutId // Include all coupon data for the modal
+        };
+    });
 
     return (
         <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
