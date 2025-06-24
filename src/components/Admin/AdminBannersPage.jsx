@@ -27,10 +27,52 @@ const AdminBannersPage = () => {
     image: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [rows, setRows] = useState([]);
 
   useEffect(() => {
     dispatch(getAllAdminBanners());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (banners && Array.isArray(banners)) {
+      const formattedRows = banners
+        .filter(banner => banner && banner._id)
+        .map(banner => ({
+          id: banner._id,
+          _id: banner._id,
+          title: banner.title || 'N/A',
+          description: banner.description || 'N/A',
+          link: banner.link || 'N/A',
+          image: banner.image || null,
+          createdAt: banner.createdAt || new Date(),
+          tags: Array.isArray(banner.tags) ? banner.tags : [],
+        }));
+      setRows(formattedRows);
+    }
+  }, [banners]);
+
+  // Filter banners based on search term and date range
+  const filteredBanners = rows.filter((banner) => {
+    const bannerTitle = String(banner.title || "").toLowerCase();
+    const bannerId = String(banner.id || "").toLowerCase();
+    const bannerDescription = String(banner.description || "").toLowerCase();
+    const bannerLink = String(banner.link || "").toLowerCase();
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch = bannerTitle.includes(search) || 
+                         bannerId.includes(search) || 
+                         bannerDescription.includes(search) ||
+                         bannerLink.includes(search);
+
+    const bannerDate = new Date(banner.createdAt);
+    const start = startDate ? new Date(startDate) : null;
+
+    const matchesDate = !start || bannerDate >= start;
+
+    return matchesSearch && matchesDate;
+  });
 
   const handleInputChange = (e) => {
     setFormData({
@@ -224,17 +266,6 @@ const AdminBannersPage = () => {
     },
   ];
 
-  const rows = banners?.map((banner) => ({
-    id: banner._id,
-    _id: banner._id,
-    title: banner.title,
-    description: banner.description,
-    link: banner.link,
-    image: banner.image,
-    createdAt: banner.createdAt,
-    tags: Array.isArray(banner.tags) ? banner.tags : [],
-  })) || [];
-
   if (loading) {
     return <Loader />;
   }
@@ -259,7 +290,12 @@ const AdminBannersPage = () => {
                   Manage and monitor all promotional banners
                 </div>
                 <div className="text-sm text-gray-500 mt-1">
-                  {banners?.length || 0} total banners
+                  {filteredBanners?.length || 0} total banners
+                  {(searchTerm || startDate) && (
+                    <span className="ml-2 text-blue-600 font-medium">
+                      (Filtered from {rows?.length || 0} total)
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -278,6 +314,8 @@ const AdminBannersPage = () => {
                   <input
                     type="text"
                     placeholder="Search banners..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full sm:w-[300px] pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
                   />
                   <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
@@ -286,6 +324,14 @@ const AdminBannersPage = () => {
                   <BsFilter size={18} />
                   <span className="text-sm font-medium">Filter</span>
                 </button>
+                <div className="relative w-full sm:w-auto">
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
+                  />
+                </div>
               </div>
               <button
                 onClick={() => {
@@ -302,17 +348,30 @@ const AdminBannersPage = () => {
 
             {loading ? (
               <Loader />
-            ) : rows.length === 0 ? (
+            ) : filteredBanners.length === 0 ? (
               <div className="w-full h-[400px] flex items-center justify-center bg-white rounded-xl shadow-lg">
                 <div className="text-center">
                   <AiOutlineAppstore className="mx-auto text-gray-400" size={48} />
-                  <p className="mt-4 text-gray-600">No banners found</p>
+                  <p className="mt-4 text-gray-600">
+                    {searchTerm || startDate ? "No banners match your filters" : "No banners found"}
+                  </p>
+                  {(searchTerm || startDate) && (
+                    <button
+                      onClick={() => {
+                        setSearchTerm("");
+                        setStartDate("");
+                      }}
+                      className="mt-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                    >
+                      Clear filters
+                    </button>
+                  )}
                 </div>
               </div>
             ) : (
               <div className="w-full overflow-x-auto bg-white rounded-xl shadow-lg p-4">
                 <DataGrid
-                  rows={rows}
+                  rows={filteredBanners}
                   columns={columns}
                   pageSize={12}
                   disableSelectionOnClick

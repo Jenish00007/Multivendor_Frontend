@@ -10,18 +10,70 @@ import { BsCurrencyRupee } from "react-icons/bs";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { server } from "../../server";
+import { FiSearch } from "react-icons/fi";
+import { BsFilter } from "react-icons/bs";
 
 const AllProducts = () => {
   const { allProducts, isLoading } = useSelector((state) => state.products);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [rows, setRows] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(getAllProductsAdmin());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (allProducts && Array.isArray(allProducts)) {
+      const formattedRows = allProducts
+        .filter(item => item && item._id)
+        .map(item => ({
+          id: item._id,
+          name: item.name || 'N/A',
+          category: item.category,
+          subcategory: item.subcategory,
+          price: item.discountPrice || item.price,
+          Stock: item.stock || 0,
+          sold: item.sold_out || 0,
+          images: Array.isArray(item.images) ? item.images : [item.images],
+          description: item.description,
+          tags: item.tags,
+          originalPrice: item.originalPrice || item.price,
+          discountPrice: item.discountPrice || item.price,
+          shop: item.shop,
+          unit: item.unit,
+          maxPurchaseQuantity: item.maxPurchaseQuantity,
+          createdAt: item.createdAt || new Date(),
+        }));
+      setRows(formattedRows);
+    }
+  }, [allProducts]);
+
+  // Filter products based on search term and date range
+  const filteredProducts = rows.filter((product) => {
+    const productName = String(product.name || "").toLowerCase();
+    const productId = String(product.id || "").toLowerCase();
+    const categoryName = String(product.category?.name || product.category || "").toLowerCase();
+    const subcategoryName = String(product.subcategory?.name || product.subcategory || "").toLowerCase();
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch = productName.includes(search) || 
+                         productId.includes(search) || 
+                         categoryName.includes(search) || 
+                         subcategoryName.includes(search);
+
+    const productDate = new Date(product.createdAt);
+    const start = startDate ? new Date(startDate) : null;
+
+    const matchesDate = !start || productDate >= start;
+
+    return matchesSearch && matchesDate;
+  });
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
@@ -242,6 +294,29 @@ const AllProducts = () => {
       ),
     },
     {
+      field: "createdAt",
+      headerName: "Created Date",
+      minWidth: 180,
+      flex: 1,
+      renderCell: (params) => (
+        <div className="flex items-center gap-3 w-full">
+          <div className="p-2.5 bg-gradient-to-br from-gray-100 to-slate-100 rounded-xl flex-shrink-0 shadow-sm">
+            <AiOutlineShopping className="text-gray-600" size={20} />
+          </div>
+          <div className="flex flex-col justify-center min-w-[120px]">
+            <span className="font-semibold text-gray-800 truncate leading-tight">
+              {new Date(params.row.createdAt).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              })}
+            </span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Creation Date</span>
+          </div>
+        </div>
+      ),
+    },
+    {
       field: "actions",
       headerName: "Actions",
       minWidth: 180,
@@ -269,29 +344,6 @@ const AllProducts = () => {
     },
   ];
 
-  const row = [];
-
-  allProducts &&
-    allProducts.forEach((item) => {
-      row.push({
-        id: item._id,
-        name: item.name,
-        category: item.category,
-        subcategory: item.subcategory,
-        price: item.discountPrice || item.price,
-        Stock: item.stock || 0,
-        sold: item.sold_out || 0,
-        images: Array.isArray(item.images) ? item.images : [item.images],
-        description: item.description,
-        tags: item.tags,
-        originalPrice: item.originalPrice || item.price,
-        discountPrice: item.discountPrice || item.price,
-        shop: item.shop,
-        unit: item.unit,
-        maxPurchaseQuantity: item.maxPurchaseQuantity
-      });
-    });
-
   return (
     <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
       {/* Header Section */}
@@ -312,11 +364,36 @@ const AllProducts = () => {
                 Manage and track all products
               </div>
               <div className="text-sm text-gray-500 mt-1">
-                {allProducts?.length || 0} total products
+                {filteredProducts?.length || 0} total products
+                {(searchTerm || startDate) && (
+                  <span className="ml-2 text-blue-600 font-medium">
+                    (Filtered from {rows?.length || 0} total)
+                  </span>
+                )}
               </div>
             </div>
           </div>
           <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
+        </div>
+        <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+          <div className="relative flex-1 sm:flex-none">
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full sm:w-[300px] pl-12 pr-6 py-3.5 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all duration-300 bg-white/80 backdrop-blur-sm shadow-lg"
+            />
+            <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          </div>
+          <div className="relative w-full sm:w-auto">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full sm:w-auto px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all duration-300 bg-white/80 backdrop-blur-sm shadow-lg"
+            />
+          </div>
         </div>
       </div>
 
@@ -328,7 +405,7 @@ const AllProducts = () => {
         
         {isLoading ? (
           <Loader />
-        ) : allProducts?.length === 0 ? (
+        ) : filteredProducts?.length === 0 ? (
           <div className="w-full h-[400px] flex items-center justify-center">
             <div className="text-center">
               <AiOutlineShopping className="mx-auto text-gray-400" size={48} />
@@ -345,7 +422,7 @@ const AllProducts = () => {
         ) : (
           <div className="w-full relative z-10">
             <DataGrid
-              rows={row}
+              rows={filteredProducts}
               columns={columns}
               pageSize={10}
               disableSelectionOnClick

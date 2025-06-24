@@ -7,6 +7,8 @@ import { BsPencil, BsCurrencyDollar, BsShop, BsClock, BsCheckCircle, BsEye } fro
 import { RxCross1 } from "react-icons/rx";
 import styles from "../../styles/styles";
 import { toast } from "react-toastify";
+import { FiSearch } from "react-icons/fi";
+import { BsFilter } from "react-icons/bs";
 
 const AllWithdraw = () => {
   const [data, setData] = useState([]);
@@ -15,6 +17,9 @@ const AllWithdraw = () => {
   const [withdrawStatus, setWithdrawStatus] = useState("Processing");
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [selectedWithdraw, setSelectedWithdraw] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [rows, setRows] = useState([]);
 
   useEffect(() => {
     const fetchWithdrawals = async () => {
@@ -33,6 +38,51 @@ const AllWithdraw = () => {
     };
     fetchWithdrawals();
   }, []);
+
+  useEffect(() => {
+    if (data && Array.isArray(data)) {
+      const formattedRows = data
+        .filter(item => item && item._id && item.seller)
+        .map(item => ({
+          id: item._id || '',
+          shopId: item.seller._id || '',
+          name: item.seller.shopName || item.seller.name || 'N/A',
+          amount: item.amount || 0,
+          status: item.status || 'Processing',
+          createdAt: item.createdAt || new Date(),
+          updatedAt: item.updatedAt || new Date(),
+          bankName: item.bankName || 'N/A',
+          bankAccountNumber: item.bankAccountNumber || 'N/A',
+          bankIfscCode: item.bankIfscCode || 'N/A',
+          transactionId: item.transactionId || 'N/A',
+          paymentMethod: item.paymentMethod || 'Bank Transfer',
+          processingFee: item.processingFee || 0,
+          seller: item.seller,
+        }));
+      setRows(formattedRows);
+    }
+  }, [data]);
+
+  // Filter withdrawals based on search term and date range
+  const filteredWithdrawals = rows.filter((withdraw) => {
+    const withdrawId = String(withdraw.id || "").toLowerCase();
+    const shopName = String(withdraw.seller?.name || withdraw.seller?.shopName || "").toLowerCase();
+    const shopId = String(withdraw.shopId || "").toLowerCase();
+    const status = String(withdraw.status || "").toLowerCase();
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch = withdrawId.includes(search) || 
+                         shopName.includes(search) || 
+                         shopId.includes(search) || 
+                         status.includes(search);
+
+    const withdrawDate = new Date(withdraw.createdAt);
+    const start = startDate ? new Date(startDate) : null;
+
+    const matchesDate = !start || withdrawDate >= start;
+
+    return matchesSearch && matchesDate;
+  });
 
   // Function to format currency in Indian format
   const formatIndianCurrency = (amount) => {
@@ -165,6 +215,29 @@ const AllWithdraw = () => {
       ),
     },
     {
+      field: "createdDate",
+      headerName: "Created Date",
+      minWidth: 180,
+      flex: 1,
+      renderCell: (params) => (
+        <div className="flex items-center gap-3 w-full">
+          <div className="p-2.5 bg-gradient-to-br from-gray-100 to-slate-100 rounded-xl flex-shrink-0 shadow-sm">
+            <BsCurrencyDollar className="text-gray-600" size={20} />
+          </div>
+          <div className="flex flex-col justify-center min-w-[120px]">
+            <span className="font-semibold text-gray-800 truncate leading-tight">
+              {new Date(params.row.createdAt).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              })}
+            </span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Request Date</span>
+          </div>
+        </div>
+      ),
+    },
+    {
       field: "actions",
       headerName: "Actions",
       minWidth: 150,
@@ -224,32 +297,6 @@ const AllWithdraw = () => {
     }
   };
 
-  const row = [];
-
-  data &&
-    data.forEach((item) => {
-      if (item && item.seller) {
-        const { _id, ...itemWithoutId } = item;
-        row.push({
-          id: _id || '',
-          shopId: item.seller._id || '',
-          name: item.seller.shopName || item.seller.name || 'N/A',
-          amount: formatIndianCurrency(item.amount || 0),
-          status: item.status || 'Processing',
-          createdAt: item.createdAt ? formatTime(item.createdAt) : 'N/A',
-          updatedAt: item.updatedAt ? formatTime(item.updatedAt) : 'N/A',
-          bankName: item.bankName || 'N/A',
-          bankAccountNumber: item.bankAccountNumber || 'N/A',
-          bankIfscCode: item.bankIfscCode || 'N/A',
-          transactionId: item.transactionId || 'N/A',
-          paymentMethod: item.paymentMethod || 'Bank Transfer',
-          processingFee: item.processingFee || 0,
-          seller: item.seller,
-          ...itemWithoutId
-        });
-      }
-    });
-
   return (
     <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
       {/* Header Section */}
@@ -270,11 +317,36 @@ const AllWithdraw = () => {
                 Manage and process seller withdrawal requests
               </div>
               <div className="text-sm text-gray-500 mt-1">
-                {data?.length || 0} pending requests
+                {filteredWithdrawals?.length || 0} pending requests
+                {(searchTerm || startDate) && (
+                  <span className="ml-2 text-blue-600 font-medium">
+                    (Filtered from {rows?.length || 0} total)
+                  </span>
+                )}
               </div>
             </div>
           </div>
           <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
+        </div>
+        <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+          <div className="relative flex-1 sm:flex-none">
+            <input
+              type="text"
+              placeholder="Search withdrawals..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full sm:w-[300px] pl-12 pr-6 py-3.5 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all duration-300 bg-white/80 backdrop-blur-sm shadow-lg"
+            />
+            <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          </div>
+          <div className="relative w-full sm:w-auto">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full sm:w-auto px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all duration-300 bg-white/80 backdrop-blur-sm shadow-lg"
+            />
+          </div>
         </div>
       </div>
 
@@ -406,7 +478,7 @@ const AllWithdraw = () => {
 
         <div className="w-full relative z-10">
           <DataGrid
-            rows={row}
+            rows={filteredWithdrawals}
             columns={columns}
             pageSize={10}
             disableSelectionOnClick

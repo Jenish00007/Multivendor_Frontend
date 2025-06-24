@@ -15,6 +15,8 @@ const AllProducts = () => {
   const { seller } = useSelector((state) => state.seller);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
 
   const dispatch = useDispatch();
 
@@ -63,6 +65,24 @@ const AllProducts = () => {
     });
     return formatter.format(amount);
   };
+
+  // Filtering logic
+  const filteredProducts = (products || []).filter((item) => {
+    const name = String(item.name || '').toLowerCase();
+    const id = String(item._id || '').toLowerCase();
+    const category = String(item.category || '').toLowerCase();
+    const subcategory = String(item.subcategory || '').toLowerCase();
+    const search = searchTerm.toLowerCase();
+    const matchesSearch =
+      name.includes(search) ||
+      id.includes(search) ||
+      category.includes(search) ||
+      subcategory.includes(search);
+    const createdDate = new Date(item.createdAt);
+    const start = startDate ? new Date(startDate) : null;
+    const matchesDate = !start || createdDate >= start;
+    return matchesSearch && matchesDate;
+  });
 
   const columns = [
     {
@@ -207,23 +227,24 @@ const AllProducts = () => {
 
   const row = [];
 
-  products &&
-    products.forEach((item) => {
-      row.push({
-        id: item._id,
-        name: item.name,
-        price: item.discountPrice,
-        stock: item.stock,
-        sold: item.sold_out,
-        images: item.images,
-        description: item.description,
-        category: item.category,
-        tags: item.tags,
-        originalPrice: item.originalPrice,
-        discountPrice: item.discountPrice,
-        shop: item.shop,
-      });
+  filteredProducts.forEach((item) => {
+    row.push({
+      id: item._id,
+      name: item.name,
+      price: item.discountPrice,
+      stock: item.stock,
+      sold: item.sold_out,
+      images: item.images,
+      description: item.description,
+      category: item.category,
+      subcategory: item.subcategory,
+      tags: item.tags,
+      originalPrice: item.originalPrice,
+      discountPrice: item.discountPrice,
+      shop: item.shop,
+      createdAt: item.createdAt,
     });
+  });
 
   return (
     <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
@@ -245,7 +266,12 @@ const AllProducts = () => {
                 Manage your product inventory with ease
               </div>
               <div className="text-sm text-gray-500 mt-1">
-                {products?.length || 0} products in your store
+                {filteredProducts.length} products in your store
+                {(searchTerm || startDate) && (
+                  <span className="ml-2 text-blue-600 font-medium">
+                    (Filtered from {products.length} total)
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -260,134 +286,60 @@ const AllProducts = () => {
         </Link>
       </div>
 
+      {/* Search and Filter UI */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative flex-1 sm:flex-none">
+            <input
+              type="text"
+              placeholder="Search by name, ID, category, subcategory..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full sm:w-[300px] pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
+            />
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            </span>
+          </div>
+          <div className="relative w-full sm:w-auto">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
+            />
+          </div>
+        </div>
+        {(searchTerm || startDate) && (
+          <button
+            onClick={() => {
+              setSearchTerm("");
+              setStartDate("");
+            }}
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
+
       {/* Main Content */}
       <div className="w-full min-h-[70vh] relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-indigo-100/30 to-purple-100/30 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-pink-100/30 to-blue-100/30 rounded-full blur-3xl"></div>
-        
-        <style>
-          {`
-            .MuiDataGrid-root {
-              border: none !important;
-              background: transparent !important;
-              border-radius: 20px !important;
-              overflow: hidden !important;
-            }
-            .MuiDataGrid-main {
-              overflow: visible !important;
-            }
-            .MuiDataGrid-virtualScroller {
-              margin-top: 8px !important;
-              overflow: visible !important;
-            }
-            .MuiDataGrid-virtualScrollerContent {
-              padding: 0 12px !important;
-              overflow: visible !important;
-            }
-            .MuiDataGrid-virtualScrollerRenderZone {
-              transform: none !important;
-              position: relative !important;
-              overflow: visible !important;
-            }
-            .MuiDataGrid-footerContainer {
-              position: relative !important;
-              overflow: visible !important;
-              margin-top: 20px !important;
-              background: transparent !important;
-              border-top: 1px solid rgba(226, 232, 240, 0.5) !important;
-            }
-            .MuiDataGrid-panel {
-              overflow: visible !important;
-            }
-            .MuiDataGrid-panelContent {
-              overflow: visible !important;
-            }
-            .MuiDataGrid-cell {
-              display: flex !important;
-              align-items: center !important;
-              justify-content: flex-start !important;
-              padding: 20px 24px !important;
-              height: 100% !important;
-              min-height: 90px !important;
-              border-bottom: 1px solid rgba(226, 232, 240, 0.3) !important;
-              overflow: visible !important;
-              background: transparent !important;
-              transition: all 0.3s ease !important;
-            }
-            .MuiDataGrid-cell:hover {
-              background: rgba(255, 255, 255, 0.1) !important;
-              transform: translateY(-1px) !important;
-            }
-            .MuiDataGrid-columnHeader {
-              padding: 24px !important;
-              height: auto !important;
-              min-height: 80px !important;
-              align-items: center !important;
-              white-space: normal !important;
-              background: transparent !important;
-              border-bottom: 2px solid rgba(79, 70, 229, 0.2) !important;
-              overflow: visible !important;
-            }
-            .MuiDataGrid-columnHeaderTitle {
-              font-weight: 800 !important;
-              color: #1e293b !important;
-              white-space: normal !important;
-              line-height: 1.3 !important;
-              display: flex !important;
-              align-items: center !important;
-              text-transform: uppercase !important;
-              font-size: 0.85rem !important;
-              letter-spacing: 0.1em !important;
-              height: auto !important;
-              min-height: 40px !important;
-              overflow: visible !important;
-              text-overflow: unset !important;
-            }
-            .MuiDataGrid-columnHeaders {
-              background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%) !important;
-              border-bottom: 2px solid rgba(79, 70, 229, 0.2) !important;
-              overflow: visible !important;
-              backdrop-filter: blur(10px) !important;
-            }
-            .MuiDataGrid-row {
-              min-height: 90px !important;
-              margin-bottom: 4px !important;
-              overflow: visible !important;
-              border-radius: 12px !important;
-              transition: all 0.3s ease !important;
-            }
-            .MuiDataGrid-row:hover {
-              background: rgba(255, 255, 255, 0.9) !important;
-              transform: translateY(-2px) !important;
-              box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
-            }
-            .MuiDataGrid-virtualScrollerContent {
-              overflow: visible !important;
-            }
-            .MuiDataGrid-virtualScrollerRenderZone {
-              overflow: visible !important;
-            }
-            .MuiTablePagination-root {
-              color: #64748b !important;
-              font-weight: 600 !important;
-            }
-            .MuiTablePagination-selectIcon {
-              color: #6366f1 !important;
-            }
-            .MuiIconButton-root {
-              color: #6366f1 !important;
-              transition: all 0.3s ease !important;
-            }
-            .MuiIconButton-root:hover {
-              background: rgba(99, 102, 241, 0.1) !important;
-              transform: scale(1.1) !important;
-            }
-          `}
-        </style>
         {isLoading ? (
           <div className="flex items-center justify-center h-96">
             <Loader />
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="w-full h-[200px] flex items-center justify-center bg-white rounded-xl shadow-lg">
+            <div className="text-center">
+              <svg className="mx-auto text-gray-400" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <p className="mt-4 text-gray-600">
+                {searchTerm || startDate ? "No products match your filters" : "No products found"}
+              </p>
+            </div>
           </div>
         ) : (
           <div className="w-full relative z-10">

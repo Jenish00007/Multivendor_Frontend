@@ -20,10 +20,48 @@ const AllModules = () => {
     image: null
   });
   const [imagePreview, setImagePreview] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [rows, setRows] = useState([]);
 
   useEffect(() => {
     fetchModules();
   }, []);
+
+  useEffect(() => {
+    if (modules && Array.isArray(modules)) {
+      const formattedRows = modules
+        .filter(module => module && module._id)
+        .map(module => ({
+          id: module._id,
+          _id: module._id,
+          name: module.name || 'N/A',
+          description: module.description || 'N/A',
+          image: module.image || null,
+          createdAt: module.createdAt || new Date(),
+        }));
+      setRows(formattedRows);
+    }
+  }, [modules]);
+
+  // Filter modules based on search term and date range
+  const filteredModules = rows.filter((module) => {
+    const moduleName = String(module.name || "").toLowerCase();
+    const moduleId = String(module.id || "").toLowerCase();
+    const moduleDescription = String(module.description || "").toLowerCase();
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch = moduleName.includes(search) || 
+                         moduleId.includes(search) || 
+                         moduleDescription.includes(search);
+
+    const moduleDate = new Date(module.createdAt);
+    const start = startDate ? new Date(startDate) : null;
+
+    const matchesDate = !start || moduleDate >= start;
+
+    return matchesSearch && matchesDate;
+  });
 
   const fetchModules = async () => {
     try {
@@ -227,15 +265,6 @@ const AllModules = () => {
     },
   ];
 
-  const rows = modules?.map((module) => ({
-    id: module._id,
-    _id: module._id,
-    name: module.name,
-    description: module.description,
-    image: module.image,
-    createdAt: module.createdAt,
-  })) || [];
-
   return (
     <div className="w-full p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
       <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -256,7 +285,12 @@ const AllModules = () => {
                   Manage and monitor all modules
                 </div>
                 <div className="text-sm text-gray-500 mt-1">
-                  {modules?.length || 0} total modules
+                  {filteredModules?.length || 0} total modules
+                  {(searchTerm || startDate) && (
+                    <span className="ml-2 text-blue-600 font-medium">
+                      (Filtered from {rows?.length || 0} total)
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -275,14 +309,20 @@ const AllModules = () => {
                   <input
                     type="text"
                     placeholder="Search modules..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full sm:w-[300px] pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
                   />
                   <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 </div>
-                <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-sm hover:shadow-md">
-                  <BsFilter size={18} />
-                  <span className="text-sm font-medium">Filter</span>
-                </button>
+                <div className="relative w-full sm:w-auto">
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
+                  />
+                </div>
               </div>
               <button
                 onClick={() => {
@@ -299,7 +339,7 @@ const AllModules = () => {
 
             {loading ? (
               <Loader />
-            ) : rows.length === 0 ? (
+            ) : filteredModules.length === 0 ? (
               <div className="w-full h-[400px] flex items-center justify-center bg-white rounded-xl shadow-lg">
                 <div className="text-center">
                   <AiOutlineAppstore className="mx-auto text-gray-400" size={48} />
@@ -309,7 +349,7 @@ const AllModules = () => {
             ) : (
               <div className="w-full overflow-x-auto bg-white rounded-xl shadow-lg p-4">
                 <DataGrid
-                  rows={rows}
+                  rows={filteredModules}
                   columns={columns}
                   pageSize={12}
                   disableSelectionOnClick

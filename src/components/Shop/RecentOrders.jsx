@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { getAllOrdersOfShop } from "../../redux/actions/order";
 import { AiOutlineArrowRight, AiOutlineShoppingCart, AiOutlineEye, AiOutlineClose } from "react-icons/ai";
 import { MdOutlinePeopleAlt, MdOutlineTrendingUp } from "react-icons/md";
-import { BsCurrencyRupee, BsFilter } from "react-icons/bs";
+import { BsCurrencyRupee } from "react-icons/bs";
 import { FiSearch } from "react-icons/fi";
 import Loader from "../Layout/Loader";
 
@@ -85,16 +85,25 @@ const RecentOrders = () => {
             });
         });
 
-    // Filter latest orders by order ID and selected date (formatted as '7 Jun 2025')
+    // Enhanced filtering logic
     const filteredLatestOrders = row.filter(orderRow => {
-        const matchesOrderId = ("#" + orderRow.id.slice(-6)).toLowerCase().includes(searchTerm.toLowerCase());
+        const orderId = ("#" + orderRow.id.slice(-6)).toLowerCase();
+        const customerName = String(orderRow.customerName || '').toLowerCase();
+        const status = String(orderRow.status || '').toLowerCase();
+        const search = searchTerm.toLowerCase();
+        
+        const matchesSearch = orderId.includes(search) || 
+                             customerName.includes(search) || 
+                             status.includes(search);
+
         let matchesDate = true;
         if (selectedOrderDateISO) {
             const pickedDate = new Date(selectedOrderDateISO);
             const formattedPickedDate = formatDisplayDate(pickedDate);
             matchesDate = orderRow.createdAt === formattedPickedDate;
         }
-        return matchesOrderId && matchesDate;
+        
+        return matchesSearch && matchesDate;
     });
 
     return (
@@ -117,7 +126,12 @@ const RecentOrders = () => {
                                 Track and manage customer orders
                             </div>
                             <div className="text-sm text-gray-500 mt-1">
-                                {orders?.length || 0} total orders in your store
+                                {filteredLatestOrders.length} recent orders
+                                {(searchTerm || selectedOrderDate) && (
+                                    <span className="ml-2 text-blue-600 font-medium">
+                                        (Filtered from {orders?.length || 0} total)
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -128,7 +142,7 @@ const RecentOrders = () => {
                     <div className="relative w-full sm:w-72">
                         <input
                             type="text"
-                            placeholder="Search by Order ID..."
+                            placeholder="Search by Order ID, customer, status..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="px-4 py-2 pl-10 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full shadow-sm"
@@ -146,6 +160,18 @@ const RecentOrders = () => {
                             className="px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full shadow-sm"
                         />
                     </div>
+                    {(searchTerm || selectedOrderDate) && (
+                        <button
+                            onClick={() => {
+                                setSearchTerm("");
+                                setSelectedOrderDate("");
+                                setSelectedOrderDateISO("");
+                            }}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                        >
+                            Clear filters
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -161,104 +187,115 @@ const RecentOrders = () => {
                     </div>
                 ) : (
                     <div className="w-full relative z-10">
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gradient-to-r from-indigo-50 to-purple-50">
-                                        <tr>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                                Order ID
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                                Customer
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                                Status
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                                Total
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                                Date
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-100">
-                                        {filteredLatestOrders.slice(0, 10).map((orderRow) => {
-                                            // Find the full order object from orders
-                                            const fullOrder = orders.find(o => o._id === orderRow.id);
-                                            return (
-                                                <tr key={orderRow.id} className="hover:bg-gray-50/50 transition-colors duration-200">
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="p-2.5 bg-gradient-to-br from-gray-100 to-blue-100 rounded-xl flex-shrink-0 shadow-sm">
-                                                                <AiOutlineShoppingCart className="text-gray-600" size={20} />
-                                                            </div>
-                                                            <span className="font-medium text-gray-800">#{orderRow.id.slice(-6)}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="p-2.5 bg-gradient-to-br from-gray-100 to-indigo-100 rounded-xl flex-shrink-0 shadow-sm">
-                                                                <MdOutlinePeopleAlt className="text-indigo-600" size={20} />
-                                                            </div>
-                                                            <span className="font-medium text-gray-800">{orderRow.customerName}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={`px-3 py-1.5 rounded-lg font-semibold text-sm shadow-sm ${
-                                                            orderRow.status === 'Delivered' 
-                                                                ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border border-green-200' 
-                                                                : orderRow.status === 'Processing'
-                                                                ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 border border-yellow-200'
-                                                                : orderRow.status === 'Cancelled'
-                                                                ? 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700 border border-red-200'
-                                                                : 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 border border-blue-200'
-                                                        }`}>
-                                                            {orderRow.status}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <BsCurrencyRupee className="text-green-600" size={16} />
-                                                            <span className="font-medium text-gray-700">{orderRow.total}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <MdOutlineTrendingUp className="text-purple-600" size={16} />
-                                                            <span className="text-gray-700">{orderRow.createdAt}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <button
-                                                                onClick={() => handlePreview(fullOrder)}
-                                                                className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
-                                                                title="View Order Details"
-                                                            >
-                                                                <AiOutlineEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
-                                                            </button>
-                                                            <Link to={`/order/${orderRow.id}`}>
-                                                                <button 
-                                                                    className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
-                                                                    title="View Order"
-                                                                >
-                                                                    <AiOutlineArrowRight size={18} className="group-hover:scale-110 transition-transform duration-200" />
-                                                                </button>
-                                                            </Link>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
+                        {filteredLatestOrders.length === 0 ? (
+                            <div className="w-full h-[200px] flex items-center justify-center bg-white rounded-xl shadow-lg">
+                                <div className="text-center">
+                                    <AiOutlineShoppingCart className="mx-auto text-gray-400" size={48} />
+                                    <p className="mt-4 text-gray-600">
+                                        {searchTerm || selectedOrderDate ? "No orders match your filters" : "No orders found"}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gradient-to-r from-indigo-50 to-purple-50">
+                                            <tr>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                    Order ID
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                    Customer
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                    Status
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                    Total
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                    Date
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-100">
+                                            {filteredLatestOrders.slice(0, 10).map((orderRow) => {
+                                                // Find the full order object from orders
+                                                const fullOrder = orders.find(o => o._id === orderRow.id);
+                                                return (
+                                                    <tr key={orderRow.id} className="hover:bg-gray-50/50 transition-colors duration-200">
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="p-2.5 bg-gradient-to-br from-gray-100 to-blue-100 rounded-xl flex-shrink-0 shadow-sm">
+                                                                    <AiOutlineShoppingCart className="text-gray-600" size={20} />
+                                                                </div>
+                                                                <span className="font-medium text-gray-800">#{orderRow.id.slice(-6)}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="p-2.5 bg-gradient-to-br from-gray-100 to-indigo-100 rounded-xl flex-shrink-0 shadow-sm">
+                                                                    <MdOutlinePeopleAlt className="text-indigo-600" size={20} />
+                                                                </div>
+                                                                <span className="font-medium text-gray-800">{orderRow.customerName}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <span className={`px-3 py-1.5 rounded-lg font-semibold text-sm shadow-sm ${
+                                                                orderRow.status === 'Delivered' 
+                                                                    ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border border-green-200' 
+                                                                    : orderRow.status === 'Processing'
+                                                                    ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 border border-yellow-200'
+                                                                    : orderRow.status === 'Cancelled'
+                                                                    ? 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700 border border-red-200'
+                                                                    : 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 border border-blue-200'
+                                                            }`}>
+                                                                {orderRow.status}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <BsCurrencyRupee className="text-green-600" size={16} />
+                                                                <span className="font-medium text-gray-700">{orderRow.total}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <MdOutlineTrendingUp className="text-purple-600" size={16} />
+                                                                <span className="text-gray-700">{orderRow.createdAt}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <button
+                                                                    onClick={() => handlePreview(fullOrder)}
+                                                                    className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+                                                                    title="View Order Details"
+                                                                >
+                                                                    <AiOutlineEye size={18} className="group-hover:scale-110 transition-transform duration-200" />
+                                                                </button>
+                                                                <Link to={`/order/${orderRow.id}`}>
+                                                                    <button 
+                                                                        className="group flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+                                                                        title="View Order"
+                                                                    >
+                                                                        <AiOutlineArrowRight size={18} className="group-hover:scale-110 transition-transform duration-200" />
+                                                                    </button>
+                                                                </Link>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

@@ -1,5 +1,5 @@
 import { DataGrid } from "@material-ui/data-grid";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AiOutlineEye, AiOutlineShoppingCart } from "react-icons/ai";
 import { Link } from "react-router-dom";
@@ -11,6 +11,8 @@ import { BsCurrencyRupee } from "react-icons/bs";
 const AllRefundOrders = () => {
     const { orders, isLoading } = useSelector((state) => state.order);
     const { seller } = useSelector((state) => state.seller);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [startDate, setStartDate] = useState("");
 
     const dispatch = useDispatch();
 
@@ -18,12 +20,37 @@ const AllRefundOrders = () => {
         dispatch(getAllOrdersOfShop(seller._id));
     }, [dispatch]);
 
-    // Filter refund orders
+    // Filter refund orders with enhanced search and date filtering
     const refundOrders = orders && orders.filter((item) => 
         item.status === "Processing refund" || 
         item.status === "Refund Success" || 
         item.status === "Refund Failed"
     );
+
+    // Enhanced filtering logic
+    const filteredRefundOrders = (refundOrders || []).filter((item) => {
+        const orderId = String(item._id || '').toLowerCase();
+        const status = String(item.status || '').toLowerCase();
+        const customerName = String(item.user?.name || '').toLowerCase();
+        const customerEmail = String(item.user?.email || '').toLowerCase();
+        const search = searchTerm.toLowerCase();
+        
+        const matchesSearch = orderId.includes(search) || 
+                             status.includes(search) || 
+                             customerName.includes(search) ||
+                             customerEmail.includes(search);
+
+        // Date filtering - check order date and refund date
+        const orderDate = new Date(item.createdAt);
+        const refundDate = new Date(item.refundDate || item.updatedAt);
+        const start = startDate ? new Date(startDate) : null;
+
+        const matchesDate = !start || 
+                           orderDate >= start || 
+                           refundDate >= start;
+
+        return matchesSearch && matchesDate;
+    });
 
     // Function to format currency in Indian format
     const formatIndianCurrency = (amount) => {
@@ -137,8 +164,8 @@ const AllRefundOrders = () => {
 
     const row = [];
 
-    refundOrders &&
-        refundOrders.forEach((item) => {
+    filteredRefundOrders &&
+        filteredRefundOrders.forEach((item) => {
             row.push({
                 id: item._id,
                 itemsQty: item.cart.length,
@@ -171,19 +198,47 @@ const AllRefundOrders = () => {
                                         Manage your refund orders with ease
                                     </div>
                                     <div className="text-sm text-gray-500 mt-1">
-                                        {refundOrders?.length || 0} refund orders in your store
+                                        {filteredRefundOrders?.length || 0} refund orders in your store
+                                        {(searchTerm || startDate) && (
+                                            <span className="ml-2 text-blue-600 font-medium">
+                                                (Filtered from {refundOrders?.length || 0} total)
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                             <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
                         </div>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Search refund orders..."
-                                className="w-[250px] pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 bg-white/50 backdrop-blur-sm shadow-sm"
-                            />
-                            <AiOutlineShoppingCart className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Search by order ID, status, customer..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-[250px] pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 bg-white/50 backdrop-blur-sm shadow-sm"
+                                />
+                                <AiOutlineShoppingCart className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                            </div>
+                            <div className="relative">
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="w-[200px] px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 bg-white/50 backdrop-blur-sm shadow-sm"
+                                />
+                            </div>
+                            {(searchTerm || startDate) && (
+                                <button
+                                    onClick={() => {
+                                        setSearchTerm("");
+                                        setStartDate("");
+                                    }}
+                                    className="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                                >
+                                    Clear filters
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -314,46 +369,57 @@ const AllRefundOrders = () => {
                         </style>
 
                         <div className="w-full relative z-10">
-                            <DataGrid
-                                rows={row}
-                                columns={columns}
-                                pageSize={10}
-                                disableSelectionOnClick
-                                autoHeight
-                                className="!border-none"
-                                getRowHeight={() => 'auto'}
-                                rowHeight={90}
-                                componentsProps={{
-                                    footer: {
-                                        sx: {
-                                            position: 'relative',
-                                            overflow: 'visible'
+                            {filteredRefundOrders.length === 0 ? (
+                                <div className="w-full h-[200px] flex items-center justify-center bg-white rounded-xl shadow-lg">
+                                    <div className="text-center">
+                                        <span className="text-5xl filter drop-shadow-lg">🔄</span>
+                                        <p className="mt-4 text-gray-600">
+                                            {searchTerm || startDate ? "No refund orders match your filters" : "No refund orders found"}
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <DataGrid
+                                    rows={row}
+                                    columns={columns}
+                                    pageSize={10}
+                                    disableSelectionOnClick
+                                    autoHeight
+                                    className="!border-none"
+                                    getRowHeight={() => 'auto'}
+                                    rowHeight={90}
+                                    componentsProps={{
+                                        footer: {
+                                            sx: {
+                                                position: 'relative',
+                                                overflow: 'visible'
+                                            }
+                                        },
+                                        panel: {
+                                            sx: {
+                                                overflow: 'visible'
+                                            }
                                         }
-                                    },
-                                    panel: {
-                                        sx: {
+                                    }}
+                                    sx={{
+                                        '& .MuiDataGrid-cell': {
                                             overflow: 'visible'
+                                        },
+                                        '& .MuiDataGrid-row': {
+                                            overflow: 'visible'
+                                        },
+                                        '& .MuiDataGrid-virtualScroller': {
+                                            overflow: 'visible !important'
+                                        },
+                                        '& .MuiDataGrid-virtualScrollerContent': {
+                                            overflow: 'visible !important'
+                                        },
+                                        '& .MuiDataGrid-virtualScrollerRenderZone': {
+                                            overflow: 'visible !important'
                                         }
-                                    }
-                                }}
-                                sx={{
-                                    '& .MuiDataGrid-cell': {
-                                        overflow: 'visible'
-                                    },
-                                    '& .MuiDataGrid-row': {
-                                        overflow: 'visible'
-                                    },
-                                    '& .MuiDataGrid-virtualScroller': {
-                                        overflow: 'visible !important'
-                                    },
-                                    '& .MuiDataGrid-virtualScrollerContent': {
-                                        overflow: 'visible !important'
-                                    },
-                                    '& .MuiDataGrid-virtualScrollerRenderZone': {
-                                        overflow: 'visible !important'
-                                    }
-                                }}
-                            />
+                                    }}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>

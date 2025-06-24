@@ -24,7 +24,7 @@ const AllEvents = () => {
   const { events, isLoading } = useSelector((state) => state.events);
   const { seller } = useSelector((state) => state.seller);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredEvents, setFilteredEvents] = useState([]);
+  const [startDate, setStartDate] = useState("");
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -34,14 +34,30 @@ const AllEvents = () => {
     dispatch(getAllEventsShop(seller._id));
   }, [dispatch]);
 
-  useEffect(() => {
-    if (events) {
-      const filtered = events.filter(event =>
-        event.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredEvents(filtered);
-    }
-  }, [events, searchTerm]);
+  // Enhanced filtering logic
+  const filteredEvents = (events || []).filter((event) => {
+    const name = String(event.name || '').toLowerCase();
+    const id = String(event._id || '').toLowerCase();
+    const description = String(event.description || '').toLowerCase();
+    const search = searchTerm.toLowerCase();
+    
+    const matchesSearch = name.includes(search) || 
+                         id.includes(search) || 
+                         description.includes(search);
+
+    // Date filtering - check creation date, start date, and end date
+    const eventCreatedDate = new Date(event.createdAt);
+    const eventStartDate = new Date(event.startDate);
+    const eventEndDate = new Date(event.endDate);
+    const start = startDate ? new Date(startDate) : null;
+
+    const matchesDate = !start || 
+                       eventCreatedDate >= start || 
+                       eventStartDate >= start || 
+                       eventEndDate >= start;
+
+    return matchesSearch && matchesDate;
+  });
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this event?")) {
@@ -203,20 +219,18 @@ const AllEvents = () => {
   ];
 
   const row = [];
-  const dataSource = searchTerm ? filteredEvents : events;
 
-  dataSource &&
-    dataSource.forEach((item) => {
-      const { _id, ...itemWithoutId } = item;
-      row.push({
-        id: _id,
-        name: item.name,
-        price: formatIndianCurrency(item.discountPrice),
-        Stock: item.stock,
-        sold: item.sold_out,
-        ...itemWithoutId // Include all event data for the modal
-      });
+  filteredEvents.forEach((item) => {
+    const { _id, ...itemWithoutId } = item;
+    row.push({
+      id: _id,
+      name: item.name,
+      price: formatIndianCurrency(item.discountPrice),
+      Stock: item.stock,
+      sold: item.sold_out,
+      ...itemWithoutId // Include all event data for the modal
     });
+  });
 
   return (
     <div className="w-full p-8 bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
@@ -238,7 +252,12 @@ const AllEvents = () => {
                 Manage your promotional events with ease
               </div>
               <div className="text-sm text-gray-500 mt-1">
-                {events?.length || 0} events in your store
+                {filteredEvents.length} events in your store
+                {(searchTerm || startDate) && (
+                  <span className="ml-2 text-blue-600 font-medium">
+                    (Filtered from {events?.length || 0} total)
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -253,6 +272,41 @@ const AllEvents = () => {
             Create New Event
           </Button>
         </Link>
+      </div>
+
+      {/* Search and Filter UI */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative flex-1 sm:flex-none">
+            <input
+              type="text"
+              placeholder="Search by name, ID, description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full sm:w-[300px] pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
+            />
+            <AiOutlineSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          </div>
+          <div className="relative w-full sm:w-auto">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
+            />
+          </div>
+        </div>
+        {(searchTerm || startDate) && (
+          <button
+            onClick={() => {
+              setSearchTerm("");
+              setStartDate("");
+            }}
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          >
+            Clear filters
+          </button>
+        )}
       </div>
 
       {/* Main Content */}
@@ -384,6 +438,15 @@ const AllEvents = () => {
         {isLoading ? (
           <div className="flex items-center justify-center h-96">
             <Loader />
+          </div>
+        ) : filteredEvents.length === 0 ? (
+          <div className="w-full h-[200px] flex items-center justify-center bg-white rounded-xl shadow-lg">
+            <div className="text-center">
+              <AiOutlineGift className="mx-auto text-gray-400" size={48} />
+              <p className="mt-4 text-gray-600">
+                {searchTerm || startDate ? "No events match your filters" : "No events found"}
+              </p>
+            </div>
           </div>
         ) : (
           <div className="w-full relative z-10">

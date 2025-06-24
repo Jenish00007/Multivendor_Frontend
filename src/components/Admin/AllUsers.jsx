@@ -24,10 +24,52 @@ const AllUsers = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [rows, setRows] = useState([]);
 
   useEffect(() => {
     dispatch(getAllUsers());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (users && Array.isArray(users)) {
+      const formattedRows = users
+        .filter(item => item && item._id)
+        .map(item => ({
+          id: item._id,
+          name: item.name || 'N/A',
+          email: item.email || 'N/A',
+          phoneNumber: item.phoneNumber || 'N/A',
+          role: item.role || 'user',
+          createdAt: item.createdAt || new Date(),
+        }));
+      setRows(formattedRows);
+    }
+  }, [users]);
+
+  // Filter users based on search term and date range
+  const filteredUsers = rows.filter((user) => {
+    const userName = String(user.name || "").toLowerCase();
+    const userEmail = String(user.email || "").toLowerCase();
+    const userPhone = String(user.phoneNumber || "").toLowerCase();
+    const userId = String(user.id || "").toLowerCase();
+    const userRole = String(user.role || "").toLowerCase();
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch = userName.includes(search) || 
+                         userEmail.includes(search) || 
+                         userPhone.includes(search) || 
+                         userId.includes(search) ||
+                         userRole.includes(search);
+
+    const userDate = new Date(user.createdAt);
+    const start = startDate ? new Date(startDate) : null;
+
+    const matchesDate = !start || userDate >= start;
+
+    return matchesSearch && matchesDate;
+  });
 
   const handleDelete = async (user) => {
     setUserToDelete(user);
@@ -131,6 +173,29 @@ const AllUsers = () => {
       ),
     },
     {
+      field: "createdAt",
+      headerName: "Created Date",
+      minWidth: 180,
+      flex: 1,
+      renderCell: (params) => (
+        <div className="flex items-center gap-3 w-full">
+          <div className="p-2.5 bg-gradient-to-br from-gray-100 to-slate-100 rounded-xl flex-shrink-0 shadow-sm">
+            <AiOutlineUser className="text-gray-600" size={20} />
+          </div>
+          <div className="flex flex-col justify-center min-w-[120px]">
+            <span className="font-semibold text-gray-800 truncate leading-tight">
+              {new Date(params.row.createdAt).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              })}
+            </span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Registration Date</span>
+          </div>
+        </div>
+      ),
+    },
+    {
       field: "actions",
       headerName: "Actions",
       minWidth: 180,
@@ -157,20 +222,6 @@ const AllUsers = () => {
       },
     },
   ];
-
-  const row = [];
-  users &&
-    users.forEach((item) => {
-      const { _id, ...itemWithoutId } = item;
-      row.push({
-        id: _id,
-        name: item.name,
-        email: item.email,
-        phoneNumber: item.phoneNumber,
-        role: item.role,
-        ...itemWithoutId
-      });
-    });
 
   const DeleteConfirmationModal = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -226,7 +277,12 @@ const AllUsers = () => {
                 Manage and monitor all registered users
               </div>
               <div className="text-sm text-gray-500 mt-1">
-                {users?.length || 0} users in your platform
+                {filteredUsers?.length || 0} users in your platform
+                {(searchTerm || startDate) && (
+                  <span className="ml-2 text-blue-600 font-medium">
+                    (Filtered from {rows?.length || 0} total)
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -237,9 +293,19 @@ const AllUsers = () => {
             <input
               type="text"
               placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full sm:w-[300px] pl-12 pr-6 py-3.5 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all duration-300 bg-white/80 backdrop-blur-sm shadow-lg"
             />
             <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          </div>
+          <div className="relative w-full sm:w-auto">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full sm:w-auto px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all duration-300 bg-white/80 backdrop-blur-sm shadow-lg"
+            />
           </div>
           <button className="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
             <BsFilter size={20} />
@@ -378,7 +444,7 @@ const AllUsers = () => {
           <div className="flex items-center justify-center h-96">
             <Loader />
           </div>
-        ) : row.length === 0 ? (
+        ) : filteredUsers.length === 0 ? (
           <div className="w-full h-[400px] flex items-center justify-center">
             <div className="text-center">
               <AiOutlineUser className="mx-auto text-gray-400" size={48} />
@@ -388,7 +454,7 @@ const AllUsers = () => {
         ) : (
           <div className="w-full relative z-10">
             <DataGrid
-              rows={row}
+              rows={filteredUsers}
               columns={columns}
               pageSize={10}
               disableSelectionOnClick

@@ -9,6 +9,7 @@ import { AiOutlineArrowRight, AiOutlineShoppingCart, AiOutlineClose, AiOutlineEy
 import { BsCurrencyRupee, BsFilter } from "react-icons/bs";
 import { MdOutlineTrendingUp, MdOutlinePeopleAlt } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
+import OrderPreviewModal from '../Admin/OrderPreviewModal';
 
 const AllOrders = () => {
     const { orders, isLoading } = useSelector((state) => state.order);
@@ -481,137 +482,7 @@ const AllOrders = () => {
 
             {/* Order Preview Modal */}
             {isModalOpen && selectedOrder && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-semibold text-gray-800">Order Details</h2>
-                            <button
-                                onClick={closeModal}
-                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                            >
-                                <AiOutlineClose size={24} />
-                            </button>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Order Information */}
-                            <div className="space-y-4">
-                                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 shadow-lg">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Order Information</h3>
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-600">Order ID:</span>
-                                            <span className="font-medium bg-gradient-to-r from-indigo-100 to-purple-100 px-3 py-1 rounded-lg">#{selectedOrder.id.slice(-6)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-600">Total Amount:</span>
-                                            <span className="font-medium bg-gradient-to-r from-green-100 to-emerald-100 px-3 py-1 rounded-lg">{selectedOrder.total}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-600">Status:</span>
-                                            <span className={`font-medium px-3 py-1 rounded-lg ${
-                                                selectedOrder.status === 'Delivered' 
-                                                    ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700' 
-                                                    : selectedOrder.status === 'Processing'
-                                                    ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700'
-                                                    : 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700'
-                                            }`}>
-                                                {selectedOrder.status}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-600">Order Date & Time:</span>
-                                            <span className="font-medium bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-lg">{formatDateTime(selectedOrder.createdAt)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Customer Information */}
-                                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 shadow-sm">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Customer Information</h3>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Name:</span>
-                                            <span className="font-medium">{selectedOrder.user?.name || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Email:</span>
-                                            <span className="font-medium">{selectedOrder.user?.email || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Phone:</span>
-                                            <span className="font-medium">{selectedOrder.user?.phoneNumber || 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Order Items */}
-                            <div className="space-y-4">
-                                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 shadow-sm">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Order Items</h3>
-                                    <div className="space-y-4">
-                                        {selectedOrder.cart?.map((item, index) => (
-                                            <div key={index} className="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
-                                                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 shadow-md">
-                                                    <img
-                                                        src={item.images[0]?.url || item.images[0]}
-                                                        alt={item.name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h4 className="font-semibold text-gray-800 text-lg mb-1 truncate">{item.name}</h4>
-                                                    <div className="flex flex-wrap gap-4 text-sm">
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-gray-500">Quantity:</span>
-                                                            <span className="font-medium text-gray-700">{item.qty}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-gray-500">Price:</span>
-                                                            <span className="font-medium text-gray-700">₹{item.discountPrice || item.price}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-gray-500">Total:</span>
-                                                            <span className="font-medium text-gray-700">₹{(item.discountPrice || item.price) * item.qty}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Shipping Information */}
-                                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 shadow-sm">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Shipping Information</h3>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Address:</span>
-                                            <span className="font-medium text-right">{selectedOrder.shippingAddress?.address1 || selectedOrder.shippingAddress?.address || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">City:</span>
-                                            <span className="font-medium">{selectedOrder.shippingAddress?.city || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">State:</span>
-                                            <span className="font-medium">{selectedOrder.shippingAddress?.state || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Country:</span>
-                                            <span className="font-medium">{selectedOrder.shippingAddress?.country || 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Zip Code:</span>
-                                            <span className="font-medium">{selectedOrder.shippingAddress?.zipCode || 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <OrderPreviewModal isOpen={isModalOpen} onClose={closeModal} order={selectedOrder} />
             )}
         </div>
     );

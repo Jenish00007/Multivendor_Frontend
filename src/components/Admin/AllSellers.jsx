@@ -24,6 +24,8 @@ const AllSellers = () => {
   const [rows, setRows] = useState([]);
   const [stats, setStats] = useState({});
   const [isDeleting, setIsDeleting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
 
   useEffect(() => {
     dispatch(getAllSellers());
@@ -40,6 +42,7 @@ const AllSellers = () => {
           phoneNumber: item.phoneNumber || 'N/A',
           status: item.status || 'inactive',
           avatar: item.avatar || null,
+          createdAt: item.createdAt || new Date(),
         }));
       setRows(formattedRows);
     }
@@ -77,6 +80,27 @@ const AllSellers = () => {
   const handlePreview = (id) => {
     navigate(`/shop/preview/${id}`);
   };
+
+  // Filter sellers based on search term and date range
+  const filteredSellers = rows.filter((seller) => {
+    const sellerName = String(seller.name || "").toLowerCase();
+    const sellerEmail = String(seller.email || "").toLowerCase();
+    const sellerPhone = String(seller.phoneNumber || "").toLowerCase();
+    const sellerId = String(seller.id || "").toLowerCase();
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch = sellerName.includes(search) || 
+                         sellerEmail.includes(search) || 
+                         sellerPhone.includes(search) || 
+                         sellerId.includes(search);
+
+    const sellerDate = new Date(seller.createdAt);
+    const start = startDate ? new Date(startDate) : null;
+
+    const matchesDate = !start || sellerDate >= start;
+
+    return matchesSearch && matchesDate;
+  });
 
   const columns = [
     { 
@@ -151,6 +175,29 @@ const AllSellers = () => {
           <div className="flex flex-col justify-center min-w-[120px]">
             <span className="font-semibold text-gray-800 truncate leading-tight">{params.row.phoneNumber}</span>
             <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Contact Number</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      field: "createdAt",
+      headerName: "Created Date",
+      minWidth: 180,
+      flex: 1,
+      renderCell: (params) => (
+        <div className="flex items-center gap-3 w-full">
+          <div className="p-2.5 bg-gradient-to-br from-gray-100 to-slate-100 rounded-xl flex-shrink-0 shadow-sm">
+            <AiOutlineShop className="text-gray-600" size={20} />
+          </div>
+          <div className="flex flex-col justify-center min-w-[120px]">
+            <span className="font-semibold text-gray-800 truncate leading-tight">
+              {new Date(params.row.createdAt).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              })}
+            </span>
+            <span className="text-xs text-gray-500 leading-tight mt-0.5 font-medium">Registration Date</span>
           </div>
         </div>
       ),
@@ -253,11 +300,40 @@ const AllSellers = () => {
                 Manage and monitor all registered sellers
           </div>
               <div className="text-sm text-gray-500 mt-1">
-                {rows?.length || 0} sellers in your platform
+                {filteredSellers?.length || 0} sellers in your platform
+                {(searchTerm || startDate) && (
+                  <span className="ml-2 text-blue-600 font-medium">
+                    (Filtered from {rows?.length || 0} total)
+                  </span>
+                )}
               </div>
             </div>
           </div>
           <div className="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
+              </div>
+              {/* Search and Filter Section */}
+              <div className="w-full sm:w-auto mt-4 sm:mt-0 flex flex-col sm:flex-row items-center gap-4">
+                  <div className="relative w-full sm:w-72">
+                      <input
+                          type="text"
+                          placeholder="Search by Shop Name, Email, Phone, or Shop ID..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="px-4 py-2 pl-10 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full shadow-sm"
+                      />
+                      <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  </div>
+                  <div className="flex gap-4 w-full sm:w-auto">
+                      <div className="relative w-full sm:w-auto">
+                          <input
+                              type="date"
+                              value={startDate}
+                              onChange={(e) => setStartDate(e.target.value)}
+                              placeholder="Filter by registration date"
+                              className="px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full shadow-sm"
+                          />
+                      </div>
+                  </div>
               </div>
             </div>
       {/* Main Content */}
@@ -268,7 +344,7 @@ const AllSellers = () => {
 
         <div className="w-full relative z-10">
               <DataGrid
-                rows={rows}
+                rows={filteredSellers}
                 columns={columns}
             pageSize={10}
                 disableSelectionOnClick
