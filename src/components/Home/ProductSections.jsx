@@ -44,14 +44,34 @@ const ProductSections = () => {
     return <Loader />;
   }
 
-  const renderProductSection = (title, products) => (
+  const renderProductSection = (title, products, type) => (
     <div className={`${styles.section}`}>
-      <div className={`${styles.heading}`}>
+      <div className={`${styles.heading} flex items-center justify-between`}>
         <h1>{title}</h1>
+        {products && products.length > 0 && (
+          <Link
+            to={`/view-all/${type}`}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-md hover:bg-indigo-100 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+          >
+            View All
+            <svg
+              className="ml-2 -mr-1 w-4 h-4"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </Link>
+        )}
       </div>
       <div className="grid grid-cols-2 gap-[15px] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 sm:gap-[20px] md:gap-[25px] lg:gap-[25px] xl:gap-[30px] mb-12 border-0">
         {products && products.length !== 0 && (
-          products.map((product) => (
+          products.slice(0, 6).map((product) => (
             <ProductCard key={product._id} data={product} />
           ))
         )}
@@ -62,11 +82,11 @@ const ProductSections = () => {
   return (
     <div className="w-full">
        <div className="h-20"></div>
-      {renderProductSection("Recommended Products", recommendedProducts)}
-      {renderProductSection("Top Offers", topOffers)}
-      {renderProductSection("Most Popular", popularProducts)}
-      {renderProductSection("Latest Products", latestProducts)}
-      {renderProductSection("Flash Sale", flashSaleItems)}
+      {renderProductSection("Recommended Products", recommendedProducts, "recommended")}
+      {renderProductSection("Top Offers", topOffers, "top-offers")}
+      {renderProductSection("Most Popular", popularProducts, "popular")}
+      {renderProductSection("Latest Products", latestProducts, "latest")}
+      {renderProductSection("Flash Sale", flashSaleItems, "flash-sale")}
     </div>
     
   );

@@ -5,9 +5,8 @@ import styles from "../../styles/styles";
 const DropDown = ({ categoriesData, setDropDown }) => {
     const navigate = useNavigate();
     const submitHandle = (i) => {
-        navigate(`/products?category=${i.title}`);
+        navigate(`/subcategories?categoryId=${i.id}&categoryName=${encodeURIComponent(i.title)}`);
         setDropDown(false);
-        window.location.reload();
     };
     return (
         <div className="pb-4 w-[400px] bg-[#fff] absolute z-30 rounded-b-md shadow-lg border border-gray-100">

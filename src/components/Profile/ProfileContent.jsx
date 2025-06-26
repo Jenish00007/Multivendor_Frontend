@@ -10,15 +10,50 @@ import {
 import { AiOutlineArrowRight, AiOutlineCamera, AiOutlineDelete } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import styles from "../../styles/styles";
-import { DataGrid } from "@material-ui/data-grid";
-import { Button } from "@material-ui/core";
+import { Button } from "@mui/material";
 import { RxCross1 } from 'react-icons/rx'
 import { MdTrackChanges } from "react-icons/md";
 import { toast } from "react-toastify";
 import axios from 'axios';
-import { Country, State } from "country-state-city";
 import { getAllOrdersOfUser } from '../../redux/actions/order';
 
+// Simple country and state data
+const countries = [
+    { name: "India", isoCode: "IN" },
+    { name: "United States", isoCode: "US" },
+    { name: "United Kingdom", isoCode: "GB" },
+    { name: "Canada", isoCode: "CA" },
+    { name: "Australia", isoCode: "AU" },
+    { name: "Germany", isoCode: "DE" },
+    { name: "France", isoCode: "FR" },
+    { name: "Japan", isoCode: "JP" },
+    { name: "China", isoCode: "CN" },
+    { name: "Brazil", isoCode: "BR" }
+];
+
+const states = {
+    IN: [
+        { name: "Maharashtra", isoCode: "MH" },
+        { name: "Delhi", isoCode: "DL" },
+        { name: "Karnataka", isoCode: "KA" },
+        { name: "Tamil Nadu", isoCode: "TN" },
+        { name: "Telangana", isoCode: "TS" },
+        { name: "Gujarat", isoCode: "GJ" },
+        { name: "Uttar Pradesh", isoCode: "UP" },
+        { name: "West Bengal", isoCode: "WB" }
+    ],
+    US: [
+        { name: "California", isoCode: "CA" },
+        { name: "New York", isoCode: "NY" },
+        { name: "Texas", isoCode: "TX" },
+        { name: "Florida", isoCode: "FL" }
+    ],
+    GB: [
+        { name: "England", isoCode: "ENG" },
+        { name: "Scotland", isoCode: "SCT" },
+        { name: "Wales", isoCode: "WLS" }
+    ]
+};
 
 const ProfileContent = ({ active }) => {
     const { user, error, successMessage } = useSelector((state) => state.user);
@@ -299,13 +334,70 @@ const AllOrders = () => {
     return (
         <>
             <div className='pl-8 pt-1'>
-                <DataGrid
-                    rows={row}
-                    columns={columns}
-                    pageSize={10}
-                    disableSelectionOnClick
-                    autoHeight
-                />
+                <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white border border-gray-300">
+                        <thead>
+                            <tr className="bg-gray-50">
+                                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                    Order ID
+                                </th>
+                                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                    Items Qty
+                                </th>
+                                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                    Total
+                                </th>
+                                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                    Order Date
+                                </th>
+                                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white">
+                            {row.map((item) => (
+                                <tr key={item.id} className="hover:bg-gray-50">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                        {item.id}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm leading-5">
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                            item.status === "Delivered" 
+                                                ? "bg-green-100 text-green-800" 
+                                                : "bg-red-100 text-red-800"
+                                        }`}>
+                                            {item.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                        {item.itemsQty}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                        {item.total}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                        {new Date(item.createdAt).toLocaleDateString('en-GB', {
+                                            day: 'numeric',
+                                            month: 'short',
+                                            year: 'numeric'
+                                        })}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                        <Link to={`/user/order/${item.id}`}>
+                                            <Button>
+                                                <AiOutlineArrowRight size={20} />
+                                            </Button>
+                                        </Link>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </>
     )
@@ -405,13 +497,70 @@ const AllRefundOrders = () => {
 
     return (
         <div className="pl-8 pt-1">
-            <DataGrid
-                rows={row}
-                columns={columns}
-                pageSize={10}
-                autoHeight
-                disableSelectionOnClick
-            />
+            <div className="overflow-x-auto">
+                <table className="min-w-full bg-white border border-gray-300">
+                    <thead>
+                        <tr className="bg-gray-50">
+                            <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Order ID
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Items Qty
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Total
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Order Date
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white">
+                        {row.map((item) => (
+                            <tr key={item.id} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                    {item.id}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5">
+                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                        item.status === "Delivered" 
+                                            ? "bg-green-100 text-green-800" 
+                                            : "bg-red-100 text-red-800"
+                                    }`}>
+                                        {item.status}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                    {item.itemsQty}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                    {item.total}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                    {new Date(item.createdAt).toLocaleDateString('en-GB', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric'
+                                    })}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                    <Link to={`/user/order/${item.id}`}>
+                                        <Button>
+                                            <AiOutlineArrowRight size={20} />
+                                        </Button>
+                                    </Link>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };
@@ -510,13 +659,70 @@ const TrackOrder = () => {
 
     return (
         <div className="pl-8 pt-1">
-            <DataGrid
-                rows={row}
-                columns={columns}
-                pageSize={10}
-                disableSelectionOnClick
-                autoHeight
-            />
+            <div className="overflow-x-auto">
+                <table className="min-w-full bg-white border border-gray-300">
+                    <thead>
+                        <tr className="bg-gray-50">
+                            <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Order ID
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Items Qty
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Total
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Order Date
+                            </th>
+                            <th className="px-6 py-3 border-b border-gray-200 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white">
+                        {row.map((item) => (
+                            <tr key={item.id} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                    {item.id}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5">
+                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                        item.status === "Delivered" 
+                                            ? "bg-green-100 text-green-800" 
+                                            : "bg-red-100 text-red-800"
+                                    }`}>
+                                        {item.status}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                    {item.itemsQty}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                    {item.total}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                    {new Date(item.createdAt).toLocaleDateString('en-GB', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric'
+                                    })}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                                    <Link to={`/user/track/order/${item.id}`}>
+                                        <Button>
+                                            <MdTrackChanges size={20} />
+                                        </Button>
+                                    </Link>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     )
 }
@@ -704,8 +910,7 @@ const Address = () => {
                                                     Choose your contry
                                                 </option>
                                                 {
-                                                    Country &&
-                                                    Country.getAllCountries().map((item) => (
+                                                    countries.map((item) => (
                                                         <option
                                                             className="block pb-2"
                                                             key={item.isoCode}
@@ -730,8 +935,8 @@ const Address = () => {
                                                 <option value="" className="block border pb-2">
                                                     choose your city
                                                 </option>
-                                                {State &&
-                                                    State.getStatesOfCountry(country).map((item) => (
+                                                {states[country] &&
+                                                    states[country].map((item) => (
                                                         <option
                                                             className="block pb-2"
                                                             key={item.isoCode}

@@ -1,12 +1,60 @@
 import React, { useState } from "react";
 import styles from "../../styles/styles";
-import { Country, State } from "country-state-city";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
+
+// Simple country and state data
+const countries = [
+    { name: "India", isoCode: "IN" },
+    { name: "United States", isoCode: "US" },
+    { name: "United Kingdom", isoCode: "GB" },
+    { name: "Canada", isoCode: "CA" },
+    { name: "Australia", isoCode: "AU" },
+    { name: "Germany", isoCode: "DE" },
+    { name: "France", isoCode: "FR" },
+    { name: "Japan", isoCode: "JP" },
+    { name: "China", isoCode: "CN" },
+    { name: "Brazil", isoCode: "BR" }
+];
+
+const states = {
+    IN: [
+        { name: "Maharashtra", isoCode: "MH" },
+        { name: "Delhi", isoCode: "DL" },
+        { name: "Karnataka", isoCode: "KA" },
+        { name: "Tamil Nadu", isoCode: "TN" },
+        { name: "Telangana", isoCode: "TS" },
+        { name: "Gujarat", isoCode: "GJ" },
+        { name: "Uttar Pradesh", isoCode: "UP" },
+        { name: "West Bengal", isoCode: "WB" }
+    ],
+    US: [
+        { name: "California", isoCode: "CA" },
+        { name: "New York", isoCode: "NY" },
+        { name: "Texas", isoCode: "TX" },
+        { name: "Florida", isoCode: "FL" }
+    ],
+    GB: [
+        { name: "England", isoCode: "ENG" },
+        { name: "Scotland", isoCode: "SCT" },
+        { name: "Wales", isoCode: "WLS" }
+    ]
+};
+
+// Function to format currency in Indian format
+const formatIndianCurrency = (amount) => {
+    const formatter = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+    return formatter.format(amount);
+};
 
 const Checkout = () => {
     const { user } = useSelector((state) => state.user);
@@ -222,12 +270,11 @@ const ShippingInfo = ({
                             <option className="block pb-2" value="">
                                 Choose your country
                             </option>
-                            {Country &&
-                                Country.getAllCountries().map((item) => (
-                                    <option key={item.isoCode} value={item.isoCode}>
-                                        {item.name}
-                                    </option>
-                                ))}
+                            {countries.map((item) => (
+                                <option key={item.isoCode} value={item.isoCode}>
+                                    {item.name}
+                                </option>
+                            ))}
                         </select>
                     </div>
                     <div className="w-[50%]">
@@ -240,12 +287,11 @@ const ShippingInfo = ({
                             <option className="block pb-2" value="">
                                 Choose your City
                             </option>
-                            {State &&
-                                State.getStatesOfCountry(country).map((item) => (
-                                    <option key={item.isoCode} value={item.isoCode}>
-                                        {item.name}
-                                    </option>
-                                ))}
+                            {states[country] && states[country].map((item) => (
+                                <option key={item.isoCode} value={item.isoCode}>
+                                    {item.name}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>
@@ -320,21 +366,21 @@ const CartData = ({
         <div className="w-full bg-[#fff] rounded-md p-5 pb-8">
             <div className="flex justify-between">
                 <h3 className="text-[16px] font-[400] text-[#000000a4]">subtotal:</h3>
-                <h5 className="text-[18px] font-[600]">${subTotalPrice}</h5>
+                <h5 className="text-[18px] font-[600]">{formatIndianCurrency(subTotalPrice)}</h5>
             </div>
             <br />
             <div className="flex justify-between">
                 <h3 className="text-[16px] font-[400] text-[#000000a4]">shipping:</h3>
-                <h5 className="text-[18px] font-[600]">${shipping.toFixed(2)}</h5>
+                <h5 className="text-[18px] font-[600]">{formatIndianCurrency(shipping)}</h5>
             </div>
             <br />
             <div className="flex justify-between border-b pb-3">
                 <h3 className="text-[16px] font-[400] text-[#000000a4]">Discount:</h3>
                 <h5 className="text-[18px] font-[600]">
-                    - {discountPercentenge ? "$" + discountPercentenge.toString() : null}
+                    - {discountPercentenge ? formatIndianCurrency(discountPercentenge) : null}
                 </h5>
             </div>
-            <h5 className="text-[18px] font-[600] text-end pt-3">${totalPrice}</h5>
+            <h5 className="text-[18px] font-[600] text-end pt-3">{formatIndianCurrency(totalPrice)}</h5>
             <br />
             <form onSubmit={handleSubmit}>
                 <input

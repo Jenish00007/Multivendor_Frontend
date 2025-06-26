@@ -21,6 +21,7 @@ import {
   OrderDetailsPage,
   TrackOrderPage,
   UserInbox,
+  Payment,
 } from "./routes/Routes";
 import {
   ShopDashboardPage,
@@ -74,6 +75,9 @@ import DeliveryManManagement from "./pages/DeliveryManManagement";
 import { getAppSettings } from "./redux/actions/appSettings";
 import AdminLogin from "./components/Login/AdminLogin";
 import AdminCreateEvent from "./pages/AdminCreateEvent";
+import SubcategoriesPage from "./pages/SubcategoriesPage";
+import CategoriesPage from "./pages/CategoriesPage";
+import ViewAllProducts from "./pages/ViewAllProducts";
 
 const App = () => {
   useEffect(() => {
@@ -100,6 +104,9 @@ const App = () => {
           element={<SellerActivationPage />}
         />
         <Route path="/products" element={<ProductsPage />} />
+        <Route path="/subcategories" element={<SubcategoriesPage />} />
+        <Route path="/categories" element={<CategoriesPage />} />
+        <Route path="/view-all/:type" element={<ViewAllProducts />} />
         <Route path="/product/:id" element={<ProductDetailsPage />} />
         <Route path="/best-selling" element={<BestSellingPage />} />
         <Route path="/events" element={<EventsPage />} />
@@ -109,6 +116,15 @@ const App = () => {
           element={
             <ProtectedRoute>
               <CheckoutPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/payment"
+          element={
+            <ProtectedRoute>
+              <Payment />
             </ProtectedRoute>
           }
         />

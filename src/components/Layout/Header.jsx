@@ -229,6 +229,7 @@ const Header = ({ activeHeading }) => {
               {dropDown && (
                 <DropDown
                   categoriesData={categories.map(category => ({
+                    id: category._id,
                     title: category.name,
                     image_Url: category.image || "https://via.placeholder.com/150?text=Category"
                   }))}

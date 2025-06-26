@@ -5,11 +5,14 @@ import axios from "axios";
 import { server } from "../../../server";
 import { AiOutlineShoppingCart, AiOutlineArrowRight } from "react-icons/ai";
 import { motion } from "framer-motion";
+import Typewriter from './Typewriter';
 
 const Hero = () => {
     const [banner, setBanner] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showSecondLine, setShowSecondLine] = useState(false);
+    const [restartAnimation, setRestartAnimation] = useState(0);
 
     useEffect(() => {
         const fetchConfiguration = async () => {
@@ -29,6 +32,27 @@ const Hero = () => {
             }
         };
         fetchConfiguration();
+    }, []);
+
+    const handleFirstLineComplete = () => {
+        // Start the second line after a short delay
+        setTimeout(() => {
+            setShowSecondLine(true);
+        }, 500);
+    };
+
+    const restartTypingAnimation = () => {
+        setShowSecondLine(false);
+        setRestartAnimation(prev => prev + 1);
+    };
+
+    // Optional: Restart animation every 10 seconds for demo purposes
+    useEffect(() => {
+        const interval = setInterval(() => {
+            restartTypingAnimation();
+        }, 10000);
+
+        return () => clearInterval(interval);
     }, []);
 
     return (
@@ -51,16 +75,40 @@ const Hero = () => {
                     transition={{ duration: 0.8 }}
                 >
                     <h1 className="text-[28px] leading-[1.2] sm:text-[40px] md:text-[50px] lg:text-[60px] 800px:text-[70px] font-[700] capitalize text-white drop-shadow-lg">
-                        Fresh Groceries <br /> 
-                        <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                            Delivered to Your Door
-                        </span>
+                        <Typewriter 
+                            text="Fresh Groceries"
+                            speed={150}
+                            delay={500}
+                            onComplete={handleFirstLineComplete}
+                            restart={restartAnimation}
+                        />
+                        <br /> 
+                        {showSecondLine && (
+                            <motion.span 
+                                className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
+                            >
+                                <Typewriter 
+                                    text="Delivered to Your Door"
+                                    speed={100}
+                                    delay={0}
+                                    restart={restartAnimation}
+                                />
+                            </motion.span>
+                        )}
                     </h1>
 
-                    <p className="pt-4 sm:pt-6 text-[14px] sm:text-[16px] md:text-[18px] font-[Poppins] font-[400] text-white/90 max-w-2xl leading-relaxed">
+                    <motion.p 
+                        className="pt-4 sm:pt-6 text-[14px] sm:text-[16px] md:text-[18px] font-[Poppins] font-[400] text-white/90 max-w-2xl leading-relaxed"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 2.5 }}
+                    >
                         Discover our wide selection of fresh fruits, vegetables, dairy products, and pantry essentials. 
                         Shop from the comfort of your home and get your groceries delivered right to your doorstep.
-                    </p>
+                    </motion.p>
 
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 sm:mt-8">
                         <Link to="/products" className="inline-block w-full sm:w-auto">
